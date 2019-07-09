@@ -1,0 +1,147 @@
+html, body {
+    height: 100%;
+    font-family: 'Merriweather Sans', FontAwesome, sans-serif;
+}
+
+.btn-birthday {
+
+}
+
+.error-message {
+    color: red;
+    font-size: 12px;
+    text-align: left;
+}
+
+.group-chat-card {
+    height: 500px;
+}
+
+.login-page {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+}
+
+.login-img {
+   height: 100%;
+   background-image: url("https://cdn.dribbble.com/users/3014280/screenshots/5970771/illustration-drib-drib_4x.jpg");
+   background-repeat: no-repeat;
+   background-size: cover;
+   background-position: center;
+
+}
+
+.login-form-container {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form {
+    text-align: center;    
+}
+
+
+.login-form-header {
+    padding: 15px;
+    color: rgba(39,199,171,1);
+}
+
+.login-form-input {
+    padding: 5px;
+    width: 300px;
+}
+
+.login-button {
+    /* background-color: rgb(97, 148, 148); */
+    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 90% );
+    color: white;
+    border: none;
+    color: white;
+    text-align: center;
+    width: 225px;
+    border-radius: 25px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px;
+}
+
+.login-button:hover {
+    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 50% );
+    color: white;
+}
+
+.login-form-link {
+    color: rgba(39,199,171,1);
+    font-size: 14px;
+}
+
+.signup-img {
+    height: 100%;
+    background-image: url("https://cdn.dribbble.com/users/1691844/screenshots/6260596/attachments/1341291/obszar_roboczy_2_kopia_21_2x-100.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.signup-form-container {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.signup-form {
+    text-align: center;    
+}
+
+
+.signup-form-header {
+    padding: 15px;
+    color: rgba(39,199,171,1);
+}
+
+.signup-form-input {
+    margin: 15px;
+    width: 300px;
+}
+
+.signup-button {
+    /* background-color: rgb(97, 148, 148); */
+    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 90% );
+    color: white;
+    border: none;
+    color: white;
+    text-align: center;
+    width: 225px;
+    border-radius: 25px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px;
+}
+
+.signup-button:hover {
+    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 50% );
+    color: white;
+}
+
+
+.signup-birthday-button {
+
+}
+
+.signup-birthday-input {
+    margin-left: 20px;
+    text-align: center;
+}
+
+.signup-form-link {
+    color: rgba(39,199,171,1);
+    font-size: 14px;
+}
+
+.mt-10 {
+    margin-top: 10px;
+}
