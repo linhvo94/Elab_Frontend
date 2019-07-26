@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { checkSignupValid } from "./form-validation.js"
 
 export default class Signup extends React.Component {
@@ -76,9 +77,9 @@ export default class Signup extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <div className="login-page h-100">
+                <div className="signup-page h-100">
                     <div className="row justify-content-center h-100">
-                        <div className="col-md-6 signup-form-container">
+                        <div className="col-xs-12 col-sm-7 col-md-7 signup-form-container">
                             <form className="signup-form">
                                 <h2 className="signup-form-header">Signup</h2>
                                 <div className="form-group">
@@ -106,17 +107,18 @@ export default class Signup extends React.Component {
                                                     <option key={index} value={month}>{month}</option>
                                                 )}
                                             </select>
-
                                         </div>
 
-                                        <input className="form-control signup-birthday-input" maxLength="2" size="2" type="text" placeholder="Day"
-                                            name="day" value={this.state.day} onChange={this.handleChange} />
+                                        <div className="form-group signup-birthday-input">
+                                            <input className="form-control " maxLength="2" size="2" type="text" placeholder="Day"
+                                                name="day" value={this.state.day} onChange={this.handleChange} />
+                                        </div>
 
 
-
-                                        <input className="form-control signup-birthday-input" maxLength="4" size="4" type="text" placeholder="Year"
-                                            name="year" value={this.state.year} onChange={this.handleChange} />
-
+                                        <div className="form-group signup-birthday-input">
+                                            <input className="form-control" maxLength="4" size="4" type="text" placeholder="Year"
+                                                name="year" value={this.state.year} onChange={this.handleChange} />
+                                        </div>
                                     </div>
                                     <p className="error-message">{this.state.error["dob"]}</p>
                                 </div>
@@ -139,21 +141,17 @@ export default class Signup extends React.Component {
                                     <p className="error-message">{this.state.error["email"]}</p>
                                 </div>
 
-                                <div className="form-group">
-                                    <a href="/signup" className="signup-form-link">Forgot password?</a>
-                                </div>
-
                                 <button type="button" className="btn btn-default signup-button" onClick={this.signup}>
                                     Signup
                                 </button>
 
                                 <div className="form-group">
-                                    <a href="/signup" className="signup-form-link">Haven't got an account?</a>
+                                    <Link to={"/login"} className="login-form-link">Already have an account?</Link>
                                 </div>
                             </form>
                         </div>
 
-                        <div className="col-md-6 h-100 signup-img">
+                        <div className="col-xs-0 col-sm-5 col-md-5 h-100 signup-img">
 
                         </div>
                     </div>

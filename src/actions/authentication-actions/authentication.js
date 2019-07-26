@@ -5,7 +5,7 @@ import {
 
 export function login(user) {
     return (dispatch) => {
-        fetch(`http://localhost:8080/oauth/token?grant_type=password&username=${user.username}&password=${user.password}`,
+        fetch(`https://www.e-lab.live:8080/api/oauth/token?grant_type=password&username=${user.username}&password=${user.password}`,
             {
                 headers: {
                     "Content-Type": "application/json",
