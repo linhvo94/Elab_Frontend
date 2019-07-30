@@ -30,9 +30,10 @@ export const sendVideoDeclineEvent = (socket, sender, receiver, socketOrigin) =>
     });
 }
 
-export const sendVideoPickedUpEvent = (socket, receiver) => {
+export const sendVideoPickedUpEvent = (socket, sender, receiver) => {
     socket.emit(VIDEO_CALL_SIGNAL, {
         type: "video-picked-up",
+        sender: sender,
         receiver: receiver
     });
 };

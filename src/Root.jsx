@@ -4,57 +4,87 @@ import './styles/style.css';
 import { BrowserRouter, Switch, Route, Link, Redirect } from "react-router-dom";
 
 import io from "socket.io-client";
-// import App from './components/App.jsx/index.js';
-// import Draft from "./components/video-calls/VideoCall.jsx";
-// import Chat from "./components/chatting/Chat.jsx";
 import Media from './components/video-calls/Media.jsx';
 import Login from "./components/login/Login.jsx";
 import Signup from "./components/login/Signup.jsx";
-import GroupChat from "./components/chatting/GroupChat.jsx";
-import VideoCall from "./components/video-calls/VideoCall.jsx";
 import LiveStream from "./components/livestream/LiveStream.jsx";
+import LiveStream1 from "./components/livestream/LiveStream1.jsx";
+import Header from "./components/general/Header.jsx";
+import Body from "./components/general/Body.jsx";
+import VideoCall from "./components/video-calls/VideoCall.jsx";
 
 import { login, signup } from "./actions/authentication-actions/authentication.js";
+import LiveStreamDetail from "./components/livestream/LiveStreamDetail";
 
-//import calling-actions
-// import { connectToSignalingServer, initiatePeerConnection } from "./actions/calling-actions/calling.js";
 
 class Root extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            // socket: io(SIGNALING_SERVER_URL)
+
         }
+        this.sfu = null;
     }
 
     componentDidMount() {
-        // this.setState({socket: io(SIGNALING_SERVER_URL)});
+        // initJanus().then(sfu => {
+        //     console.log("WHATUP", sfu);
+        //     // sessionStorage.setItem("sfu", sfu);
+        //     sessionStorage.setItem("sfu", JSON.stringify(sfu));
+        // });
     }
+
 
     render() {
         return (
             <BrowserRouter>
                 <React.Fragment>
-                    {/* <VideoCall /> */}
+                    <Route path="/" render={(props) => (props.location.pathname === "/" ||
+                        props.location.pathname === "/home" || props.location.pathname === "/aboutus" ||
+                        props.location.pathname === "/media" || props.location.pathname === "/livestream")
+                        && <Header {...props} authenticated={this.props.authentication.authenticated} />} />
 
-                    <Route exact path="/livestream" render={(props) => <LiveStream /> }/>
-                    
-                    {/* <Chat /> */}
+                    <Route path="/" render={(props) => (props.location.pathname === "/" ||
+                        props.location.pathname === "/home") && <Body />} />
+
+                    <Route exact path="/media" render={(props) =>
+                        !this.props.authentication.authenticated ?
+                            <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
+                            : <Media />
+                    } />
+
+                    <Route exact path="/livestream" render={(props) =>
+                        !this.props.authentication.authenticated ?
+                            <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
+                            : <LiveStream />
+                    } />
+
+                    <Route path="/livestream/:id" render={(props) =>
+                        !this.props.authentication.authenticated ?
+                            <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
+                            : <LiveStreamDetail {...props} />
+
+                    } />
+
+                    <Route exact path="/livestream1" render={(props) =>
+                        !this.props.authentication.authenticated ?
+                            <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
+                            : <LiveStream1 />
+                    } />
+
+                    <Route />
                     <Route exact path="/login" render={(props) =>
-                        <Login {...props} 
-                                authentication={this.props.authentication}
-                                login={this.props.login} />} />
+                        <Login {...props}
+                            authentication={this.props.authentication}
+                            login={this.props.login} />} />
 
-                    {/* <Route exact path="/chatting" render={(props) => <Chat /> }/> */}
-                    <Route exact path="/signup" render={(props) => 
-                        <Signup {...props} 
-                                registration={this.props.registration} 
-                                signup={this.props.signup} />} />
-                                
-                    <Route exact path="/chatting" render={(props) => <GroupChat /> }/>
+                    <Route exact path="/signup" render={(props) =>
+                        <Signup {...props}
+                            registration={this.props.registration}
+                            signup={this.props.signup} />} />
 
-                    <Route exact path = "/media" render={(props) => <Media socket={this.state.socket} />}/>
-                    <Route exact path = "/videocall" render={(props) => <VideoCall />}/>
+                    <Route exact path="/videocall" render={(props) => <VideoCall />} />
+
                 </React.Fragment>
             </BrowserRouter>
         )

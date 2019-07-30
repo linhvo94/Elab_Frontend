@@ -50,12 +50,11 @@ export default class VideoCall extends React.Component {
         let receiver = window.receiver;
         let userType = window.userType;
 
-        if (sender !== "" && receiver !== null) {
+        if (sender !== "" && receiver !== "") {
 
             this.setState({ sender: sender, receiver: receiver });
 
             if (userType === "caller") {
-                playRingTone(this.ringTone);
                 this.isAudioCall = window.isAudioCall;
 
                 let mediaConstraints = window.isAudioCall ? { video: false, audio: true } : { video: true, audio: true };
@@ -64,6 +63,7 @@ export default class VideoCall extends React.Component {
                     this.localStreamSource.current.srcObject = stream;
                     this.localStream = stream;
                     this.createPeerConnection(stream);
+                    playRingTone(this.ringTone);
                 }).catch(e => console.log(e));
             }
 
@@ -91,7 +91,6 @@ export default class VideoCall extends React.Component {
                         case "video-answer":
                             stopRingTone(this.ringTone);
                             this.socketOrigin = message.socketOrigin;
-                            console.log("this socket origin", message.socketOrigin);
                             this.peerConnection.setLocalDescription(this.offerSDP);
                             this.handleVideoAnswer(message);
 
@@ -153,7 +152,7 @@ export default class VideoCall extends React.Component {
 
                             setTimeout(() => {
                                 window.close();
-                            }, 3000);
+                            }, 2000);
 
                             break;
                         default:
@@ -166,7 +165,9 @@ export default class VideoCall extends React.Component {
 
     handleLeavePage = (e) => {
         e.preventDefault();
-        sendVideoHangupEvent(this.socket, this.state.sender, this.state.receiver);
+        if (this.socketOrigin !== null && this.socketOrigin !== "") {
+            sendVideoHangupEvent(this.socket, this.state.sender, this.state.receiver);
+        }
     }
 
     createPeerConnection(stream) {
@@ -204,7 +205,6 @@ export default class VideoCall extends React.Component {
     }
 
     handleTrack = (event) => {
-        console.log("new track...", event.streams[0]);
         if (this.remoteStreamSource.current.srcObject !== event.streams[0]) {
             this.remoteStreamSource.current.srcObject = null
             this.remoteStreamSource.current.srcObject = event.streams[0];
@@ -232,7 +232,7 @@ export default class VideoCall extends React.Component {
         this.peerConnection.setRemoteDescription(remoteSDP)
             .then(() => this.peerConnection.createAnswer())
             .then(this.onCreateAnswerSuccess)
-            .then(sendVideoPickedUpEvent(this.socket, this.state.sender))
+            .then(() => sendVideoPickedUpEvent(this.socket, this.state.sender, this.state.sender))
             .catch(e => console.log(e));
     }
 
@@ -313,7 +313,6 @@ export default class VideoCall extends React.Component {
                 return this.peerConnection.createOffer();
             })
             .then(offerSDP => {
-                console.log("create offer SDP and send")
                 this.offerSDP = offerSDP;
                 sendVideoUpgrade(this.socket, this.state.sender, this.state.receiver, this.socketOrigin, offerSDP);
                 this.isAudioCall = false;
@@ -401,26 +400,12 @@ export default class VideoCall extends React.Component {
                             <video className="videocall-localstream" ref={this.localStreamSource} muted autoPlay>
 
                             </video>
-
-                            <div className="videocall-overlay-img">
-                                {this.state.onVideo === null || this.state.onVideo === false ?
-                                    <i className="fas fa-user-circle fa-7x"></i> : null
-                                }
-                            </div>
                         </div>
 
                         <div className="col-6 videocall-remotestream-container">
                             <video className="videocall-remotestream" ref={this.remoteStreamSource} autoPlay>
 
                             </video>
-
-                            <div className="videocall-overlay-img">
-                                {this.remoteStreamSource === null || this.remoteStreamSource === undefined ? null
-                                    : this.remoteStreamSource.current === null || this.remoteStreamSource.current === undefined ? null
-                                        : this.remoteStreamSource.current.srcObject === null || this.remoteStreamSource.current.srcObject === undefined ?
-                                            <i className="fas fa-user-circle fa-7x"></i> : null
-                                }
-                            </div>
                         </div>
                     </div>
 
@@ -459,7 +444,6 @@ export default class VideoCall extends React.Component {
                 </div>
 
             </React.Fragment >
-
         )
     }
 }

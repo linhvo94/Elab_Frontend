@@ -18,7 +18,6 @@ export function login(user) {
                 if (res.status === 200) {
                     return res.json();
                 } else if (res.status === 400) {
-                    console.log("invalid")
                     dispatch({
                         type: BAD_CREDENTIALS,
                         payload: "Username or password is not correct"
@@ -34,11 +33,13 @@ export function login(user) {
             })
             .then(data => {
                 if (data !== "") {
-                    sessionStorage.setItem("access_token", data.access_token);
-                    sessionStorage.setItem("expires_in", data.expires_in);
-                    sessionStorage.setItem("refresh_token", data.refresh_token);
-                    sessionStorage.setItem("scope", data.scope);
-                    sessionStorage.setItem("user", JSON.stringify(data.user));
+                    console.log(data);
+                    localStorage.setItem("access_token", data.access_token);
+                    localStorage.setItem("expires_in", data.expires_in);
+                    localStorage.setItem("refresh_token", data.refresh_token);
+                    localStorage.setItem("scope", data.scope);
+                    localStorage.setItem("user", JSON.stringify(data.user));
+                    localStorage.setItem("user_roles", JSON.stringify(data.user_roles));
                     dispatch({
                         type: LOGIN_SUCCESSFULLY,
                         payload: ""
@@ -64,7 +65,6 @@ export function signup(user) {
             .then(res => {
                 if (res.status === 200) {
                     status = 200;
-                    return null;
                 } else if (res.status === 400) {
                     status = 400;
                     return res.text();
@@ -78,6 +78,7 @@ export function signup(user) {
                     dispatch({
                         type: SIGNUP_SUCCESSFULLY
                     });
+                    dispatch(login(user));
                 } else if (status === 400) {
                     dispatch({
                         type: BAD_REQUEST,

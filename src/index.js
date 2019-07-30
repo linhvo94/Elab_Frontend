@@ -7,10 +7,18 @@ import { authentication } from "./reducers/authentication-reducer/login-reducer.
 import { registration } from "./reducers/authentication-reducer/signup-reducer.js"
 import thunk from "redux-thunk";
 import Root from "./Root.jsx";
+import { loadState, saveState } from "./localStorage.js";
+
+
+const persistedState = loadState();
 
 const store = createStore(
-            combineReducers({ calling, authentication, registration })
-        , applyMiddleware(thunk));
+    combineReducers({ calling, authentication, registration }), persistedState
+    , applyMiddleware(thunk));
+
+store.subscribe(() => {
+    saveState({ authentication: store.getState().authentication })
+});
 
 ReactDOM.render(
     <Provider store={store}>

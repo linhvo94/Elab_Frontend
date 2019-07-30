@@ -34,6 +34,8 @@ export default class Signup extends React.Component {
                 error["unexpected"] = props.registration.errorMessage;
                 this.setState({ error: error });
             }
+        } else if (props.registration.successfulSignup) {
+            props.history.push("/");
         }
     }
 

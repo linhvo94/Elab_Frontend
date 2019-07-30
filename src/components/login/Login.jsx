@@ -15,7 +15,12 @@ export default class Login extends React.Component {
 
     componentWillReceiveProps(props) {
         if (props.authentication.authenticated) {
-            props.history.push("/media");
+            if (props.location.state !== undefined) {
+                const { from } = props.location.state;
+                props.history.push(from.pathname);
+            } else {
+                props.history.push("/");
+            }
         } else {
             this.setState({ errorMessage: props.authentication.errorMessage });
         }
@@ -59,16 +64,12 @@ export default class Login extends React.Component {
                                         name="password" value={this.state.password} onChange={this.handleChange} />
                                 </div>
 
-                                {/* <div className="form-group">
-                                    <Link to={"/signup"} className="login-form-link">Haven't got an account?</Link>
-                                </div> */}
-
                                 <button type="button" className="btn btn-default login-button" onClick={this.login}>
                                     Login
                                 </button>
 
                                 <div className="form-group">
-                                <Link to={"/signup"} className="signup-form-link">Haven't got an account?</Link>
+                                    <Link to={"/signup"} className="signup-form-link">Haven't got an account?</Link>
                                 </div>
                             </form>
                         </div>
