@@ -395,7 +395,7 @@ function Janus(gatewayCallbacks) {
 	}
 	var iceServers = gatewayCallbacks.iceServers;
 	if(iceServers === undefined || iceServers === null)
-		iceServers = [{urls: "stun:stun.l.google.com:19302"}];
+		iceServers = [{ urls: "stun:e-lab.host:5349" }, { urls: "turn:e-lab.host:5349?transport=udp", username: "lcq", credential: "lcq" }, { urls: "turn:e-lab.host:5349?transport=tcp", username: "lcq", credential: "lcq" }];
 	var iceTransportPolicy = gatewayCallbacks.iceTransportPolicy;
 	var bundlePolicy = gatewayCallbacks.bundlePolicy;
 	// Whether IPv6 candidates should be gathered

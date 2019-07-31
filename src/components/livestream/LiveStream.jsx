@@ -9,18 +9,28 @@ export default class LiveStream extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            rooms: []
+            rooms: [],
+            canLivestream: false
         }
         this.janus = null;
-        this.janusServer = "http://e-lab.host:8088/elab";
+        this.janusServer = "https://e-lab.host:8089/elab";
         this.opaqueID = `videoroom - ${Janus.randomString(12)}`;
         this.sfu = null;
     }
 
     componentDidMount() {
-         initJanus().then(sfu => {
-           this.sfu = sfu
-           this.getRoomList();
+        initJanus().then(sfu => {
+            this.sfu = sfu
+            this.getRoomList();
+        });
+
+        let roles = JSON.parse(localStorage.getItem("user_roles"));
+        roles.some((role) => {
+            if (role.authority === "ROLE_LECTURER") {
+                this.setState({ canLivestream: true });
+                return true;
+            }
+            return false;
         });
     }
 
@@ -76,7 +86,9 @@ export default class LiveStream extends React.Component {
                 <div className="row">
                     <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
                         <h1><i className="fas fa-wave-square"></i> Ongoing Livestreams ({this.state.rooms.length})</h1>
-                        <Link className="btn btn default publish-stream-link" to={"/livestream/456"}><i className="fas fa-plus"></i> Publish Stream </Link>
+                        {this.state.canLivestream ?
+                            <Link className="btn btn default publish-stream-link" to={"/livestream/456"}><i className="fas fa-plus"></i> Publish Stream </Link>
+                            : null}
                     </div>
                 </div>
                 <div className="row livestream-list">

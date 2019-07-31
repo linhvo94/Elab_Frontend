@@ -18,7 +18,7 @@ export const initJanus = () => {
                             console.log("=== success connect ===");
                             janus.attach({
                                 plugin: "janus.plugin.videoroom",
-                                // opaqueID: opaqueID,
+                                opaqueID: opaqueID,
                                 success: (pluginHandle) => {
                                     Janus.log(`[Video Room] plugin attached!(${pluginHandle.getPlugin()}, id = ${pluginHandle.getId()})`);
                                     resolve(pluginHandle);

@@ -41,7 +41,8 @@ class Root extends React.Component {
                 <React.Fragment>
                     <Route path="/" render={(props) => (props.location.pathname === "/" ||
                         props.location.pathname === "/home" || props.location.pathname === "/aboutus" ||
-                        props.location.pathname === "/media" || props.location.pathname === "/livestream")
+                        props.location.pathname === "/media" || props.location.pathname === "/livestream" ||
+                        props.location.pathname.includes("/livestream/"))
                         && <Header {...props} authenticated={this.props.authentication.authenticated} />} />
 
                     <Route path="/" render={(props) => (props.location.pathname === "/" ||
