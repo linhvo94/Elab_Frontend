@@ -1,5 +1,6 @@
 import {
-    LOGIN_SUCCESSFULLY, BAD_CREDENTIALS, SERVER_ERRORS, SIGNUP_SUCCESSFULLY, BAD_REQUEST, USERNAME_TAKEN
+    LOGIN_SUCCESSFULLY, BAD_CREDENTIALS, SERVER_ERRORS, SIGNUP_SUCCESSFULLY, BAD_REQUEST, USERNAME_TAKEN,
+    LOGOUT_SUCCESSFULLY
 
 } from "../../action-types/authentication-types.js";
 
@@ -98,3 +99,15 @@ export function signup(user) {
             })
     }
 } 
+
+export function logout() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("user_roles");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("scope");
+    localStorage.removeItem("expires_in");
+    return {
+        type: LOGOUT_SUCCESSFULLY
+    }
+}

@@ -37,6 +37,8 @@ export default class VideoCall extends React.Component {
         this.upgradeSDP = null;
         this.isAudioCall = null;
         this.socketOrigin = "";
+        this.audioCallConstraint = { video: false, audio: true };
+        this.videoCallConstraint = { video: true, audio: true };
     }
 
 
@@ -51,13 +53,12 @@ export default class VideoCall extends React.Component {
         let userType = window.userType;
 
         if (sender !== "" && receiver !== "") {
-
             this.setState({ sender: sender, receiver: receiver });
 
             if (userType === "caller") {
                 this.isAudioCall = window.isAudioCall;
 
-                let mediaConstraints = window.isAudioCall ? { video: false, audio: true } : { video: true, audio: true };
+                let mediaConstraints = this.configCallConstraints(window.isAudioCall);
 
                 handleGetUserMedia(mediaConstraints).then(stream => {
                     this.localStreamSource.current.srcObject = stream;
@@ -71,7 +72,7 @@ export default class VideoCall extends React.Component {
                 this.socketOrigin = window.offerMessage.socketOrigin;
                 this.isAudioCall = window.offerMessage.isAudioCall;
 
-                let mediaConstraints = window.offerMessage.isAudioCall ? { video: false, audio: true } : { video: true, audio: true };
+                let mediaConstraints = this.configCallConstraints(window.offerMessage.isAudioCall);
 
                 handleGetUserMedia(mediaConstraints).then(stream => {
                     this.localStreamSource.current.srcObject = stream;
@@ -86,14 +87,13 @@ export default class VideoCall extends React.Component {
                 sendAddOnlineUserEvent(this.socket, window.sender);
 
                 this.socket.on("video_call", (message) => {
-                    console.log("incoming data type: ", message.type);
+                    console.log("incoming data type Video Call: ", message.type);
                     switch (message.type) {
                         case "video-answer":
                             stopRingTone(this.ringTone);
                             this.socketOrigin = message.socketOrigin;
                             this.peerConnection.setLocalDescription(this.offerSDP);
                             this.handleVideoAnswer(message);
-
                             break;
 
                         case "video-decline":
@@ -127,7 +127,6 @@ export default class VideoCall extends React.Component {
                         case "new-ice-candidate":
                             console.log("receive ice candidateeeeeeeee...........")
                             this.handleNewIceCandidate(message);
-
                             break;
 
                         case "video-upgrade":
@@ -136,7 +135,6 @@ export default class VideoCall extends React.Component {
                             break;
 
                         case "upgrade-video-decline":
-                            this.isAudioCall = true;
                             this.turnOffVideoTracks();
                             this.setState({
                                 videoMessageDialogOpened: true, onVideo: null,
@@ -145,6 +143,7 @@ export default class VideoCall extends React.Component {
                             break;
 
                         case "busy-user":
+                            window.removeEventListener('beforeunload', this.handleLeavePage);
                             this.setState({
                                 videoMessageDialogOpened: true, onVideo: null,
                                 videoMessage: `${this.state.receiver} is on another call`
@@ -163,9 +162,21 @@ export default class VideoCall extends React.Component {
         }
     }
 
+    configCallConstraints = (isAudioCall) => {
+        if (isAudioCall) {
+            this.setState({ onAudio: true, onVideo: null });
+            return this.audioCallConstraint;
+
+        } else if (isAudioCall === false) {
+            this.setState({ onAudio: true, onVideo: true });
+            return this.videoCallConstraint;
+        }
+        return null;
+    }
+
     handleLeavePage = (e) => {
         e.preventDefault();
-        if (this.socketOrigin !== null && this.socketOrigin !== "") {
+        if (this.socket !== null && this.socket !== "") {
             sendVideoHangupEvent(this.socket, this.state.sender, this.state.receiver);
         }
     }
@@ -177,6 +188,10 @@ export default class VideoCall extends React.Component {
         this.peerConnection.onnegotiationneeded = this.handleNegotiation;
         this.peerConnection.ontrack = this.handleTrack;
         stream.getTracks().forEach(track => this.peerConnection.addTrack(track, this.localStream));
+
+        this.peerConnection.createOffer()
+            .then(this.onCreateOfferSuccess)
+            .catch(e => console.log(e));
     }
 
     handleIceCandidate = (event) => {
@@ -186,21 +201,8 @@ export default class VideoCall extends React.Component {
         }
     }
 
-    handleNegotiation = () => {
-        if (this.peerConnection._negotiating) return;
-        this.peerConnection._negotiating = true;
-        this.peerConnection.createOffer()
-            .then(this.onCreateOfferSuccess)
-            .catch(e => console.log(e));
-    }
-
     onCreateOfferSuccess = (offerSDP) => {
         this.offerSDP = offerSDP;
-        if (this.isAudioCall) {
-            this.setState({ onAudio: true });
-        } else {
-            this.setState({ onAudio: true, onVideo: true });
-        }
         sendVideoOffer(this.socket, this.state.sender, this.state.receiver, this.isAudioCall, offerSDP);
     }
 
@@ -222,12 +224,6 @@ export default class VideoCall extends React.Component {
         stream.getTracks().forEach(track => this.peerConnection.addTrack(track, this.localStream));
 
         let remoteSDP = new RTCSessionDescription(message.sdp);
-
-        if (this.isAudioCall) {
-            this.setState({ onAudio: true });
-        } else {
-            this.setState({ onAudio: true, onVideo: true });
-        }
 
         this.peerConnection.setRemoteDescription(remoteSDP)
             .then(() => this.peerConnection.createAnswer())
@@ -263,6 +259,7 @@ export default class VideoCall extends React.Component {
         console.log("ice candidate......... received and let me set it", message.candidate);
         let candidate = new RTCIceCandidate(message.candidate);
         this.peerConnection.addIceCandidate(candidate).catch(e => console.log(e));
+        this.peerConnection._negotiating = true;
     }
 
     handleHangup = () => {
@@ -276,7 +273,7 @@ export default class VideoCall extends React.Component {
     }
 
     callCleanup = () => {
-        if (this.peerConnection !== null) {
+        if (this.peerConnection !== undefined && this.peerConnection !== null) {
             this.peerConnection.close();
             this.peerConnection = null;
             let tracks = this.localStream.getVideoTracks();
@@ -290,7 +287,6 @@ export default class VideoCall extends React.Component {
         }
     }
 
-
     turnOnVideoTracks = () => {
         this.localStream.getVideoTracks().forEach(track => track.enabled = true);
     }
@@ -302,20 +298,19 @@ export default class VideoCall extends React.Component {
     handleUpgradeVideo = (e) => {
         e.preventDefault();
 
-        handleGetUserMedia({ video: true, audio: true })
+        handleGetUserMedia(this.videoCallConstraint)
             .then(stream => {
                 this.localStream = stream;
                 this.turnOnVideoTracks();
                 this.localStreamSource.current.srcObject = stream;
                 stream.getTracks().forEach(track => this.peerConnection.addTrack(track, this.localStream));
-                this.setState({ onVideo: true });
+                this.setState({ onVideo: true, onAudio: true });
 
                 return this.peerConnection.createOffer();
             })
             .then(offerSDP => {
                 this.offerSDP = offerSDP;
                 sendVideoUpgrade(this.socket, this.state.sender, this.state.receiver, this.socketOrigin, offerSDP);
-                this.isAudioCall = false;
             })
             .catch(e => console.log(e));
     }
@@ -327,27 +322,26 @@ export default class VideoCall extends React.Component {
 
     handleVideoUpgradeDecline = (e) => {
         e.preventDefault();
-        this.setState({ videoUpgradeDiaglogOpened: false, offerMessage: true });
+        this.setState({ videoUpgradeDiaglogOpened: false });
         sendVideoUpgradeDecline(this.socket, this.state.sender, this.state.receiver, this.socketOrigin);
     }
 
     handleVideoUpgradeAccept = (e) => {
         e.preventDefault();
 
-        this.setState({ videoUpgradeDiaglogOpened: false, offerResponded: true });
+        this.setState({ videoUpgradeDiaglogOpened: false });
 
         let remoteSDP = new RTCSessionDescription(this.upgradeSDP.sdp);
         this.peerConnection.setRemoteDescription(remoteSDP);
 
-
-        handleGetUserMedia({ video: true, audio: true })
+        handleGetUserMedia(this.videoCallConstraint)
             .then(stream => {
                 this.localStream = stream;
                 this.localStreamSource.current.srcObject = stream;
                 this.turnOnVideoTracks();
                 stream.getTracks().forEach(track => this.peerConnection.addTrack(track, this.localStream));
 
-                this.setState({ onVideo: true });
+                this.setState({ onVideo: true, onAudio: true });
 
                 return this.peerConnection.createAnswer();
             })
@@ -425,19 +419,16 @@ export default class VideoCall extends React.Component {
                                 </button>
                         }
 
+
                         {this.state.onVideo === null ?
                             <button type="button" className="btn btn-success upgrade-video-button ml-5" onClick={this.handleUpgradeVideo}>
                                 <i className="fas fa-video"></i>
                             </button>
-
-                            : this.state.onVideo ?
-                                <button type="button" className="btn btn-success upgrade-video-button ml-5" onClick={this.handleVideoState}>
-                                    <i className="fas fa-video"></i>
-                                </button>
-                                :
-                                <button type="button" className="btn btn-default stop-video-button ml-5" onClick={this.handleVideoState}>
-                                    <i className="fas fa-user-slash"></i>
-                                </button>
+                            :
+                            <button type="button" className={this.state.onVideo ? "btn btn-success upgrade-video-button ml-5" : "btn btn-default stop-video-button ml-5"}
+                                onClick={this.handleVideoState}>
+                                {this.state.onVideo ? <i className="fas fa-video"></i> : <i className="fas fa-user-slash"></i>}
+                            </button>
                         }
                     </div>
 

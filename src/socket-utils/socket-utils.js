@@ -21,7 +21,6 @@ export const sendVideoAnswer = (socket, sender, receiver, socketOrigin, sdp) => 
 };
 
 export const sendVideoDeclineEvent = (socket, sender, receiver, socketOrigin) => {
-    console.log("declineeeeeeeeeeeeeee..........., sender: ", sender);
     socket.emit(VIDEO_CALL_SIGNAL, {
         type: "video-decline",
         sender: sender,

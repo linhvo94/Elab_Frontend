@@ -1,10 +1,11 @@
 import React from "react";
 import io from "socket.io-client";
 
+import ringing_tone from "../../media/sounds/ringing_tone.wav";
 import { CalleeDialog } from "./CalleeDialog.jsx";
 import { playRingTone, stopRingTone } from "../../media/sounds/sound-control.js";
-import ringing_tone from "../../media/sounds/ringing_tone.wav";
 import { SearchUserBox } from "./SearchUserBox.jsx";
+import { UserDialog } from "./UserDialog.jsx";
 import { sendVideoHangupEvent, sendAddOnlineUserEvent, sendVideoDeclineEvent } from '../../socket-utils/socket-utils.js';
 
 export default class Media extends React.Component {
@@ -14,6 +15,7 @@ export default class Media extends React.Component {
             username: "",
             firstName: "",
             receiver: "",
+            userSelected: "",
 
             onlineUsers: [],
             filterUsers: [],
@@ -21,20 +23,21 @@ export default class Media extends React.Component {
             searchUser: "",
             searchUserSidebar: "",
 
+
             callDiaglogOpened: false,
             searchUserBoxOpened: false,
+            userDiaglogOpened: false,
             displaySidebar: true,
 
             offerResponded: false,
-            isAudioCall: null,
             isOnCall: false
-
 
         }
 
         this.peerConnection = null;
         this.ringTone = new Audio(ringing_tone);
-        this.offerMessage = null
+        this.offerMessage = null;
+        this.isAudioCall = null;
     }
 
     componentDidMount() {
@@ -130,17 +133,26 @@ export default class Media extends React.Component {
         videoCallWindow.sender = this.state.username;
         videoCallWindow.receiver = receiver;
         videoCallWindow.userType = "caller";
-        videoCallWindow.isAudioCall = this.state.isAudioCall;
+        videoCallWindow.isAudioCall = this.isAudioCall;
+    }
+
+    handleUserSelectedCall = (e, isAudioCall) => {
+        e.preventDefault();
+        this.isAudioCall = isAudioCall;
+        this.setState({ userDiaglogOpened: false });
+        this.makeACall(e, this.state.userSelected);
     }
 
     handleVideoCall = (e) => {
         e.preventDefault();
-        this.setState({ searchUserBoxOpened: true, isAudioCall: false });
+        this.isAudioCall = false;
+        this.setState({ searchUserBoxOpened: true });
     }
 
     handleAudioCall = (e) => {
         e.preventDefault();
-        this.setState({ searchUserBoxOpened: true, isAudioCall: true });
+        this.isAudioCall = true;
+        this.setState({ searchUserBoxOpened: true });
     }
 
     handleCallDecline = (e) => {
@@ -181,10 +193,27 @@ export default class Media extends React.Component {
         this.setState({ displaySidebar: !this.state.displaySidebar })
     }
 
+    handleUserSelected = (user) => {
+        this.setState({ userDiaglogOpened: true, userSelected: user });
+
+    }
+
+    handleCloseUserDialog = (e) => {
+        e.preventDefault();
+        this.setState({ userDiaglogOpened: false, userSelected: "" });
+    }
+
     render() {
         return (
             <React.Fragment>
                 <div className="media-page">
+                    <UserDialog userDiaglogOpened={this.state.userDiaglogOpened}
+                        userSelected={this.state.userSelected}
+                        handleCloseUserDialog={this.handleCloseUserDialog}
+                        handleAudioCall={this.handleAudioCall}
+                        handleVideoCall={this.handleVideoCall}
+                        handleUserSelectedCall={this.handleUserSelectedCall} />
+
                     <SearchUserBox
                         searchUserBoxOpened={this.state.searchUserBoxOpened}
                         handleCloseSearchUserBox={this.handleCloseSearchUserBox}
@@ -195,7 +224,7 @@ export default class Media extends React.Component {
 
                     <CalleeDialog
                         callDiaglogOpened={this.state.callDiaglogOpened}
-                        caller={this.state.receiver}
+                        calleeMessage={this.offerMessage === null ? null : this.offerMessage.isAudioCall ? `${this.state.receiver} is calling you` : `${this.state.receiver} is video calling you`}
                         handleCallAccept={this.handleCallAccept}
                         handleCloseCallDiaglog={this.handleCloseCallDiaglog}
                         handleCallDecline={this.handleCallDecline} />
@@ -208,7 +237,9 @@ export default class Media extends React.Component {
                                 <ul>
                                     {this.state.filterUsersSidebar.map((user, index) =>
                                         <li key={index}>
-                                            <button type="button" className="btn btn-default">{user}</button>
+                                            <button type="button" className="btn btn-default" onClick={() => this.handleUserSelected(user)}>
+                                                {user}
+                                            </button>
                                         </li>
                                     )}
                                 </ul>

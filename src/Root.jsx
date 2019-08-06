@@ -13,8 +13,9 @@ import Header from "./components/general/Header.jsx";
 import Body from "./components/general/Body.jsx";
 import VideoCall from "./components/video-calls/VideoCall.jsx";
 
-import { login, signup } from "./actions/authentication-actions/authentication.js";
+import { login, signup, logout } from "./actions/authentication-actions/authentication.js";
 import LiveStreamDetail from "./components/livestream/LiveStreamDetail";
+import MediaUI from "./components/video-calls/MediaUI.jsx";
 
 
 class Root extends React.Component {
@@ -43,7 +44,10 @@ class Root extends React.Component {
                         props.location.pathname === "/home" || props.location.pathname === "/aboutus" ||
                         props.location.pathname === "/media" || props.location.pathname === "/livestream" ||
                         props.location.pathname.includes("/livestream/"))
-                        && <Header {...props} authenticated={this.props.authentication.authenticated} />} />
+                        && <Header {...props} 
+                            authenticated={this.props.authentication.authenticated}
+                            logout={this.props.logout}
+                            />} />
 
                     <Route path="/" render={(props) => (props.location.pathname === "/" ||
                         props.location.pathname === "/home") && <Body />} />
@@ -86,6 +90,8 @@ class Root extends React.Component {
 
                     <Route exact path="/videocall" render={(props) => <VideoCall />} />
 
+                    <Route exact path="/mediaui" render={(props) => <MediaUI />} />
+
                 </React.Fragment>
             </BrowserRouter>
         )
@@ -104,7 +110,8 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // connectToSignalingServer: () => { dispatch(connectToSignalingServer()) }
         login: (user) => { dispatch(login(user)) },
-        signup: (user) => { dispatch(signup(user)) }
+        signup: (user) => { dispatch(signup(user)) },
+        logout: () => { dispatch(logout()) }
     }
 }
 

@@ -6,7 +6,6 @@ export const VideoUpgradeDialog = (props) => {
 
     return (
         <div className={modalStyle}>
-            {/* <div className="modal modal-callee-dialog modal-display"> */}
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-body">

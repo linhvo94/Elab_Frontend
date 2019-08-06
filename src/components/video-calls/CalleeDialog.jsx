@@ -17,7 +17,7 @@ export const CalleeDialog = (props) => {
                         </div>
                         {/* <img className="modal-call-img" src="https://cdn.dribbble.com/users/2424687/screenshots/6509663/learn_anywhere-01_4x.png" alt="calling avatar"/> */}
 
-                        <p className="modal-callee-message m-40">{props.caller} is video calling you...</p>
+                        <p className="modal-callee-message m-40">{props.calleeMessage}</p>
 
                         <div className="d-flex justify-content-center">
                             <button type="button" className="btn btn-danger modal-callee-button" onClick={props.handleCallDecline}>
