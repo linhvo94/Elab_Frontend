@@ -1,11 +1,12 @@
 import React from "react";
+import { Link, Route } from "react-router-dom";
 import io from "socket.io-client";
 
+import Sidebar from "./Sidebar.jsx";
+import Chat from "./Chat.jsx";
 import ringing_tone from "../../media/sounds/ringing_tone.wav";
 import { CalleeDialog } from "./CalleeDialog.jsx";
 import { playRingTone, stopRingTone } from "../../media/sounds/sound-control.js";
-import { SearchUserBox } from "./SearchUserBox.jsx";
-import { UserDialog } from "./UserDialog.jsx";
 import { sendVideoHangupEvent, sendAddOnlineUserEvent, sendVideoDeclineEvent } from '../../socket-utils/socket-utils.js';
 
 export default class Media extends React.Component {
@@ -14,15 +15,13 @@ export default class Media extends React.Component {
         this.state = {
             username: "",
             firstName: "",
+            lastName: "",
             receiver: "",
-            userSelected: "",
 
             onlineUsers: [],
             filterUsers: [],
-            filterUsersSidebar: [],
-            searchUser: "",
-            searchUserSidebar: "",
 
+            searchUser: "",
 
             callDiaglogOpened: false,
             searchUserBoxOpened: false,
@@ -30,8 +29,9 @@ export default class Media extends React.Component {
             displaySidebar: true,
 
             offerResponded: false,
-            isOnCall: false
+            isOnCall: false,
 
+            linkSelected: ""
         }
 
         this.peerConnection = null;
@@ -39,11 +39,11 @@ export default class Media extends React.Component {
         this.offerMessage = null;
         this.isAudioCall = null;
     }
-
     componentDidMount() {
         let user = JSON.parse(localStorage.getItem("user"));
 
-        this.setState({ username: user.username, firstName: user.firstName });
+
+        this.setState({ username: user.username, firstName: user.firstName, lastName: user.lastName });
         // this.socket = io("http://localhost:9000");
         // this.socket = io(SIGNALING_SERVER_URL);
         this.socket = io("https://www.e-lab.live:9000");
@@ -54,7 +54,7 @@ export default class Media extends React.Component {
             this.socket.on("online_users", (message) => {
                 console.log(message);
                 let onlineUsers = message.filter(m => m !== this.state.username);
-                this.setState({ onlineUsers: onlineUsers, filterUsers: onlineUsers, filterUsersSidebar: onlineUsers });
+                this.setState({ onlineUsers: onlineUsers, filterUsers: onlineUsers });
             });
 
             this.socket.on("video_call", (message) => {
@@ -67,13 +67,13 @@ export default class Media extends React.Component {
 
                         this.setState({ receiver: message.sender, callDiaglogOpened: true });
 
-                        setTimeout(() => {
-                            if (this.state.offerResponded === false) {
-                                sendVideoHangupEvent(this.socket, this.state.username, this.state.receiver);
-                                stopRingTone(this.ringTone);
-                                this.setState({ callDiaglogOpened: false });
-                            }
-                        }, 30000);
+                        // setTimeout(() => {
+                        //     if (this.state.offerResponded === false) {
+                        //         sendVideoHangupEvent(this.socket, this.state.username, this.state.receiver);
+                        //         stopRingTone(this.ringTone);
+                        //         this.setState({ callDiaglogOpened: false });
+                        //     }
+                        // }, 30000);
 
                         break;
 
@@ -96,6 +96,7 @@ export default class Media extends React.Component {
                     case "busy-user":
                         this.setState({ isOnCall: false });
                         break;
+
                     default:
                         break;
                 }
@@ -104,9 +105,9 @@ export default class Media extends React.Component {
         });
     }
 
+
     handleChange = (e) => {
         this.setState({ [e.target.name]: e.target.value });
-
         if (e.target.name === "searchUser") {
             if (e.target.value !== null && e.target.value !== "") {
                 let filterUsers = this.state.onlineUsers.filter(user => user.includes(e.target.value));
@@ -114,51 +115,12 @@ export default class Media extends React.Component {
             } else {
                 this.setState({ filterUsers: this.state.onlineUsers });
             }
-
-        } else if (e.target.name === "searchUserSidebar") {
-            if (e.target.value !== null && e.target.value !== "") {
-                let filterUsersSidebar = this.state.onlineUsers.filter(user => user.includes(e.target.value));
-                this.setState({ filterUsersSidebar: filterUsersSidebar });
-            } else {
-                this.setState({ filterUsersSidebar: this.state.onlineUsers });
-            }
         }
-    }
-
-    makeACall = (e, receiver) => {
-        e.preventDefault();
-        console.log("making a call to......", receiver);
-        this.setState({ searchUserBoxOpened: false, searchUser: "", filterUsers: this.state.onlineUsers, isOnCall: true });
-        var videoCallWindow = window.open("/videocall", "Popup", "toolbar=no, location=no, statusbar=no, menubar=no, scrollbars=1, resizable=0, width=1024, height=576, top=30");
-        videoCallWindow.sender = this.state.username;
-        videoCallWindow.receiver = receiver;
-        videoCallWindow.userType = "caller";
-        videoCallWindow.isAudioCall = this.isAudioCall;
-    }
-
-    handleUserSelectedCall = (e, isAudioCall) => {
-        e.preventDefault();
-        this.isAudioCall = isAudioCall;
-        this.setState({ userDiaglogOpened: false });
-        this.makeACall(e, this.state.userSelected);
-    }
-
-    handleVideoCall = (e) => {
-        e.preventDefault();
-        this.isAudioCall = false;
-        this.setState({ searchUserBoxOpened: true });
-    }
-
-    handleAudioCall = (e) => {
-        e.preventDefault();
-        this.isAudioCall = true;
-        this.setState({ searchUserBoxOpened: true });
     }
 
     handleCallDecline = (e) => {
         e.preventDefault();
-        this.ringTone.pause();
-        this.ringTone.currentTime = 0;
+        stopRingTone(this.ringTone);
         this.setState({ callDiaglogOpened: false, offerResponded: true });
         sendVideoDeclineEvent(this.socket, this.state.username, this.state.receiver, this.offerMessage.socketOrigin);
     }
@@ -184,95 +146,64 @@ export default class Media extends React.Component {
         this.setState({ callDiaglogOpened: false });
     }
 
-    handleCloseSearchUserBox = (e) => {
-        e.preventDefault();
-        this.setState({ searchUserBoxOpened: false, searchUser: "", filterUsers: this.state.onlineUsers });
-    }
-
-    toggleSidebar = () => {
-        this.setState({ displaySidebar: !this.state.displaySidebar })
-    }
-
-    handleUserSelected = (user) => {
-        this.setState({ userDiaglogOpened: true, userSelected: user });
-
-    }
-
     handleCloseUserDialog = (e) => {
         e.preventDefault();
-        this.setState({ userDiaglogOpened: false, userSelected: "" });
+        this.setState({ userDiaglogOpened: false });
     }
 
     render() {
         return (
             <React.Fragment>
-                <div className="media-page">
-                    <UserDialog userDiaglogOpened={this.state.userDiaglogOpened}
-                        userSelected={this.state.userSelected}
-                        handleCloseUserDialog={this.handleCloseUserDialog}
-                        handleAudioCall={this.handleAudioCall}
-                        handleVideoCall={this.handleVideoCall}
-                        handleUserSelectedCall={this.handleUserSelectedCall} />
+                <CalleeDialog
+                    callDiaglogOpened={this.state.callDiaglogOpened}
+                    calleeMessage={this.offerMessage === null ? null : this.offerMessage.isAudioCall ? `${this.state.receiver} is calling you` : `${this.state.receiver} is video calling you`}
+                    handleCallAccept={this.handleCallAccept}
+                    handleCloseCallDiaglog={this.handleCloseCallDiaglog}
+                    handleCallDecline={this.handleCallDecline} />
 
-                    <SearchUserBox
-                        searchUserBoxOpened={this.state.searchUserBoxOpened}
-                        handleCloseSearchUserBox={this.handleCloseSearchUserBox}
-                        makeACall={this.makeACall}
-                        filterUsers={this.state.filterUsers}
-                        handleChange={this.handleChange}
-                        searchUser={this.state.searchUser} />
-
-                    <CalleeDialog
-                        callDiaglogOpened={this.state.callDiaglogOpened}
-                        calleeMessage={this.offerMessage === null ? null : this.offerMessage.isAudioCall ? `${this.state.receiver} is calling you` : `${this.state.receiver} is video calling you`}
-                        handleCallAccept={this.handleCallAccept}
-                        handleCloseCallDiaglog={this.handleCloseCallDiaglog}
-                        handleCallDecline={this.handleCallDecline} />
-
-                    <div className="row">
-                        <div className={this.state.displaySidebar ? "col-xs-0 col-sm-0 col-md-0 col-lg-0 col-xl-3 online-user-sidebar" : "col-xs-0 col-sm-0 col-md-0 col-lg-0 col-xl-1 online-user-sidebar"}>
-                            <div id="online-user-sidebar" className={this.state.displaySidebar ? "visible" : "hide"}>
-                                <input type="text" className="form-control media-onlineuser-searchbox" name="searchUserSidebar" value={this.state.searchUserSidebar}
-                                    onChange={this.handleChange} placeholder="&#xf002; Search" />
-                                <ul>
-                                    {this.state.filterUsersSidebar.map((user, index) =>
-                                        <li key={index}>
-                                            <button type="button" className="btn btn-default" onClick={() => this.handleUserSelected(user)}>
-                                                {user}
-                                            </button>
-                                        </li>
-                                    )}
-                                </ul>
-                                <div id="online-usersidebar-btn">
-                                    <button className="btn btn-default" type="button" onClick={this.toggleSidebar}>
-                                        <i className="fas fa-bars"></i>
-                                    </button>
-                                </div>
+                <div className="col-md-3 col-lg-3 media-conversation-list-container">
+                    <div className="user clearfix">
+                        <div className="user-avatar">{this.state.username[0]}</div>
+                        <div className="about">
+                            <div className="name">{this.state.firstName} {this.state.lastName}</div>
+                            <div className="status">
+                                <i className="fa fa-circle online"></i> online
                             </div>
-                        </div>
-
-                        <div className={this.state.displaySidebar ? "col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-4" : "col-xs-12 col-sm-12 col-md-12 col-lg-6 col-xl-5"}>
-                            <div className="media-form-container">
-                                <form className="media-form">
-                                    <h2 className="media-form-header">Hello, {this.state.firstName}</h2>
-                                    <button type="button" className="btn btn-default media-call-button" onClick={this.handleAudioCall} disabled={this.state.isOnCall}>
-                                        <i className="fas fa-phone-alt fa-2x"></i>
-                                    </button>
-                                    <button type="button" className="btn btn-default media-video-button" onClick={this.handleVideoCall} disabled={this.state.isOnCall}>
-                                        <i className="fas fa-video fa-2x"></i>
-                                    </button>
-                                    <button type="button" className="btn btn-default media-message-button">
-                                        <i className="fas fa-comment-alt fa-2x"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-
-                        <div className={this.state.displaySidebar ? "col-xs-0 col-sm-0 col-md-6 col-lg-6 col-xl-5 media-img" : "col-xs-0 col-sm-0 col-md-6 col-lg-6 col-xl-6 media-img"}>
                         </div>
                     </div>
+
+                    <div className="people-list clearfix" id="people-list">
+                        <div className="search">
+                            <input className="form-control" type="text" onChange={this.handleChange} name="searchUser" value={this.state.searchUser} placeholder="Search..." />
+                        </div>
+                        <ul className="list">
+                            {this.state.filterUsers.map((user, index) =>
+                                <li key={index} className="clearfix">
+                                    <Link to={`${this.props.match.url}/${user}`}>
+                                        <div className="user-avatar">{user[0]}</div>
+                                        <div className="about">
+                                            <div className="name">{user}</div>
+                                            <div className="status">
+                                                <i className="fa fa-circle online"></i> online
+                                                </div>
+                                        </div>
+                                    </Link>
+                                </li>
+                            )}
+                        </ul>
+
+                    </div>
                 </div>
+
+                <div className="col-md-8 col-lg-8 media-chat-container">
+                    <Route path={`${this.props.match.path}/:username`}
+                        render={(props) => <Chat {...props}
+                            onlineUsers={this.state.onlineUsers}
+                            isOnCall={this.state.isOnCall} />} />
+                </div>
+
             </React.Fragment>
+
         )
     }
 }

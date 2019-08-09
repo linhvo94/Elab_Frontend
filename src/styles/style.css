@@ -48,7 +48,6 @@ html, body {
     width: 100%;
     height: 100%;
     background-color: #111;
-    
 }
 
 video::-webkit-media-controls {
@@ -60,8 +59,10 @@ video::-webkit-media-controls-enclosure {
 }
 
 .video-container {
-    width: 100%;
-    max-width: 640px;
+    height: 423px;
+    width: 704px;
+    max-width: 704px;
+    height: 396px;
     position: relative;
     overflow: hidden;
 }
@@ -73,11 +74,11 @@ video::-webkit-media-controls-enclosure {
 
 .controls {
     position: absolute;
-    bottom: 0;
+    bottom: 0px;
     width: 100%;
     flex-wrap: wrap;
     background: rgba(80, 74, 74, 0.205);
-    transform: translateY(100%) translateY(-7px);
+    transform: translateY(100%) translateY(-5px);
     transition: all 0.2s;
     z-index: 2147483647;
 }
@@ -96,8 +97,8 @@ video::-webkit-media-controls-enclosure {
 
 
 .video-buttons button::before {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     font-size: 28px;
     color: rgba(39, 199, 172, 0.9);
 }
@@ -116,7 +117,6 @@ video::-webkit-media-controls-enclosure {
 
 .video-progress-bar-color {
     height: 3px;
-    /* width: 100px; */
     background-color: rgba(39,199,171,1);
 }
 
@@ -125,9 +125,7 @@ video::-webkit-media-controls-enclosure {
     height: 100%;
 }
 
-.livestream-page {
-    overflow: hidden;
-}
+
 
 .livestream-page h1 {
     font-size: 25px; font-weight: 500px; color: rgba(39,199,171,1);
@@ -640,8 +638,8 @@ header {
 /* Container */
 
 .call-screen-container {
-    width: auto;
-    height: 90%;
+    width: 100%;
+    height: 100%;
 }
 
 .login-form-container {
@@ -672,16 +670,47 @@ header {
 
 .videocall-remotestream-container {
     display: flex;
+    max-height: 100vh;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    /* max-height: 100vh;
     height: 100%;
+    width: 100%; */
     align-items: center;
     justify-content: center;
 }
 
 .videocall-localstream-container {
     display: flex;
-    height: 100%;
+    /* height: 100%;
+    width: 100%; */
+    /* height: 100%; */
+    padding: 0;
+    margin: 0;
+    align-items: right;
+    justify-content: center;
+    height: 153px;
+    width: 272px;
+    max-width: 272px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    background-color: rgba(0,0,0,0.5); /*dim the background*/
+}
+
+.call-screen-page .call-buttons {
+    display: flex;
+    width: 100%;
+    padding: 10px 0;
+    margin: 0;
     align-items: center;
     justify-content: center;
+    position: absolute;
+    bottom: 0;
+    z-index: 10;
+    background-color: transparent;
 }
 
 /* Form */
@@ -931,22 +960,15 @@ header {
     display: none;
 }
 
-
-
 .videocall-localstream {
-    margin-top:5px;
-    height: 90%;
-    width: 100%;
+    width: 100%; 
+    height: 100%;
 }
 
 .videocall-remotestream {
-    margin-top:5px;
-    height: 90%;
-    width: 100%;
+    /* width: 100%;  */
+    height: 100%;
 }
-
-
-
 
 /* buttons */
 
@@ -1464,13 +1486,14 @@ header {
 .media-sidebar {
     height: 100vh;
     width: 100%;
-    top: 0px;
-    padding: 50px 0;
     display: block;
     text-align: center;
+    justify-content: center;
     align-items: center;
-    color: white;
-    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 90% );
+    background-color: white;
+    border-right: 1px solid rgba(0, 0, 0, 0.25);
+    /* color: rgba(39,199,171,1); */
+    /* background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 90% ); */
     /* border-right: 1px solid rgba(0, 0, 0, 0.25); */
 }
 
@@ -1549,23 +1572,9 @@ header {
     padding: 5px 20px;
 }
 
-/* .media-chat-container {
-    height: 100vh;
-    background: rgba(39,199,171,1);
-} */
-
-.media-title-container {
-    height: 15%;
-    width: 100%;
-    background-color: #FF6466;
+.sidebar {
+    height: 100%;
 }
-
-.media-chat-panel {
-    height: 85%;
-    width: 100%;
-    background-color: peru;
-}
-
 
 .sidebar ul {
     list-style: none;
@@ -1577,13 +1586,21 @@ header {
 }
 
 .sidebar ul li a {
-    color: white;
-    font-size: 27px;
+    color: rgba(39,199,171,1);
+    font-size: 20px;
 }
 
 .media-page-container {
     height: 100vh;
     width: 100%;
+    overflow: hidden;
+}
+
+.insider-page {
+    height: 100%;
+    max-height: 100vh;
+    width: 100%;
+    /* overflow-y: auto; */
     overflow: hidden;
 }
 
@@ -1609,15 +1626,32 @@ header {
     border-bottom: 1px solid rgba(146, 149, 158, 0.5);
 }
 
-.user-avatar {
+/* .user-avatar {
     float: left;
     border-radius: 50%;
+} */
+
+.user-avatar {
+    float: left;
+    width: 55px;
+    height: 55px;
+    background: rgba(39,199,171,1);
+    border-radius: 50%;
+    color: white;
+    text-align: center;
+    line-height: 55px;
+    text-transform: uppercase;
+    font-size: 20px;
 }
 
 .media-conversation-list-container .user .about {
     float: left;
     margin-top: 7px;
     padding-left: 8px;
+}
+
+.media-conversation-list-container .user .about .name {
+    font-weight: bold;
 }
 
 
@@ -1642,9 +1676,10 @@ header {
     background: white;
     width: 100%;
     float: left;      
-    height: 80vh;
-    overflow: hidden;
-    overflow-y: scroll;
+    height: 90vh;
+    max-height: 90vh;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 
@@ -1671,7 +1706,7 @@ header {
 }
 
 .people-list > ul > li {
-    padding: 15px 0;
+    padding: 5px 0;
     border-bottom: 1px solid rgba(146, 149, 158, 0.219);
     cursor: pointer;
     width: 100%;
@@ -1684,7 +1719,17 @@ header {
     color: black;
     width: 100%;
     height: 100%;
+    margin-top: 5px;
+    padding: 5px 0;
+    border-radius: 3px;
 }
+
+.people-list ul > li > a:visited, 
+.people-list ul > li a:hover, 
+.people-list ul > li a:active {
+    background-color: #eeee;
+}
+
 
 .people-list img {
     float: left;
@@ -1784,15 +1829,30 @@ header {
     margin-top: 6px;
 }
 
-.chat .chat-header .chat-call a {
+.chat .chat-header .chat-call button {
+    border: none;
+    outline: none;
+    background: transparent;
     margin-right: 25px;
     color: rgba(39,199,171,1);
+    cursor: pointer;
+}
+
+.chat .chat-header .chat-call button:disabled, button[disabled] {
+    color: rgba(61, 80, 77, 0.75);
+}
+
+.chat .chat-header .chat-call button:hover:not([disabled]) {
+    color: rgba(39, 199, 171, 0.75);
 }
 
 .chat-history {
     padding: 30px 30px 20px;
     border-bottom: 1px solid rgba(146, 149, 158, 0.5);
-    overflow-y: scroll;
+    overflow-y: auto;
+    max-height: 75vh;
+    overflow-x: hidden;
+    overflow-y: auto;
     height: 75vh;
 }
 
@@ -1868,14 +1928,12 @@ header {
     font-size: 16px;
     color: gray;
     cursor: pointer;
-    
 }
     
 .chat-message button {
     float: right;
     color: rgba(39,199,171,1);
     font-size: 16px;
-    text-transform: uppercase;
     border: none;
     outline: none;
     cursor: pointer;
@@ -1884,10 +1942,327 @@ header {
 }
     
 .chat-message button:hover {
-    color: rgba(39, 199, 172, 0.5);
+    color: rgba(39, 199, 171, 0.75);
+}
+
+.loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    width: 100px;
+    height: 100px;
+    margin: -75px 0 0 -75px;
+    border: 7px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 7px solid rgba(39,199,171,1);
+    width: 80px;
+    height: 80px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.livestream-review {
+    width: 100%;
+    display: flex;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    background: #000;
+}
+
+.preview-localstream {
+    margin: 0; 
+    padding: 0;
+    /* max-height: 100%; */
+    height: 100%;
+    width: 100%;
+}
+
+.livestream-form {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-items: center;
+    align-content: center;
+    height: 100vh; 
 }
 
 
+.livestream-form form {
+    padding: 20px;
+    vertical-align: middle;
+    
+}
+
+.livestream-form input {
+    margin: 5px 0 20px 0;
+    padding: 5px 15px;
+}
+
+.livestream-form textarea {
+    margin: 5px 0 15px 0;
+    padding: 5px 15px;
+    resize: none;
+}
+
+.livestream-form button {
+    text-decoration: none;
+    background: rgba(39,199,171,1);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    outline: none;
+    padding: 7px;
+    cursor: pointer;
+    float: right;
+    margin: 10px 0;
+}
+
+.livestream-page-container {
+    height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+} 
+
+.livestream-page {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.livestream-page .create {
+    text-decoration: none;
+    border: 1px solid rgba(39,199,171,1);
+    color: rgba(39,199,171,1);
+    padding: 10px;
+    border-radius: 6px;
+}
 
 
-  
+.livestream-header {
+    padding: 20px;
+    color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.livestreamdetail-container {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    max-height: 100vh;
+}
+
+.livestream-container {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    max-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.livestream-create-header {
+    display: flex;
+    align-content: center;
+    justify-content: space-around;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 30px 0;
+}
+
+.livestream-container input {
+    width: 50%;
+
+}
+
+.livestream-container .create {
+    padding: 10px;
+    text-align: center;
+    background-color: rgba(39,199,171,1);
+    border-radius: 3px;
+    border: none;
+    text-decoration: none;
+    color: white;
+    /* vertical-align: middle; */
+    cursor: pointer;
+}
+
+.livestream-container .create:hover {
+    background-color: rgba(39, 199, 171, 0.75);
+}
+
+.livestreamdetail-header button {
+    padding: 10px;
+    border: none;
+    background-color: rgba(39,199,171,1);
+    text-decoration: none;
+    color: white;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-right: 30px;
+}
+
+.livestreamdetail-header button:hover {
+    background-color: rgba(39, 199, 171, 0.75);
+}
+
+.livestream-container ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 30px 10px;
+    list-style: none;
+}
+
+
+.livestream-container ul li {
+    margin: 10px;
+    width: 30%;
+}
+
+.livestream-container ul li > .card-img-top {
+    height: 100%;
+}
+
+.livestream-container ul li > .card-title {
+    font-weight: bold;
+}
+
+.livestream-container ul li a {
+    padding: 10px;
+    float: right;
+    text-align: center;
+    background: rgba(39,199,171,1);
+    border-radius: 3px;
+    border: none;
+    text-decoration: none;
+    color: white;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.livestreamdetail-header {
+    padding: 15px;
+    height: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    vertical-align: middle; 
+    /* background: red; */
+}
+
+.livestreamdetail-header label {
+    font-weight: bold;
+}
+
+.livestreamdetail-videocontainer {
+    height: 70%;
+    padding: 15px;
+}
+
+.livestreamdetail-description {
+    padding: 15px;
+    height: 20%;
+}
+
+.livestreamdetail-description label {
+    font-weight: bold;
+}
+
+.livestreamdetail-description label {
+    font-weight: bold;
+}
+
+.livestreamdetail-description p {
+    font-weight: lighter;
+}
+
+.livestreamdetail-chat-container {
+    padding: 30px 30px 20px;
+    /* background: #000; */
+    /* border-bottom: 1px solid rgba(146, 149, 158, 0.5); */
+    overflow-y: auto;
+    max-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.livestreamdetail-chat-header {
+    padding: 15px;
+    height: 10vh;
+}
+
+.livestreamdetail-chat-header label {
+    font-weight: bold;
+}
+
+.livestreamdetail-chat {
+    overflow-y: auto;
+    max-height: 70vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 70vh;
+    
+}
+
+.livestreamdetail-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px;
+    height: 20vh;
+}
+
+.livestreamdetail-message textarea {
+    background: #eee;
+    width: 100%;
+    border: none;
+    padding: 5px 10px;
+    margin: 0px 10px;
+    border-radius: 5px;
+    resize: none;
+}
+
+.livestreamdetail-message button {
+    padding: 5px 10px;
+    margin: 0px 10px;
+    color: rgba(39,199,171,1);
+    /* font-size: 16px; */
+    border: none;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    font-weight: bold;
+    background: white;
+}

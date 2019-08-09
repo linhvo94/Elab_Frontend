@@ -1,6 +1,7 @@
 export const VIDEO_CALL_SIGNAL = "video_call_signal";
 
 export const sendVideoOffer = (socket, sender, receiver, isAudioCall, sdp) => {
+    console.log("Offer",sender, receiver);
     socket.emit(VIDEO_CALL_SIGNAL, {
         type: "video-offer",
         sender: sender,

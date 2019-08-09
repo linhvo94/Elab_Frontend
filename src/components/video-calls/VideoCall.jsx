@@ -43,7 +43,8 @@ export default class VideoCall extends React.Component {
 
 
     componentDidMount() {
-
+        console.log(window.sender);
+        console.log(window.receiver);
         window.addEventListener("beforeunload", this.handleLeavePage);
 
         this.socket = io("https://www.e-lab.live:9000");
@@ -389,47 +390,45 @@ export default class VideoCall extends React.Component {
                         videoMessage={this.state.videoMessage}
                     />
 
-                    <div className="row justify-content-center call-screen-container">
-                        <div className="col-6 videocall-localstream-container">
-                            <video className="videocall-localstream" ref={this.localStreamSource} muted autoPlay>
-
-                            </video>
-                        </div>
-
-                        <div className="col-6 videocall-remotestream-container">
+                    <div className="row call-screen-container">
+                        <div className="col-12 col-md-12 col-lg-12 videocall-remotestream-container">
                             <video className="videocall-remotestream" ref={this.remoteStreamSource} autoPlay>
 
                             </video>
+                            <div className="videocall-localstream-container">
+                                <video className="videocall-localstream" ref={this.localStreamSource} muted autoPlay>
+
+                                </video>
+                            </div>
+
+                            <div className="call-buttons">
+                                <button type="button" className="btn btn-danger hangup-button" onClick={this.handleHangup}>
+                                    <i className="fas fa-phone-slash"></i>
+                                </button>
+
+                                {this.state.onAudio === null ? null
+                                    : this.state.onAudio ?
+                                        <button type="button" className="btn btn-default audio-button ml-5" onClick={this.handleAudioState}>
+                                            <i className="fas fa-microphone"></i>
+                                        </button>
+
+                                        : <button type="button" className="btn btn-default audio-button ml-5" onClick={this.handleAudioState}>
+                                            <i className="fas fa-microphone-slash"></i>
+                                        </button>
+                                }
+
+
+                                {this.state.onVideo === null ?
+                                    <button type="button" className="btn btn-success upgrade-video-button ml-5" onClick={this.handleUpgradeVideo}>
+                                        <i className="fas fa-video"></i>
+                                    </button>
+                                    :
+                                    <button type="button" className="btn btn-success upgrade-video-button ml-5" onClick={this.handleVideoState}>
+                                        {this.state.onVideo ? <i className="fas fa-video"></i> : <i className="fas fa-video-slash"></i>}
+                                    </button>
+                                }
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="d-flex justify-content-center">
-                        <button type="button" className="btn btn-danger hangup-button" onClick={this.handleHangup}>
-                            <i className="fas fa-phone-slash"></i>
-                        </button>
-
-                        {this.state.onAudio === null ? null
-                            : this.state.onAudio ?
-                                <button type="button" className="btn btn-default audio-button ml-5" onClick={this.handleAudioState}>
-                                    <i className="fas fa-microphone"></i>
-                                </button>
-
-                                : <button type="button" className="btn btn-default audio-button ml-5" onClick={this.handleAudioState}>
-                                    <i className="fas fa-microphone-slash"></i>
-                                </button>
-                        }
-
-
-                        {this.state.onVideo === null ?
-                            <button type="button" className="btn btn-success upgrade-video-button ml-5" onClick={this.handleUpgradeVideo}>
-                                <i className="fas fa-video"></i>
-                            </button>
-                            :
-                            <button type="button" className={this.state.onVideo ? "btn btn-success upgrade-video-button ml-5" : "btn btn-default stop-video-button ml-5"}
-                                onClick={this.handleVideoState}>
-                                {this.state.onVideo ? <i className="fas fa-video"></i> : <i className="fas fa-user-slash"></i>}
-                            </button>
-                        }
                     </div>
 
                 </div>

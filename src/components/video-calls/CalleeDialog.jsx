@@ -1,8 +1,7 @@
 import React from "react";
 
 export const CalleeDialog = (props) => {
-    const modalStyle = props.callDiaglogOpened ? "modal modal-callee-dialog modal-display"
-        : "modal modal-hide";
+    const modalStyle = props.callDiaglogOpened ? "modal modal-callee-dialog modal-display" : "modal modal-hide";
 
     return (
         <div className={modalStyle}>
@@ -15,7 +14,6 @@ export const CalleeDialog = (props) => {
                         <div className="modal-callee-img">
 
                         </div>
-                        {/* <img className="modal-call-img" src="https://cdn.dribbble.com/users/2424687/screenshots/6509663/learn_anywhere-01_4x.png" alt="calling avatar"/> */}
 
                         <p className="modal-callee-message m-40">{props.calleeMessage}</p>
 

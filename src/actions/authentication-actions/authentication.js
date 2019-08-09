@@ -6,7 +6,8 @@ import {
 
 export function login(user) {
     return (dispatch) => {
-        fetch(`https://www.e-lab.live:8080/api/oauth/token?grant_type=password&username=${user.username}&password=${user.password}`,
+        //https://www.e-lab.live:8080/api/oauth/token?grant_type=password&username=${user.username}&password=${user.password}
+        fetch(`http://localhost:8080/oauth/token?grant_type=password&username=${user.username}&password=${user.password}`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -53,7 +54,7 @@ export function login(user) {
 export function signup(user) {
     var status = ""
     return (dispatch) => {
-        fetch("http://localhost:8080/create-student-account",
+        fetch("https://www.e-lab.live:8080/api/create-student-account",
             {
                 headers: {
                     "Content-Type": "application/json",

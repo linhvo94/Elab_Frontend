@@ -3,146 +3,57 @@ import { Link } from "react-router-dom";
 import Janus from "../../janus-utils/janus.js";
 import { initJanus } from "../../actions/livestream-actions/livestreaming.js";
 
-
-
-export default class LiveStream extends React.Component {
+export default class MediaUI extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            rooms: [],
-            canLivestream: false
+            livestreams: []
         }
-        this.janus = null;
-        this.janusServer = "https://e-lab.host:8089/elab";
-        this.opaqueID = `videoroom - ${Janus.randomString(12)}`;
-        this.sfu = null;
     }
 
     componentDidMount() {
-        initJanus().then(sfu => {
-            this.sfu = sfu
-            this.getRoomList();
-        });
-
-        let roles = JSON.parse(localStorage.getItem("user_roles"));
-        roles.some((role) => {
-            if (role.authority === "ROLE_LECTURER") {
-                this.setState({ canLivestream: true });
-                return true;
-            }
-            return false;
-        });
+        this.props.fetchAllLiveStreams();
     }
 
-    getRoomList = () => {
-        if (this.sfu !== undefined && this.sfu !== null) {
-            let body = { request: "list" };
-            this.sfu.send({
-                message: body, success: (message) => {
-                    console.log("ROOM", message);
-                }
-            });
+    componentDidUpdate(prevProps) {
+
+        if (this.props.livestreams !== undefined && this.props.livestreams !== null) {
+            if (this.props.livestreams !== prevProps.livestreams) {
+                this.setState({ livestreams: this.props.livestreams });
+                console.log(this.props.livestreams);
+            }
         }
     }
 
-    // initJanus = () => {
-    //     Janus.init({
-    //         debug: "all",
-    //         callback: () => {
-    //             if (!Janus.isWebrtcSupported) {
-    //                 alert("Your browser does not support WebRTC. Please try different browser.");
-    //                 return;
-    //             } else {
-    //                 this.janus = new Janus({
-    //                     server: this.janusServer,
-    //                     iceServers: [{ urls: "stun:e-lab.host:5349" }, { urls: "turn:e-lab.host:5349?transport=udp", username: "lcq", credential: "lcq" }, { urls: "turn:e-lab.host:5349?transport=tcp", username: "lcq", credential: "lcq" }],
-    //                     success: () => {
-    //                         console.log("=== success connect ===");
-    //                         this.janus.attach({
-    //                             plugin: "janus.plugin.videoroom",
-    //                             opaqueID: this.opaqueID,
-    //                             success: (pluginHandle) => {
-    //                                 this.sfu = pluginHandle;
-    //                                 Janus.log(`[Video Room] plugin attached!(${this.sfu.getPlugin()}, id = ${this.sfu.getId()})`);
-    //                                 let body = { request: "list" };
-    //                                 this.sfu.send({
-    //                                     message: body, success: (data) => {
-    //                                         this.setState({ rooms: data.list });
-    //                                     }
-    //                                 });
-    //                             }
-    //                         });
-    //                     }
-    //                 });
-    //             }
-    //         }
-    //     })
-    // }
+
+    handleChange = (e) => {
+
+    }
+
+
 
     render() {
-        console.log(this.state.rooms);
         return (
-            <div className="livestream-page">
-                <div className="row">
-                    <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-                        <h1><i className="fas fa-wave-square"></i> Ongoing Livestreams ({this.state.rooms.length})</h1>
-                        {this.state.canLivestream ?
-                            <Link className="btn btn default publish-stream-link" to={"/livestream/456"}><i className="fas fa-plus"></i> Publish Stream </Link>
-                            : null}
-                    </div>
+            <div className="col-11 livestream-container">
+                <div className="livestream-create-header">
+                    <input type="text" className="form-control" placeholder="Search" />
+                    <Link className="create" to={`${this.props.match.url}/create`}><i className="fas fa-plus"></i> Publish Stream </Link>
                 </div>
-                <div className="row livestream-list">
-                    {/* {this.state.rooms.map((room, index) =>
-                        <div className="col-12 col-sm-12 col-md-6 col-lg-4 col-lg-4">
-                            <div key={index} className="card" style={{ width: "18rems" }}>
-                                <img src="https://cdn.dribbble.com/users/3809802/screenshots/6827845/school_life_4x.png" alt="Class" />
+                <ul>
+                    {this.state.livestreams.map((livestream, index) =>
+                        <li key={index}>
+                            <div className="card">
+                                <img className="card-img-top" src="https://cdn.dribbble.com/users/407431/screenshots/4281480/education.jpg" alt="Card cap" />
                                 <div className="card-body">
-                                    <h5 className="card-title">{room.description}</h5>
-                                    <p className="card-text"></p>
-                                    <Link className="btn btn-primary watchnow-link" to={"/"}>Watch now</Link>
+                                    <h5 class="card-title">{livestream.title}</h5>
+                                    <p class="card-text">{livestream.description}</p>
+                                    <Link to={`${this.props.match.url}/${livestream.roomID}`}>Watch Now</Link>
                                 </div>
                             </div>
-                        </div>
-                    )} */}
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-4 col-lg-4">
-                        <div className="card" style={{ width: "18rems" }}>
-                            <img src="https://cdn.dribbble.com/users/3809802/screenshots/6827845/school_life_4x.png" alt="Class" />
-                            <div className="card-body">
-                                <h5 className="card-title">A</h5>
-                                <p className="card-text"></p>
-                                <Link className="btn btn-primary" to={"/livestream/456"}>Watch now</Link>
-                            </div>
-                        </div>
+                        </li>
 
-                    </div>
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-4 col-lg-4">
-                        <div className="card" style={{ width: "18rems" }}>
-                            <img src="https://cdn.dribbble.com/users/3809802/screenshots/6827845/school_life_4x.png" alt="Class" />
-                            <div className="card-body">
-                                <h5 className="card-title">A</h5>
-                                <p className="card-text"></p>
-                                <Link className="btn btn-default watchnow-link" to={"/"}>Watch now</Link>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-4 col-lg-4">
-                        <div className="card" style={{ width: "18rems" }}>
-                            <img src="https://cdn.dribbble.com/users/3809802/screenshots/6827845/school_life_4x.png" alt="Class" />
-                            <div className="card-body">
-                                <h5 className="card-title">A</h5>
-                                <p className="card-text"></p>
-                                <Link className="btn btn-primary" to={"/livestream/2"}>Watch now</Link>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-                        <h1><i className="fas fa-folder-open"></i> Past Livestreams</h1>
-                    </div>
-                </div>
+                    )}
+                </ul>
             </div>
         )
     }
