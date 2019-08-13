@@ -2,12 +2,11 @@ import React from "react";
 import { Link, Route } from "react-router-dom";
 import io from "socket.io-client";
 
-import Sidebar from "./Sidebar.jsx";
 import Chat from "./Chat.jsx";
 import ringing_tone from "../../media/sounds/ringing_tone.wav";
 import { CalleeDialog } from "./CalleeDialog.jsx";
 import { playRingTone, stopRingTone } from "../../media/sounds/sound-control.js";
-import { sendVideoHangupEvent, sendAddOnlineUserEvent, sendVideoDeclineEvent } from '../../socket-utils/socket-utils.js';
+import { sendVideoHangupEvent, sendAddOnlineUserEvent, sendVideoDeclineEvent } from '../../utils/socket-utils/socket-utils.js';
 
 export default class Media extends React.Component {
     constructor(props) {
@@ -20,18 +19,13 @@ export default class Media extends React.Component {
 
             onlineUsers: [],
             filterUsers: [],
-
             searchUser: "",
 
             callDiaglogOpened: false,
-            searchUserBoxOpened: false,
-            userDiaglogOpened: false,
-            displaySidebar: true,
 
             offerResponded: false,
             isOnCall: false,
 
-            linkSelected: ""
         }
 
         this.peerConnection = null;
@@ -110,12 +104,26 @@ export default class Media extends React.Component {
         this.setState({ [e.target.name]: e.target.value });
         if (e.target.name === "searchUser") {
             if (e.target.value !== null && e.target.value !== "") {
-                let filterUsers = this.state.onlineUsers.filter(user => user.includes(e.target.value));
+                let filterUsers = this.state.onlineUsers.filter(user => (user.toLowerCase()).includes((e.target.value).toLowerCase()));
                 this.setState({ filterUsers: filterUsers });
             } else {
                 this.setState({ filterUsers: this.state.onlineUsers });
             }
         }
+    }
+
+    handleCallAccept = (e) => {
+        e.preventDefault();
+
+        stopRingTone(this.ringTone);
+        this.setState({ callDiaglogOpened: false, offerResponded: true, isOnCall: true });
+
+        var videoCallWindow = window.open("/videocall", "Popup", "toolbar=no, location=no, statusbar=no, menubar=no, scrollbars=1, resizable=0, width=1024, height=576");
+        videoCallWindow.sender = this.state.username;
+        videoCallWindow.receiver = this.state.receiver;
+        videoCallWindow.offerMessage = this.offerMessage;
+        videoCallWindow.isAudioCall = this.offerMessage.isAudioCall;
+        videoCallWindow.userType = "callee";
     }
 
     handleCallDecline = (e) => {
@@ -125,30 +133,11 @@ export default class Media extends React.Component {
         sendVideoDeclineEvent(this.socket, this.state.username, this.state.receiver, this.offerMessage.socketOrigin);
     }
 
-    handleCallAccept = (e) => {
-        e.preventDefault();
-
-        stopRingTone(this.ringTone);
-        this.setState({ callDiaglogOpened: false, offerResponded: true, isOnCall: true });
-
-        var videoCallWindow = window.open("/videocall", "Popup", "toolbar=no, location=no, statusbar=no, menubar=no, scrollbars=1, resizable=0, width=1024, height=576, top=30");
-        videoCallWindow.sender = this.state.username;
-        videoCallWindow.receiver = this.state.receiver;
-        videoCallWindow.offerMessage = this.offerMessage;
-        videoCallWindow.isAudioCall = this.offerMessage.isAudioCall;
-        videoCallWindow.userType = "callee";
-    }
-
 
     handleCloseCallDiaglog = (e) => {
         e.preventDefault();
         stopRingTone(this.ringTone);
         this.setState({ callDiaglogOpened: false });
-    }
-
-    handleCloseUserDialog = (e) => {
-        e.preventDefault();
-        this.setState({ userDiaglogOpened: false });
     }
 
     render() {
@@ -161,7 +150,7 @@ export default class Media extends React.Component {
                     handleCloseCallDiaglog={this.handleCloseCallDiaglog}
                     handleCallDecline={this.handleCallDecline} />
 
-                <div className="col-md-3 col-lg-3 media-conversation-list-container">
+                <div className="col-1 col-sm-2 col-md-3 col-lg-3 col-xl-3 media-conversation-list-container">
                     <div className="user clearfix">
                         <div className="user-avatar">{this.state.username[0]}</div>
                         <div className="about">
@@ -191,11 +180,10 @@ export default class Media extends React.Component {
                                 </li>
                             )}
                         </ul>
-
                     </div>
                 </div>
 
-                <div className="col-md-8 col-lg-8 media-chat-container">
+                <div className="col-11 col-sm-10 col-md-8 col-lg-8 col-xl-8 media-chat-container">
                     <Route path={`${this.props.match.path}/:username`}
                         render={(props) => <Chat {...props}
                             onlineUsers={this.state.onlineUsers}

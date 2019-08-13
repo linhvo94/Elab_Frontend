@@ -64,7 +64,7 @@ export default class Login extends React.Component {
                                         name="password" value={this.state.password} onChange={this.handleChange} />
                                 </div>
 
-                                <button type="button" className="btn btn-default login-button" onClick={this.login}>
+                                <button type="button" className="login-button" onClick={this.login}>
                                     Login
                                 </button>
 

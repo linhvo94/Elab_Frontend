@@ -11,7 +11,9 @@ export default class LiveStreamForm extends React.Component {
             roomID: Math.floor(Math.random() * 2468),
             publisher: {}
         }
+
         this.sfu = null;
+        this.localStream = null;
         this.localStreamSource = React.createRef();
     }
 
@@ -21,6 +23,7 @@ export default class LiveStreamForm extends React.Component {
 
         handleGetUserMedia({ video: true, audio: true }).then(stream => {
             this.localStreamSource.current.srcObject = stream;
+            this.localStream = stream;
         }).catch(e => console.log(e));
     }
 
@@ -40,10 +43,10 @@ export default class LiveStreamForm extends React.Component {
 
     generateRoom = (sfu, roomID) => {
         return new Promise((resolve, reject) => {
-            let roomConfig = { 
-                request: "create", 
-                room: roomID, 
-                permanent: false, 
+            let roomConfig = {
+                request: "create",
+                room: roomID,
+                permanent: false,
                 description: this.state.title,
                 max_publishers: 1
             };
@@ -58,7 +61,7 @@ export default class LiveStreamForm extends React.Component {
                     let anotherRoomID = Math.floor(Math.random() * 3579);
                     this.setState({ roomID: anotherRoomID });
                     this.generateRoom(sfu, anotherRoomID);
-                    // reject(error);
+                    reject(error);
                 }
             });
         });
@@ -72,6 +75,16 @@ export default class LiveStreamForm extends React.Component {
                 this.props.createLiveStream(this.state);
             });
         });
+    }
+
+    componentWillUnmount() {
+        let tracks = this.localStream.getTracks();
+        tracks.forEach(track => {
+            track.stop();
+            this.localStream.removeTrack(track);
+        });
+
+        this.localStreamSource.current.srcObject = null;
     }
 
     render() {
@@ -88,7 +101,7 @@ export default class LiveStreamForm extends React.Component {
                 <div className="col-3 livestream-form">
                     <form>
                         <input type="text" name="title" value={this.state.title} className="form-control"
-                            onChange={this.handleChange} placeholder="Title"/>
+                            onChange={this.handleChange} placeholder="Title" />
                         <textarea className="form-control" name="description" value={this.state.description}
                             onChange={this.handleChange} rows="3" placeholder="Description"></textarea>
 

@@ -1,36 +1,37 @@
 import React from "react";
-import { Link } from "react-router-dom";
-
-import ringing_tone from "../../media/sounds/ringing_tone.wav";
-import { playRingTone, stopRingTone } from "../../media/sounds/sound-control.js";
 
 export default class Chat extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            offerResponded: false,
             isOnCall: false,
             loading: true,
             sender: "",
-            receiver: ""
+            receiver: "",
+            onlineUsers: []
         }
-
-        this.onlineUsers = [];
     }
 
     componentDidMount() {
         let user = JSON.parse(localStorage.getItem("user"));
         this.setState({ sender: user.username });
+        if (this.props.onlineUsers !== undefined && this.props.onlineUsers !== null) {
+            this.setState({ onlineUsers: this.props.onlineUsers});
+        }
+
+        if (this.props.isOnCall !== undefined && this.props.isOnCall !== null) {
+            this.setState({ isOnCall: this.props.isOnCall });
+        }
         if (this.props.match.params.username !== undefined && this.props.match.params.username !== null) {
-            console.log(this.props.onlineUsers, "component did mount");
-            this.setState({ receiver: this.props.match.params.username, loading: false });
+            this.setState({ receiver: this.props.match.params.username });
+            this.loadData(500);
         }
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.props.onlineUsers !== undefined && prevProps.onlineUsers !== null) {
+        if (this.props.onlineUsers !== undefined && this.props.onlineUsers !== null) {
             if (this.props.onlineUsers !== prevProps.onlineUsers) {
-                this.onlineUsers = this.props.onlineUsers;
+                this.setState({ onlineUsers: this.props.onlineUsers });
                 if (this.isUserOnline(this.state.receiver, this.props.onlineUsers)) {
                     this.setState({ loading: false });
                 }
@@ -39,15 +40,15 @@ export default class Chat extends React.Component {
 
         if (this.props.match.params.username !== undefined && this.props.match.params.username !== null) {
             if (this.props.match.params.username !== prevProps.match.params.username) {
-                if (this.isUserOnline(this.props.match.params.username, this.onlineUsers)) {
-                    console.log("current url", this.props.match.params.username);
-                    this.setState({ receiver: this.props.match.params.username, isOnCall: false, loading: false });
+                if (this.isUserOnline(this.props.match.params.username, this.state.onlineUsers)) {
+                    this.setState({ receiver: this.props.match.params.username, loading: true });
+                    this.loadData(500);
                 }
             }
         }
 
         if (this.props.isOnCall !== undefined && this.props.isOnCall !== null) {
-            console.log("is on call",this.props.isOnCall)
+            console.log("is on call", this.props.isOnCall)
             if (this.props.isOnCall !== prevProps.isOnCall) {
                 this.setState({ isOnCall: this.props.isOnCall });
             }
@@ -80,7 +81,6 @@ export default class Chat extends React.Component {
             <div className="chat">
                 <div className="chat-header clearfix">
                     <div className="user-avatar">{this.state.receiver ? this.state.receiver[0] : `...`}</div>
-                    {/* <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/195612/chat_avatar_01_green.jpg" alt="avatar" /> */}
 
                     <div className="chat-about">
                         <div className="chat-with">{this.state.receiver}</div>

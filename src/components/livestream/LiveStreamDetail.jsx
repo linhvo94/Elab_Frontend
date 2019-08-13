@@ -1,5 +1,5 @@
 import React from "react";
-import Janus from "../../janus-utils/janus.js";
+import Janus from "../../utils/janus-utils/janus.js";
 import { initJanus } from "../../actions/livestream-actions/livestreaming.js";
 
 export default class LiveStreamDetail extends React.Component {
@@ -27,12 +27,16 @@ export default class LiveStreamDetail extends React.Component {
         }
 
         this.sfu = null;
+        this.streamRecorder = null;
+        this.streamBlobs = null;
+        this.liveStream = null;
+        this.uploadVideo = null;
         this.liveStreamSrc = React.createRef();
+        this.gapi = null;
     }
 
     componentDidMount() {
         if (this.props.match.params.id !== undefined && this.props.match.params.id !== null && !isNaN(parseInt(this.props.match.params.id))) {
-            console.log("HELLO, config janus");
             this.livestreamPrepare();
             this.props.getALiveStream(this.props.match.params.id);
             initJanus().then(sfu => {
@@ -43,11 +47,12 @@ export default class LiveStreamDetail extends React.Component {
                     console.log("SUBCRIBING");
                     this.checkRoomExistence().then(message => {
                         this.subscribeStream(message.room, this.state.publisherID);
-                        // console.log("SUBCRIBING");
                     });
                 }
             });
         }
+
+        this.gapi = window.gapi;
     }
 
     componentDidUpdate(prevProps) {
@@ -108,7 +113,8 @@ export default class LiveStreamDetail extends React.Component {
     publishStream = () => {
         this.checkRoomExistence().then(message => {
             this.setState({ roomID: message.room });
-            this.configStream();
+            let publisherConfig = { request: "join", ptype: "publisher", room: message.room, id: this.state.participantID, display: this.state.title };
+            this.sfu.send({ message: publisherConfig });
         });
 
         this.sfu.onmessage = (message, jsep) => {
@@ -121,6 +127,7 @@ export default class LiveStreamDetail extends React.Component {
                     this.setState({ privateParticipantID: message.private_id, isOnLive: true });
                     console.log("MESSAGE", message);
                     Janus.log("Successfully joined room " + message.room + " with ID " + message.id);
+                    this.configStream();
                     window.addEventListener("beforeunload", () => this.leaveLiveStreamRoom());
 
                 } else if (event === "event") {
@@ -130,7 +137,7 @@ export default class LiveStreamDetail extends React.Component {
 
             if (jsep !== undefined && jsep !== null) {
                 Janus.log("Handling SDP as well...");
-                Janus.debug(jsep);
+                Janus.log(jsep);
                 this.sfu.handleRemoteJsep({ jsep: jsep });
             }
         }
@@ -138,50 +145,51 @@ export default class LiveStreamDetail extends React.Component {
         this.sfu.onlocalstream = (stream) => {
             Janus.log(" ::: Got a local stream ::: ", stream);
             this.liveStreamSrc.current.srcObject = stream;
+            this.liveStream = stream;
+            if (!this.isPublishing) {
+                this.startStreamRecording();
+            }
+            this.setState({ isPublishing: true });
         }
     }
 
     checkRoomExistence = () => {
         return new Promise((resolve, reject) => {
-            let body = { request: "exists", room: parseInt(this.props.match.params.id) };
-            this.sfu.send({
-                message: body, success: (message) => {
-                    console.log("EXIST: ", message);
-                    if (message.exists) {
-                        resolve(message);
-                    } else {
-                        this.setState({ error: "Livestream is unavailable" });
-                        // reject(message);
+            if (this.sfu !== undefined && this.sfu !== null) {
+                let body = { request: "exists", room: parseInt(this.props.match.params.id) };
+                this.sfu.send({
+                    message: body, success: (message) => {
+                        console.log("EXIST: ", message);
+                        if (message.exists) {
+                            resolve(message);
+                        } else {
+                            this.setState({ error: "Livestream is unavailable" });
+                            reject(message);
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                console.log("Cannot find janus instance");
+            }
         });
     }
 
     configStream = () => {
-        this.sfu.createOffer({
-            media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: true },
-            success: (jsep) => {
-                Janus.log("Got publisher SDP!");
+        if (this.sfu !== undefined && this.sfu !== null) {
+            this.sfu.createOffer({
+                media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: true },
+                success: (jsep) => {
+                    Janus.log("Got publisher SDP!");
+                    let publish = { request: "configure", "audio": true, "video": true };
+                    this.sfu.send({ message: publish, jsep: jsep });
+                },
+                error: (error) => {
+                    Janus.error("WebRTC error: ", error);
+                    console.log("WebRTC error... " + JSON.stringify(error));
 
-                let publisherConfig = {
-                    request: "joinandconfigure",
-                    ptype: "publisher",
-                    room: this.state.roomID,
-                    id: this.state.participantID,
-                    display: `${this.state.firstName} ${this.state.lastName}`,
-                    audio: true,
-                    video: true
-
-                };
-                this.sfu.send({ message: publisherConfig, jsep: jsep });
-            },
-            error: (error) => {
-                Janus.error("WebRTC error: ", error);
-                console.log("WebRTC error... " + JSON.stringify(error));
-
-            }
-        });
+                }
+            });
+        }
     }
 
     pauseStream = () => {
@@ -198,69 +206,132 @@ export default class LiveStreamDetail extends React.Component {
         }
     }
 
-    leaveLiveStreamRoom = () => {
-        let unpublishConfig = { request: "leave" };
+    stopPublishingStream = (e) => {
+        e.preventDefault();
+        this.stopStreamRecording();
+        let unpublishConfig = { request: "unpublish" };
         this.sfu.send({ message: unpublishConfig });
     }
 
+    leaveLiveStreamRoom = () => {
+        let leavingRoomConfig = { request: "leave" };
+        this.sfu.send({ message: leavingRoomConfig });
+    }
+
     subscribeStream = (roomID, publisherID) => {
-        console.log("INFO", roomID, publisherID);
-        let subscriberConfig = {
-            request: "join",
-            ptype: "subscriber",
-            room: roomID,
-            feed: publisherID
+        if (this.sfu !== undefined && this.sfu !== null) {
+            let subscriberConfig = {
+                request: "join",
+                ptype: "subscriber",
+                room: roomID,
+                feed: publisherID
+            };
+
+            this.sfu.videoCodec = "vp8".toUpperCase();
+            this.sfu.send({ message: subscriberConfig });
+
+            this.sfu.onmessage = (message, jsep) => {
+                console.log(message);
+                let event = message.videoroom;
+
+                if (event !== undefined && event !== null) {
+                    if (event === "attached") {
+                        window.addEventListener("beforeunload", () => this.leaveLiveStreamRoom());
+                    } else if (event === "event") {
+                        if (message.started !== undefined && message.started !== null) {
+                            if (message.started === "ok") {
+                                console.log("START SUCCESS");
+                                this.setState({ isStreamPlaying: true });
+                            }
+                        } else if (message.paused !== undefined && message.paused !== null) {
+                            if (message.paused === "ok") {
+                                console.log("PAUSED SUCCESS");
+                                this.setState({ isStreamPlaying: false });
+                            }
+                        }
+                    }
+                }
+
+                if (jsep !== undefined && jsep !== null) {
+                    Janus.log("Handling SDP as well...");
+                    this.sfu.createAnswer({
+                        jsep: jsep,
+                        media: { audioSend: false, videoSend: false },
+                        success: (jsep) => {
+                            let body = { request: "start", room: roomID };
+                            this.sfu.send({ message: body, jsep: jsep });
+                        },
+                        error: (error) => {
+                            Janus.log("Error: ", error);
+                        }
+                    });
+                }
+            }
+
+            this.sfu.onremotestream = (stream) => {
+                Janus.log(" ::: Got a remote stream ::: ", stream);
+                this.liveStreamSrc.current.srcObject = stream;
+            }
+
+            this.sfu.error = (error) => {
+                console.log(error)
+            }
+        } else {
+            console.log("Cannot find janus instance");
+        }
+    }
+
+    startStreamRecording = () => {
+        this.streamBlobs = [];
+        let options = { mimeType: 'video/webm;codecs=vp9' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            console.error(`${options.mimeType} is not Supported`);
+            options = { mimeType: 'video/webm;codecs=vp8' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                console.error(`${options.mimeType} is not Supported`);
+                options = { mimeType: 'video/webm' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    console.error(`${options.mimeType} is not Supported`);
+                    options = { mimeType: '' };
+                }
+            }
+        }
+
+        try {
+            this.streamRecorder = new MediaRecorder(this.liveStream, options);
+        } catch (e) {
+            console.error('Exception while creating MediaRecorder:', e);
+            return;
+        }
+
+        console.log('Created MediaRecorder', this.streamRecorder, 'with options', options);
+
+        this.streamRecorder.onstop = (event) => {
+            console.log('Recorder stopped: ', event);
+            let livestreamVideo = document.getElementById("livestream-video");
+            const superBuffer = new Blob(this.streamBlobs, { type: this.streamRecorder.mimeType });
+            livestreamVideo.srcObject = null;
+            livestreamVideo.src = null;
+            this.uploadVideo = livestreamVideo.src = window.URL.createObjectURL(superBuffer);
+            this.handleYoutubeVideoUpload();
         };
 
-        this.sfu.videoCodec = "vp8".toUpperCase();
-        this.sfu.send({ message: subscriberConfig });
+        this.streamRecorder.ondataavailable = this.handleDataAvailable;
+        this.streamRecorder.start(10); // collect 10ms of data
+        console.log('MediaRecorder started', this.streamRecorder);
+    }
 
-        this.sfu.onmessage = (message, jsep) => {
-            console.log(message);
-            let event = message.videoroom;
-            // console.log(event);
-
-            if (event !== undefined && event !== null) {
-                if (event === "attached") {
-                    window.addEventListener("beforeunload", () => this.leaveLiveStreamRoom());
-                } else if (event === "event") {
-                    if (message.started !== undefined && message.started !== null) {
-                        if (message.started === "ok") {
-                            console.log("START SUCCESS");
-                            this.setState({ isStreamPlaying: true });
-                        }
-                    } else if (message.paused !== undefined && message.paused !== null) {
-                        if (message.paused === "ok") {
-                            console.log("PAUSED SUCCESS");
-                            this.setState({ isStreamPlaying: false });
-                        }
-                    }
-                } 
-            }
-
-            if (jsep !== undefined && jsep !== null) {
-                Janus.log("Handling SDP as well...");
-                this.sfu.createAnswer({
-                    jsep: jsep,
-                    media: { audioSend: false, videoSend: false },
-                    success: (jsep) => {
-                        let body = { request: "start", room: roomID };
-                        this.sfu.send({ message: body, jsep: jsep });
-                    },
-                    error: (error) => {
-                        Janus.log("Error: ", error);
-                    }
-                });
-            }
+    handleDataAvailable = (event) => {
+        if (event.data && event.data.size > 0) {
+            this.streamBlobs.push(event.data);
         }
-        
-        this.sfu.onremotestream = (stream) => {
-            Janus.log(" ::: Got a remote stream ::: ", stream);
-            this.liveStreamSrc.current.srcObject = stream;       
-        }
+    }
 
-        this.sfu.error = (error) => {
-            console.log(error)
+    stopStreamRecording = () => {
+        if (this.streamRecorder !== undefined && this.streamRecorder !== null) {
+            this.streamRecorder.stop();
+            console.log('Recorded Blobs: ', this.streamBlobs);
+
         }
     }
 
@@ -292,21 +363,146 @@ export default class LiveStreamDetail extends React.Component {
         }
     }
 
+    destroyRoom = () => {
+        let body = { request: "destroy", room: this.state.roomID };
+        this.sfu.send({
+            message: body, success: (message) => {
+                console.log(message);
+            }
+        });
+    }
+
+    handleYoutubeVideoUpload = () => {
+        this.gapi.load('client:auth2', this.initGoogleClient);
+    }
+
+    initGoogleClient = () => {
+        console.log("INIT");
+        this.gapi.client.init({
+            discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"],
+            clientId: "217688731435-dne8fig8kdocdher9cn2673jq4dkfkj7.apps.googleusercontent.com",
+            scope: "https://www.googleapis.com/auth/youtube.upload"
+        }).then(() => {
+            this.gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus);
+            this.updateSigninStatus(this.gapi.auth2.getAuthInstance().isSignedIn.get());
+        });
+    }
+    // handleYoutubeVideoUpload = () => {
+    //     if (window.GAPI !== undefined && window.GAPI !== null) {
+    //         console.log("STATUS ", window.GAPI.auth2.getAuthInstance().isSignedIn.get());
+
+    //         window.GAPI.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus);
+
+    //         this.updateSigninStatus(window.GAPI.auth2.getAuthInstance().isSignedIn.get());
+
+
+    //     } else {
+    //         console.log("Cannot perform authenticate.");
+    //     }
+    // }
+
+    updateSigninStatus = (isSignedIn) => {
+        console.log("UPDATE STATUS: ", isSignedIn);
+        if (isSignedIn) {
+            this.handleUploadRequest().then(message => {
+                console.log("HELLO MESSAGE ", message);
+            });
+        } else {
+            this.gapi.auth2.getAuthInstance().signIn();
+        }
+    }
+
+    handleUploadRequest = async () => {
+        // return new Promise((resolve, reject) => {
+        // this.convertVideoFile().then(videoFile => {
+        // console.log("VIDEOFILE: ", videoFile);
+
+        let request = {
+            part: "snippet, status",
+            requestBody: {
+                snippet: {
+                    title: this.state.title,
+                    description: this.state.description
+                },
+                status: {
+                    privacyStatus: "unlisted"
+                }
+            },
+            media: {
+                body: this.uploadVideo
+                //"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
+        }
+
+        const youtubeResponse = await this.gapi.client.youtube.videos.insert(JSON.stringify({
+            resource: {
+                snippet: {
+                  title: "Testing YoutTube API NodeJS module",
+                  description: "Test video upload via YouTube API"
+                },
+                status: {
+                  privacyStatus: "private"
+                }
+              },
+              part: "snippet,status",
+              media: {
+                body: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              },
+        }));
+
+        return youtubeResponse;
+        // resolve(youtubeResponse);
+        // }
+        // );
+
+        // });
+
+
+        ///////////////////////////////////////////////////////////////////////
+        // let request = window.gapi.client.youtube.videos.insert({
+        //     part: "snippet",
+        //     resource: {
+        //         snippet: {
+        //             title: this.state.title,
+        //             description: this.state.description
+        //         }
+        //     },
+        //         body: this.uploadVideo
+
+        // });
+
+        // let response = request.execute();
+        // console.log("RESPONSE", response);
+
+    }
+
+    onUploadProgress = (event) => {
+        const progress = Math.round((event.bytesRead / this.uploadVideo.size) * 100);
+        console.log(`${progress} % uploading`);
+    }
+
+    convertVideoFile = () => {
+        return new Promise(resolve => {
+            const superBuffer = new Blob(this.streamBlobs, { type: this.streamRecorder.mimeType });
+            resolve(window.URL.createObjectURL(superBuffer));
+        });
+    }
+
     componentWillUnmount() {
         this.leaveLiveStreamRoom();
+        // janus.destroy();
     }
 
     render() {
-        console.log(this.state.isOnLive, this.state.privateParticipantID);
         return (
             <React.Fragment>
                 {this.state.loading ? <div className="loader"></div> :
                     <React.Fragment>
-                        <div className="col-7 livestreamdetail-container">
+                        <div className="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7 livestreamdetail-container">
                             <div className="livestreamdetail-header">
                                 <label>{this.state.title}</label>
                                 {this.state.isOnLive === null || !this.state.isPublisher ? null :
-                                    this.state.isOnLive ? <button onClick={this.leaveLiveStreamRoom}>Stop Publishing</button>
+                                    this.state.isOnLive ? <button onClick={this.stopPublishingStream}>Stop Publishing</button>
                                         :
                                         <button onClick={this.publishStream}>Start Publishing</button>
                                 }
@@ -353,7 +549,7 @@ export default class LiveStreamDetail extends React.Component {
                             </div>
                         </div>
 
-                        <div className="col-4 livestreamdetail-chat-container">
+                        <div className="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4 livestreamdetail-chat-container">
                             <div className="livestreamdetail-chat-header">
                                 <label>Live Chat</label>
                             </div>
@@ -372,7 +568,6 @@ export default class LiveStreamDetail extends React.Component {
                         </div>
                     </React.Fragment>
                 }
-
             </React.Fragment >
         )
     }

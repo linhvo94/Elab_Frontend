@@ -143,7 +143,7 @@ export default class Signup extends React.Component {
                                     <p className="error-message">{this.state.error["email"]}</p>
                                 </div>
 
-                                <button type="button" className="btn btn-default signup-button" onClick={this.signup}>
+                                <button type="button" className="signup-button" onClick={this.signup}>
                                     Signup
                                 </button>
 

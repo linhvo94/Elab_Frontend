@@ -177,7 +177,7 @@ export default class LiveStream extends React.Component {
             media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true },
             success: (jsep) => {
                 Janus.log("Got publisher SDP!");
-                let publish = { request: "configure", "audio": useAudio, "video": true };
+                let publish = { request: "configure", "audio": true, "video": true };
                 this.sfu.send({ message: publish, jsep: jsep });
             },
             error: (error) => {

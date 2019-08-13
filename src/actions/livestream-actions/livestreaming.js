@@ -1,4 +1,4 @@
-import Janus from "../../janus-utils/janus.js";
+import Janus from "../../utils/janus-utils/janus.js";
 import { JANUS_SERVER_HTTP, JANUS_SERVER_HTTPS } from "../../environment/janus-urls.js";
 import {
     FETCH_ALL_LIVESTREAMS_SUCCESSFULLY, CREATE_ROOM_SUCCESSFULLY, FETCH_A_LIVESTREAM_SUCCESSFULLY, LIVESTREAM_NOT_FOUND

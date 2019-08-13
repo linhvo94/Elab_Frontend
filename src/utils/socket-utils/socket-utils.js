@@ -1,7 +1,7 @@
 export const VIDEO_CALL_SIGNAL = "video_call_signal";
 
 export const sendVideoOffer = (socket, sender, receiver, isAudioCall, sdp) => {
-    console.log("Offer",sender, receiver);
+    console.log("Offer", sender, receiver);
     socket.emit(VIDEO_CALL_SIGNAL, {
         type: "video-offer",
         sender: sender,
@@ -78,6 +78,17 @@ export const sendVideoUpgradeDecline = (socket, sender, receiver, socketOrigin) 
         socketOrigin: socketOrigin
     });
 };
+
+export const sendOfferChangingEvent = (socket, sender, receiver, socketOrigin, sdp) => {
+    console.log(sender, receiver, socketOrigin)
+    socket.emit(VIDEO_CALL_SIGNAL, {
+        type: "video-offer-changing",
+        sender: sender,
+        receiver: receiver,
+        socketOrigin: socketOrigin,
+        sdp: sdp
+    });
+}
 
 
 

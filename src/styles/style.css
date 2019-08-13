@@ -4,7 +4,6 @@ html, body {
     overflow-x: hidden;
 }
 
-
 .header .row::after {
     content: attr(data-class);
     clear: both;
@@ -588,6 +587,63 @@ header {
     background: black;
 }
 
+
+.btn-call {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    text-align: center;
+    border: none;
+    outline: none;
+    background: rgba(80, 80, 80, 0.5);
+    color: white;
+}
+
+.btn-call:hover {
+    background: rgba(100, 100, 100, 0.5);
+}
+
+.btn-hangup {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    text-align: center;
+    border: none;
+    outline: none;
+    background: rgba(235, 60, 60, 0.8);
+    color: white;
+}
+
+.btn-hangup:hover {
+    background: rgba(255, 60, 60, 0.8);
+}
+
+.btn-sharescreen {
+    border: none;
+    outline: none;
+    background-color: transparent;
+    color: rgba(200, 200, 200, 0.5);
+    font-size: 20px;
+}
+
+.btn-sharescreen:hover {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.on-top-right {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 10;
+    margin: 10px;
+}
+
+
 /* Images */
 .login-img {
     background-image: url("https://cdn.dribbble.com/users/3014280/screenshots/5970771/illustration-drib-drib_4x.jpg");
@@ -639,7 +695,11 @@ header {
 
 .call-screen-container {
     width: 100%;
-    height: 100%;
+    height: 100vh;
+    display: flex;
+    /* height: 100%; */
+    align-items: center;
+    justify-content: center;
 }
 
 .login-form-container {
@@ -671,26 +731,22 @@ header {
 .videocall-remotestream-container {
     display: flex;
     max-height: 100vh;
-    height: 100vh;
+    height: 100%;
     margin: 0;
     padding: 0;
-    /* max-height: 100vh;
-    height: 100%;
-    width: 100%; */
+    position: absolute;
     align-items: center;
     justify-content: center;
 }
 
 .videocall-localstream-container {
     display: flex;
-    /* height: 100%;
-    width: 100%; */
-    /* height: 100%; */
     padding: 0;
     margin: 0;
     align-items: right;
-    justify-content: center;
+    justify-content: right;
     height: 153px;
+    max-height: 153px;
     width: 272px;
     max-width: 272px;
     position: absolute;
@@ -966,7 +1022,6 @@ header {
 }
 
 .videocall-remotestream {
-    /* width: 100%;  */
     height: 100%;
 }
 
@@ -1027,28 +1082,21 @@ header {
     color: white;
     text-align: center;
     width: 225px;
-    border-radius: 25px;
-    text-decoration: none !important;
+    border-radius: 3px;
+    text-decoration: none;
     display: inline-block;
     margin: 10px;
-    border: none !important;
-    outline: none !important;
+    padding: 7px;
+    border: none;
+    outline: none;
 }
 
 .login-button:hover {
     color: white;
-    text-decoration: none !important;
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 50% );
-}
-
-.login-button:active:focus {
-    text-decoration: none !important;
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
+    text-decoration: none;
+    outline: none;
+    border: none;
+    box-shadow: none;
     background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 50% );
 }
 
@@ -1141,9 +1189,10 @@ header {
     color: white;
     text-align: center;
     width: 225px;
-    border-radius: 25px;
+    border-radius: 3px;
     display: inline-block;
     margin: 10px;
+    padding: 7px;
     text-decoration: none !important;
     outline: none !important;
     border: none !important;
@@ -1158,12 +1207,6 @@ header {
     box-shadow: none !important;
 }
 
-.signup-button:active:focus {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 50% );
-}
 
 .stop-video-button {
     border-radius: 50%;
@@ -1392,7 +1435,6 @@ header {
 
 @media only screen and (max-width: 576px) { 
 
-
     .platforms-logos {
         display: block;
         align-content: center;
@@ -1492,9 +1534,6 @@ header {
     align-items: center;
     background-color: white;
     border-right: 1px solid rgba(0, 0, 0, 0.25);
-    /* color: rgba(39,199,171,1); */
-    /* background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 90% ); */
-    /* border-right: 1px solid rgba(0, 0, 0, 0.25); */
 }
 
 .media-message-container {
@@ -1597,10 +1636,9 @@ header {
 }
 
 .insider-page {
-    height: 100%;
+    height: 100vh;
     max-height: 100vh;
     width: 100%;
-    /* overflow-y: auto; */
     overflow: hidden;
 }
 
@@ -1626,11 +1664,6 @@ header {
     border-bottom: 1px solid rgba(146, 149, 158, 0.5);
 }
 
-/* .user-avatar {
-    float: left;
-    border-radius: 50%;
-} */
-
 .user-avatar {
     float: left;
     width: 55px;
@@ -1652,6 +1685,10 @@ header {
 
 .media-conversation-list-container .user .about .name {
     font-weight: bold;
+    width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 
@@ -1745,6 +1782,13 @@ header {
     padding-left: 8px;
 }
 
+.people-list .name {
+    width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .people-list .status {
     color: #92959E;
 }
@@ -1798,6 +1842,7 @@ header {
 
 .chat {
     background: white;
+    width: 100%;
 }
     
 .chat .chat-header {
@@ -1820,6 +1865,10 @@ header {
 .chat .chat-with {
     font-weight: bold;
     font-size: 16px;
+    width: 500px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
     
@@ -1918,10 +1967,10 @@ header {
 .chat-message textarea {
     width: 100%;
     border: none;
-    padding: 5px 20px;
-    margin: 5px 10px;
+    margin: 5px 10px 0px 10px;
     border-radius: 5px;
     resize: none;
+    background: #eee;
 }
     
 .chat-message .fa-file-o, .fa-file-image-o {
@@ -2105,7 +2154,6 @@ header {
     border: none;
     text-decoration: none;
     color: white;
-    /* vertical-align: middle; */
     cursor: pointer;
 }
 
@@ -2128,34 +2176,39 @@ header {
     background-color: rgba(39, 199, 171, 0.75);
 }
 
-.livestream-container ul {
+.livestream-list {
     display: flex;
-    flex-wrap: wrap;
     align-content: center;
-    justify-content: space-between;
+    justify-content: center;
     position: relative;
     width: 100%;
     height: 100%;
     margin: 0;
-    padding: 30px 10px;
+    padding: 0;
+}
+
+.livestream-list ul {
+    padding: 0;
     list-style: none;
+    width: 100%;
 }
 
 
-.livestream-container ul li {
-    margin: 10px;
-    width: 30%;
+.livestream-list ul > li {
+    margin: 5px;
+    width: 32%;
+    display: inline-block;
 }
 
-.livestream-container ul li > .card-img-top {
+.livestream-list ul > li > .card-img-top {
     height: 100%;
 }
 
-.livestream-container ul li > .card-title {
+.livestream-list ul li > .card-title {
     font-weight: bold;
 }
 
-.livestream-container ul li a {
+.livestream-list ul li a {
     padding: 10px;
     float: right;
     text-align: center;
@@ -2258,7 +2311,6 @@ header {
     padding: 5px 10px;
     margin: 0px 10px;
     color: rgba(39,199,171,1);
-    /* font-size: 16px; */
     border: none;
     border-radius: 3px;
     outline: none;

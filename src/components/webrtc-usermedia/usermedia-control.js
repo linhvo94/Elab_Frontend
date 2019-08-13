@@ -18,10 +18,41 @@ export const handleGetUserMedia = (mediaContraints) => {
 };
 
 export const handleGetVideoTracks = () => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            resolve(stream.getVideoTracks());
-        })
+            .then(stream => {
+                resolve(stream.getVideoTracks());
+            })
+            .catch(e => {
+                console.log(e);
+                reject(e);
+            });
+    });
+}
+
+export const handleGetAudioTracks = () => {
+    return new Promise((resolve, reject) => {
+        if (hasUserMedia()) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    resolve(stream.getAudioTracks());
+                })
+                .catch(e => {
+                    console.log(e);
+                    reject(e);
+                })
+        }
+    });
+}
+
+export const handleGetScreenTracks = () => {
+    return new Promise((resolve, reject) => {
+        if (navigator.getDisplayMedia) {
+            resolve(navigator.getDisplayMedia({ video: true }));
+        } else if (navigator.mediaDevices.getDisplayMedia) {
+            resolve(navigator.mediaDevices.getDisplayMedia({ video: true }));
+        } else {
+            resolve(navigator.mediaDevices.getUserMedia({ video: { mediaSource: "screen" } }));
+        }
     });
 }
