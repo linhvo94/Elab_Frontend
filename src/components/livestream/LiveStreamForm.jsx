@@ -8,7 +8,8 @@ export default class LiveStreamForm extends React.Component {
         this.state = {
             title: "",
             description: "",
-            roomID: Math.floor(Math.random() * 2468),
+            status: "created",
+            roomID: Math.floor(Math.random() * 24683579),
             publisher: {}
         }
 
@@ -19,8 +20,10 @@ export default class LiveStreamForm extends React.Component {
 
     componentDidMount() {
         let user = JSON.parse(localStorage.getItem("user"));
-        this.setState({ publisher: user });
-
+        if (user !== undefined && user !== null) {
+            this.setState({ publisher: user });
+        }
+        
         handleGetUserMedia({ video: true, audio: true }).then(stream => {
             this.localStreamSource.current.srcObject = stream;
             this.localStream = stream;
@@ -28,13 +31,15 @@ export default class LiveStreamForm extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        console.log("ROOM created", this.props.roomCreated);
         if (this.props.roomCreated !== undefined && this.props.roomCreated !== null) {
             if (this.props.roomCreated && this.props.roomCreated !== prevProps.roomCreated) {
+                console.log("ROM CREATED");
                 this.props.history.push(`/livestream/${this.state.roomID}`);
             }
         }
+
     }
+
 
     handleChange = (e) => {
         e.preventDefault();
@@ -48,7 +53,8 @@ export default class LiveStreamForm extends React.Component {
                 room: roomID,
                 permanent: false,
                 description: this.state.title,
-                max_publishers: 1
+                publishers: 1,
+                bitrate: 128000
             };
             sfu.send({
                 message: roomConfig,
@@ -58,7 +64,7 @@ export default class LiveStreamForm extends React.Component {
                 },
                 error: (error) => {
                     console.log(error);
-                    let anotherRoomID = Math.floor(Math.random() * 3579);
+                    let anotherRoomID = Math.floor(Math.random() * 35792468);
                     this.setState({ roomID: anotherRoomID });
                     this.generateRoom(sfu, anotherRoomID);
                     reject(error);
@@ -70,8 +76,8 @@ export default class LiveStreamForm extends React.Component {
 
     createLiveStream = (e) => {
         e.preventDefault();
-        initJanus().then(sfu => {
-            this.generateRoom(sfu, this.state.roomID).then(() => {
+        initJanus().then(data => {
+            this.generateRoom(data.sfu, this.state.roomID).then(() => {
                 this.props.createLiveStream(this.state);
             });
         });
@@ -110,8 +116,6 @@ export default class LiveStreamForm extends React.Component {
 
                 </div>
             </React.Fragment>
-
         )
     }
-
 }

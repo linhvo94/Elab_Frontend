@@ -100,6 +100,11 @@ video::-webkit-media-controls-enclosure {
     height: 25px;
     font-size: 28px;
     color: rgba(39, 199, 172, 0.9);
+    text-align: center;
+}
+
+.video-buttons #screen-sharing-button span i:first-child {
+    position: absolute;
 }
 
 .video-buttons #screen-adjust-button {
@@ -135,9 +140,6 @@ video::-webkit-media-controls-enclosure {
     margin: 0px 30px;
 }
 
-.livestream-list .card {
-    margin: 30px;
-}
 
 .livestream-list .card .watchnow-link {
     background-color: transparent;
@@ -150,7 +152,7 @@ video::-webkit-media-controls-enclosure {
     background-color: transparent;
     border-color: rgba(39,199,171,1);
     color: rgba(39,199,171,1);
-    float: right;
+    padding: 12px 16px;
     margin-right: 75px;
     display: inline;
 }
@@ -158,66 +160,6 @@ video::-webkit-media-controls-enclosure {
 .livestream-list img {
     width: 100%;
     height: auto;
-}
-
-#online-user-sidebar {
-    width: 200px;
-    height: 100%;
-    display: block;
-    position: absolute;
-    left: -200px;
-    top: 0px;
-    transition: left 0.25s linear;
-    margin-left: 15px;
-}
-
-#online-user-sidebar.visible {
-    left: 0px;
-    transition: left 0.25s linear;
-}
-
-#online-user-sidebar.hide {
-    left: -200px;
-    transition: left 0.25s linear;
-}
-
-#online-user-sidebar input {
-    margin: 20px 10px;
-    width: 180px;
-}
-
-#online-user-sidebar ul {
-    margin: 5px;
-    padding: 0px;
-}
-
-#online-user-sidebar ul li {
-    list-style: none;
-}
-
-#online-user-sidebar ul li button {
-    padding: 10px;
-    color: rgba(39,199,171,1);
-    background-color: transparent;
-    /* border-bottom: 1px solid rgba(39,199,171,1); */
-    display: block;
-    width: 200px;
-    text-align: left;
-    
-}
-
-#online-usersidebar-btn {
-    position: absolute;
-    top: 0px;
-    right: -60px;
-}
-
-#online-usersidebar-btn button {
-    background-color: transparent;
-    outline: none;
-    border-color: rgba(39,199,171,1);
-    color: rgba(39,199,171,1);
-    margin-top: 20px;
 }
 
 .header {
@@ -906,23 +848,6 @@ header {
     margin-bottom: 5px;
 }
 
-.modal-search-userbox {
-    /* margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-right: -50%;
-    transform: translate(-50%, -50%);
-    width: 600px; */
-    width: 650px;
-    height: 300px;
-    position: absolute;
-    top: 50%;   
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: left;
-}
-
 .close-button {
     border: none !important;
     outline: none !important;
@@ -967,8 +892,6 @@ header {
 }
 
 
-
-
 .media-username-li {
     white-space: nowrap;
     width: 150px;
@@ -985,27 +908,6 @@ header {
     margin-left: 20px;
     margin-right: 20px;
     margin-bottom: 20px;
-}
-
-.modal-caller-button {
-    border-radius: 50%;
-    color: white;
-    text-align: center;
-    height: 50px;
-    width: 50px;
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-bottom: 20px;
-}
-
-.modal-caller-dialog {
-    width: 400px;
-    height: 400px;
-    position: absolute;
-    top: 50%;   
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
 }
 
 .modal-display {
@@ -1235,14 +1137,14 @@ header {
 /* margin */
 
 .m-10 { margin: 10px; }
-
 .m-20 { margin: 20px; }
-
 .m-40 { margin: 40px; }
-
+.m-30 { margin: 30px; }
 .m-50 { margin: 50px; }
 
 .mb-3 { margin-bottom: 3px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-30 { margin-bottom: 30px; }
 
 .ml-10 { margin-left: 10px; }
 
@@ -1250,280 +1152,9 @@ header {
 
 .mt-20 { margin-top: 20px; }
 
-@media only screen and (max-width: 1200px) { 
-
-    #online-user-sidebar {
-        display: none;
-    }
-
-    .media-call-button-li {
-        display: none;
-    }
-
-    .media-video-button-li {
-        display: none;
-    }
-
-    .media-onlineuser-container {
-        display: none;
-    }
-}
 
 
-@media only screen and (max-width: 992px) {
 
-    .online-user-sidebar {
-        display: none;
-    }
-
-    .platforms-logos {
-        display: flex;
-        align-content: center;
-        text-align: center;
-    }
-
-    .platforms-logos div span {
-        display: none;
-    }
-
-    .intro-rightside {
-        align-content: center;
-        text-align: center;
-        margin: 30px;
-    }
-    
-    .intro-rightside img {
-        width: 177.777%;
-        margin: auto;
-        height: auto;
-        max-width: 1100px;
-        margin: -15.875% -21.875%;
-    }
-
-    .intro-leftside {
-        align-content: center;
-        text-align: center;
-        height: 200px;
-        margin-top: 40px;
-        padding: 40px;
-    }
-}
-
-@media only screen and (max-width: 768px) { 
-
-    .menu-toggle {
-		display: block;
-	}
-
-	nav {
-		padding-top: 0;
-		display: none !important;
-		flex-direction: column;
-		justify-content: space-evenly;
-		align-items: center;
-		height: 100vh;
-        text-align: center;
-	}
-
-	nav ul {
-		flex-direction: column;
-	}
-
-	nav ul li {
-		margin-top: 2rem;
-	}
-
-	nav ul li .nav-link {
-		margin: 0;
-		font-size: 1.5rem;
-	}
-
-	.brand-name {
-		font-size: 1.5rem;
-	}
-  
-    .overlay.menu-open, nav.menu-open {
-        display: flex !important;
-        transform: scale(1);
-        opacity: 1;
-    }
-
-    .platforms-logos {
-        display: block;
-        align-content: center;
-        text-align: center;
-        margin-left: 100px;
-    }
-
-    .platforms-logos div span {
-        display: none;
-    }
-
-    
-    .intro-rightside {
-        align-content: center;
-        text-align: center;
-        margin: 30px;
-    }
-
-    .intro-rightside img {
-        margin: auto;
-        height: auto;
-        max-width: 800px;
-        margin: -15.875% -21.875%;
-        
-    }
-
-    .intro-leftside {
-        align-content: center;
-        text-align: center;
-        height: 200px;
-        margin-top: 40px;
-        padding: 40px;
-    }
-
-    .media-img {
-        background-size: center;
-    }
-
-    .media-video-button {
-        margin: 5px;
-    }
-
-    .media-message-button {
-        margin: 5px;
-    }
-
-    .modal-search-userbox {
-        width: 450px;
-        height: 300px;
-        position: absolute;
-        top: 50%;   
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: left;
-    }
-    
-    .search-userbox-group {
-        overflow: hidden;
-        overflow-y: scroll;
-        width: 100%;
-        height: 100px;
-    }
-
-    .search-userbox-group-scroll {
-        margin-top: 5px;
-        width: 100%;
-        height: 95px;
-        overflow: hidden; 
-        overflow-y: scroll;
-    }
-
-    .media-call-button-li {
-        display: none;
-    }
-
-    .media-video-button-li {
-        display: none;
-    }
-
-    .media-img {
-        display: none;
-    }
-}
-
-
-@media only screen and (max-width: 576px) { 
-
-    .platforms-logos {
-        display: block;
-        align-content: center;
-        text-align: center;
-        margin-left: 15px;
-    }
-
-    .platforms-logos div span {
-        display: none;
-    }
-
-    .availability-section div div img {
-        margin: 20px;
-        height: auto;
-        max-width: 300px;
-    }
-
-    
-    .availability-section {
-        align-items: center;
-        text-align: center; 
-        
-    }
-
-    .intro-rightside {
-        align-content: center;
-        text-align: center;
-        margin: 30px;
-    }
-
-    .intro-rightside img {
-        height: auto;
-        max-width: 550px;
-        margin: -15.875% -21.875%;
-        
-    }
-
-    .intro-leftside {
-        align-content: center;
-        text-align: center;
-        height: 300px;
-        margin-top: 40px;
-        padding: 40px;
-    }
-
-    .login-img {
-        display: none;
-    } 
-
-    .signup-page {
-        position: relative;
-        overflow: hidden;
-        overflow-y: auto;
-    }
-
-    .signup-img {
-        display: none;
-    }
-
-    .signup-form-input {
-        margin: 5px;
-        width: 250px;
-    }
-
-    .signup-birthday-input {
-        margin-left: 5px;
-        display: inline;
-        text-align: center;
-        
-    }
-
-    .modal-search-userbox {
-        width: 300px;
-        height: 250px;
-        position: absolute;
-        top: 50%;   
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: left;
-    }
-
-    .search-userbox-group-scroll {
-        margin-top: 5px;
-        width: 100%;
-        height: 80px;
-        overflow: hidden; 
-        overflow-y: scroll;
-    }
-}
 
 .media-sidebar {
     height: 100vh;
@@ -2042,8 +1673,7 @@ header {
     display: flex;
     position: relative;
     align-items: center;
-    justify-items: center;
-    align-content: center;
+    justify-content: center;
     height: 100vh; 
 }
 
@@ -2074,8 +1704,13 @@ header {
     outline: none;
     padding: 7px;
     cursor: pointer;
-    float: right;
-    margin: 10px 0;
+    width: 100%;
+    /* vertical-align: middle; */
+    /* margin-left: 50%; */
+
+    /* float: center; */
+    /* float: center; */
+    /* margin: 10px 0; */
 }
 
 .livestream-page-container {
@@ -2147,7 +1782,7 @@ header {
 }
 
 .livestream-container .create {
-    padding: 10px;
+    padding: 12px 16px;
     text-align: center;
     background-color: rgba(39,199,171,1);
     border-radius: 3px;
@@ -2170,45 +1805,73 @@ header {
     border-radius: 3px;
     cursor: pointer;
     margin-right: 30px;
+    top: 50%;
 }
 
 .livestreamdetail-header button:hover {
     background-color: rgba(39, 199, 171, 0.75);
 }
 
-.livestream-list {
-    display: flex;
-    align-content: center;
-    justify-content: center;
-    position: relative;
+.livestream-filters {
     width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
+    margin-left: 30px;
+
+}
+
+.livestream-filters button {
+    border: none;
+    outline: none;
+    padding: 12px 16px;
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+.livestream-filters button:hover {
+    background-color: #ddd;
+}
+
+.livestream-list {
+    overflow: hidden;
+    width: 100%;
+    margin: 20px auto;
+    padding: 10px;
 }
 
 .livestream-list ul {
     padding: 0;
+    margin: 0;
     list-style: none;
-    width: 100%;
 }
 
 
 .livestream-list ul > li {
-    margin: 5px;
-    width: 32%;
-    display: inline-block;
+    float: left;
+    width: 30%;
+    height: 400px;
+    margin: 0px 10px 50px 20px;
+    box-sizing: border-box;
 }
 
-.livestream-list ul > li > .card-img-top {
+.livestream-list ul li .card-img-top {
     height: 100%;
 }
 
-.livestream-list ul li > .card-title {
+.livestream-list ul li .card-title {
     font-weight: bold;
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.livestream-list ul li a {
+.livestream-list ul li .card-text {
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.livestream-list ul > li a {
     padding: 10px;
     float: right;
     text-align: center;
@@ -2233,6 +1896,7 @@ header {
 
 .livestreamdetail-header label {
     font-weight: bold;
+    top: 50%;
 }
 
 .livestreamdetail-videocontainer {
@@ -2317,4 +1981,325 @@ header {
     cursor: pointer;
     font-weight: bold;
     background: white;
+}
+
+.modal-uploading-video-dialog {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    width: 500px;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.modal-uploading-video-dialog i {
+    color: rgba(39,199,171,1);
+}
+
+.uploadingVideoBar {
+    background-color: grey;
+    width: 80%;
+    border-radius: 3px; 
+}
+
+.completedVideoBar {
+    background-color: rgba(39,199,171,1);
+    color: white;
+    border-radius: 3px; 
+    text-align: right;
+}
+
+
+@media only screen and (max-width: 1200px) { 
+
+    .livestream-list ul > li {
+        /* width: 27%; */
+    }
+
+    #online-user-sidebar {
+        display: none;
+    }
+
+    .media-call-button-li {
+        display: none;
+    }
+
+    .media-video-button-li {
+        display: none;
+    }
+
+    .media-onlineuser-container {
+        display: none;
+    }
+}
+
+
+@media only screen and (max-width: 992px) {
+
+    .livestream-list ul > li {
+        width: 40%;
+    }
+
+    .online-user-sidebar {
+        display: none;
+    }
+
+    .platforms-logos {
+        display: flex;
+        align-content: center;
+        text-align: center;
+    }
+
+    .platforms-logos div span {
+        display: none;
+    }
+
+    .intro-rightside {
+        align-content: center;
+        text-align: center;
+        margin: 30px;
+    }
+    
+    .intro-rightside img {
+        width: 177.777%;
+        margin: auto;
+        height: auto;
+        max-width: 1100px;
+        margin: -15.875% -21.875%;
+    }
+
+    .intro-leftside {
+        align-content: center;
+        text-align: center;
+        height: 200px;
+        margin-top: 40px;
+        padding: 40px;
+    }
+}
+
+@media only screen and (max-width: 768px) { 
+
+    .livestream-list ul > li {
+        width: 42%;
+        margin: 0px 20px 20px 20px;
+    }
+
+    .menu-toggle {
+		display: block;
+	}
+
+	nav {
+		padding-top: 0;
+		display: none !important;
+		flex-direction: column;
+		justify-content: space-evenly;
+		align-items: center;
+		height: 100vh;
+        text-align: center;
+	}
+
+	nav ul {
+		flex-direction: column;
+	}
+
+	nav ul li {
+		margin-top: 2rem;
+	}
+
+	nav ul li .nav-link {
+		margin: 0;
+		font-size: 1.5rem;
+	}
+
+	.brand-name {
+		font-size: 1.5rem;
+	}
+  
+    .overlay.menu-open, nav.menu-open {
+        display: flex !important;
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .platforms-logos {
+        display: block;
+        align-content: center;
+        text-align: center;
+        margin-left: 100px;
+    }
+
+    .platforms-logos div span {
+        display: none;
+    }
+
+    
+    .intro-rightside {
+        align-content: center;
+        text-align: center;
+        margin: 30px;
+    }
+
+    .intro-rightside img {
+        margin: auto;
+        height: auto;
+        max-width: 800px;
+        margin: -15.875% -21.875%;
+        
+    }
+
+    .intro-leftside {
+        align-content: center;
+        text-align: center;
+        height: 200px;
+        margin-top: 40px;
+        padding: 40px;
+    }
+
+    .media-img {
+        background-size: center;
+    }
+
+    .media-video-button {
+        margin: 5px;
+    }
+
+    .media-message-button {
+        margin: 5px;
+    }
+
+    .modal-search-userbox {
+        width: 450px;
+        height: 300px;
+        position: absolute;
+        top: 50%;   
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: left;
+    }
+    
+    .search-userbox-group {
+        overflow: hidden;
+        overflow-y: scroll;
+        width: 100%;
+        height: 100px;
+    }
+
+    .search-userbox-group-scroll {
+        margin-top: 5px;
+        width: 100%;
+        height: 95px;
+        overflow: hidden; 
+        overflow-y: scroll;
+    }
+
+    .media-call-button-li {
+        display: none;
+    }
+
+    .media-video-button-li {
+        display: none;
+    }
+
+    .media-img {
+        display: none;
+    }
+}
+
+
+@media only screen and (max-width: 576px) { 
+
+    .livestream-list ul > li {
+        width: 90%;
+        margin: 0px 20px 100px 20px;
+    }
+
+    .platforms-logos {
+        display: block;
+        align-content: center;
+        text-align: center;
+        margin-left: 15px;
+    }
+
+    .platforms-logos div span {
+        display: none;
+    }
+
+    .availability-section div div img {
+        margin: 20px;
+        height: auto;
+        max-width: 300px;
+    }
+
+    
+    .availability-section {
+        align-items: center;
+        text-align: center; 
+        
+    }
+
+    .intro-rightside {
+        align-content: center;
+        text-align: center;
+        margin: 30px;
+    }
+
+    .intro-rightside img {
+        height: auto;
+        max-width: 550px;
+        margin: -15.875% -21.875%;
+        
+    }
+
+    .intro-leftside {
+        align-content: center;
+        text-align: center;
+        height: 300px;
+        margin-top: 40px;
+        padding: 40px;
+    }
+
+    .login-img {
+        display: none;
+    } 
+
+    .signup-page {
+        position: relative;
+        overflow: hidden;
+        overflow-y: auto;
+    }
+
+    .signup-img {
+        display: none;
+    }
+
+    .signup-form-input {
+        margin: 5px;
+        width: 250px;
+    }
+
+    .signup-birthday-input {
+        margin-left: 5px;
+        display: inline;
+        text-align: center;
+        
+    }
+
+    .modal-search-userbox {
+        width: 300px;
+        height: 250px;
+        position: absolute;
+        top: 50%;   
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: left;
+    }
+
+    .search-userbox-group-scroll {
+        margin-top: 5px;
+        width: 100%;
+        height: 80px;
+        overflow: hidden; 
+        overflow-y: scroll;
+    }
 }

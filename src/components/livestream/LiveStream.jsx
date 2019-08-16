@@ -41,6 +41,19 @@ export default class LiveStream extends React.Component {
         }
     }
 
+    filterLiveStreams = (e, type) => {
+        e.preventDefault();
+        if (type === "all") {
+            this.setState({ filterLiveStreams: this.state.livestreams });
+        } else if (type === "live") {
+            let liveStreams = this.state.livestreams.filter(l => l.url !== null);
+            this.setState({ filterLiveStreams: liveStreams });
+        } else if (type === "past") {
+            let pastStreams = this.state.livestreams.filter(l => l.url === null);
+            this.setState({ filterLiveStreams: pastStreams });
+        }
+    }
+
     render() {
         return (
             <div className="col-11 col-sm-11 col-md-11 col-lg-11 col-xl-11 livestream-container">
@@ -50,6 +63,13 @@ export default class LiveStream extends React.Component {
                     <Link className="create" to={"create-stream"}><i className="fas fa-plus"></i> Publish Stream </Link>
 
                 </div>
+
+                <div className="livestream-filters">
+                    <button className="" onClick={(e) => this.filterLiveStreams(e, "all")}> Show all</button>
+                    <button className="" onClick={(e) => this.filterLiveStreams(e, "live")}> Live </button>
+                    <button className="" onClick={(e) => this.filterLiveStreams(e, "past")}> Past </button>
+                </div>
+
                 <div className="livestream-list">
                     <ul>
                         {this.state.filterLiveStreams === null ? null :

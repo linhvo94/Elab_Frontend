@@ -12,22 +12,34 @@ import Header from "./components/general/Header.jsx";
 import Body from "./components/general/Body.jsx";
 import VideoCall from "./components/video-calls/VideoCall.jsx";
 import LiveStreamDetail from "./components/livestream/LiveStreamDetail.jsx";
-import ScreenSharing from "./components/video-calls/ScreenSharing.jsx"
 import SideBar from "./components/video-calls/Sidebar.jsx";
 
 import { login, signup, logout } from "./actions/authentication-actions/authentication.js";
-import { fetchAllLiveStreams, createLiveStream, getALiveStream } from "./actions/livestream-actions/livestreaming.js";
+import { fetchAllLiveStreams, createLiveStream, getALiveStream, initJanus, updateALiveStream, deleteALiveStream } from "./actions/livestream-actions/livestreaming.js";
 import LoginYoutube from "./components/livestream/LoginYoutube";
 
 
 class Root extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            janus: null,
+            sfu: null
+        }
+    }
+
+    componentDidMount() {
+        initJanus().then(data => {
+            this.janus = data.janus;
+            this.sfu = data.sfu;
+            this.setState({ janus: data.janus, sfu: data.sfu });
+        });
+    }
 
     render() {
         return (
             <BrowserRouter>
                 <React.Fragment>
-                    {/* <LoginYoutube /> */}
-
                     <Route exact path="/screen" render={(props) => <LoginYoutube />} />
 
                     <Route path="/" render={(props) => (props.location.pathname === "/" ||
@@ -41,8 +53,6 @@ class Root extends React.Component {
                         props.location.pathname === "/home") && <Body />} />
 
                     <Route exact path="/videocall" render={(props) => <VideoCall />} />
-
-                    {/* <Route exact path="/screen" render={(props) => <ScreenSharing />} /> */}
 
                     <Route exact path="/login" render={(props) =>
                         <Login {...props}
@@ -71,9 +81,11 @@ class Root extends React.Component {
                                 } />
 
                                 <Route exact path="/create-stream" render={(props) =>
-                                    <LiveStreamForm {...props}
-                                        createLiveStream={this.props.createLiveStream}
-                                        roomCreated={this.props.roomCreated} />
+                                    !this.props.authentication.authenticated ?
+                                        <Redirect to={{ pathname: "/login", state: { from: props.location } }} /> :
+                                        <LiveStreamForm {...props}
+                                            createLiveStream={this.props.createLiveStream}
+                                            roomCreated={this.props.roomCreated} />
                                 } />
 
                                 <Route exact path="/livestream" render={(props) =>
@@ -89,7 +101,9 @@ class Root extends React.Component {
                                         <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
                                         : <LiveStreamDetail {...props}
                                             livestream={this.props.livestream}
-                                            getALiveStream={this.props.getALiveStream} />
+                                            getALiveStream={this.props.getALiveStream}
+                                            updateALiveStream={this.props.updateALiveStream}
+                                         />
                                 } />
                             </Switch>
                         </div>
@@ -109,7 +123,8 @@ const mapStateToProps = (state) => {
         registration: state.registration,
         livestreams: state.livestreams.livestreams,
         roomCreated: state.livestreams.roomCreated,
-        livestream: state.livestreams.livestream
+        livestream: state.livestreams.livestream,
+        janus: state.janus
     }
 }
 
@@ -121,7 +136,9 @@ const mapDispatchToProps = (dispatch) => {
         logout: () => { dispatch(logout()) },
         fetchAllLiveStreams: () => { dispatch(fetchAllLiveStreams()) },
         createLiveStream: (livestream) => { dispatch(createLiveStream(livestream)) },
-        getALiveStream: (id) => { dispatch(getALiveStream(id)) }
+        getALiveStream: (id) => { dispatch(getALiveStream(id)) },
+        updateALiveStream: (id) => { dispatch(updateALiveStream(id)) },
+        deleteALiveStream: (id) => { dispatch(deleteALiveStream(id)) }
     }
 }
 

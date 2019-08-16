@@ -1,8 +1,9 @@
 import Janus from "../../utils/janus-utils/janus.js";
-import { JANUS_SERVER_HTTP, JANUS_SERVER_HTTPS } from "../../environment/janus-urls.js";
+import { JANUS_SERVER_HTTP, JANUS_SERVER_HTTPS, JANUS_SERVER_WSS } from "../../environment/janus-urls.js";
 import {
     FETCH_ALL_LIVESTREAMS_SUCCESSFULLY, CREATE_ROOM_SUCCESSFULLY, FETCH_A_LIVESTREAM_SUCCESSFULLY, LIVESTREAM_NOT_FOUND
 } from "../../action-types/livestream-types.js";
+import { iceServerConfig } from "../../environment/ice-server-config.js";
 
 export const initJanus = () => {
     return new Promise((resolve, reject) => {
@@ -15,8 +16,8 @@ export const initJanus = () => {
                     return;
                 } else {
                     let janus = new Janus({
-                        server: JANUS_SERVER_HTTPS,
-                        iceServers: [{ urls: "stun:e-lab.host:5349" }, { urls: "turn:e-lab.host:5349?transport=udp", username: "lcq", credential: "lcq" }, { urls: "turn:e-lab.host:5349?transport=tcp", username: "lcq", credential: "lcq" }],
+                        server: JANUS_SERVER_WSS,
+                        iceServers: iceServerConfig.iceServers,
                         success: () => {
                             console.log("=== success connect ===");
                             janus.attach({
@@ -24,7 +25,7 @@ export const initJanus = () => {
                                 opaqueID: opaqueID,
                                 success: (pluginHandle) => {
                                     Janus.log(`[Video Room] plugin attached!(${pluginHandle.getPlugin()}, id = ${pluginHandle.getId()})`);
-                                    resolve(pluginHandle);
+                                    resolve({ janus: janus, sfu: pluginHandle });
                                 }
                             });
                         },
@@ -54,6 +55,7 @@ export function fetchAllLiveStreams() {
 }
 
 export function createLiveStream(liveStream) {
+    console.log("CREATE STREAM");
     let access_token = localStorage.getItem("access_token");
     return (dispatch) => {
         // https://www.e-lab.live:8080/api/create-livestream?access_token${access_token}
@@ -83,6 +85,26 @@ export function createLiveStream(liveStream) {
     }
 }
 
+export function updateALiveStream(liveStream) {
+    let access_token = localStorage.getItem("access_token");
+    return (dispatch) => {
+        fetch(`http://localhost:8080/update-livestream?access_token=${access_token}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'PUT',
+            body: JSON.stringify(liveStream)
+        })
+            .then(res => {
+                console.log(res.status);
+                if (res.status === 200) {
+                    dispatch(getALiveStream(liveStream.id));
+                }
+            })
+    }
+}
+
 export function getALiveStream(id) {
     let access_token = localStorage.getItem("access_token");
     return (dispatch) => {
@@ -90,7 +112,7 @@ export function getALiveStream(id) {
             .then((res) => res.text())
             .then((text) => {
                 console.log(text);
-                if(text.length) {
+                if (text.length > 0) {
                     dispatch({
                         type: FETCH_A_LIVESTREAM_SUCCESSFULLY,
                         payload: JSON.parse(text)
@@ -106,5 +128,18 @@ export function getALiveStream(id) {
             .catch((error) => {
                 throw error;
             });
+    }
+}
+
+export const deleteALiveStream = (id) => {
+    let access_token = localStorage.getItem("access_token");
+    return (dispatch) => {
+        fetch(`http://localhost:8080/delete-livestream/${id}?access_token=${access_token}`, {
+            method: 'DELETE'
+        })
+            .then((res) => { return res.text() })
+            .then((data) => {
+                dispatch(fetchAllLiveStreams())
+            })
     }
 }

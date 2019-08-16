@@ -5,8 +5,6 @@ import {
 } from "../../action-types/livestream-types";
 
 const initialState = {
-    // pluginHandle: null,
-    // connected: false,
     livestreams: null,
     livestream: null,
     roomCreated: false,
@@ -45,11 +43,3 @@ export const livestreams = (state = initialState, action) => {
 }
 
 
-// export const janusServer = (state = initialState, action) => {
-//     switch (action.type) {
-//         case CONNECT_TO_JANUS_SUCCESSFULLY:
-//             return state;
-//         default:
-//             return;
-//     }
-// }
