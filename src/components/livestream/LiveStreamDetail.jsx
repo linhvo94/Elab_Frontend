@@ -1,8 +1,8 @@
 import React from "react";
 import Janus from "../../utils/janus-utils/janus.js";
-import uuid from "uuid/v4";
 import { initJanus } from "../../actions/livestream-actions/livestreaming.js";
 import UploadingVideoDialog from "./UploadingVideoDialog.jsx";
+import { LiveStreamMessageDialog } from "./LiveStreamMessageDialog.jsx";
 
 
 export default class LiveStreamDetail extends React.Component {
@@ -23,15 +23,15 @@ export default class LiveStreamDetail extends React.Component {
             description: "",
             publisherName: "",
             url: "",
-            error: "",
             loading: true,
             progress: null,
-            onScreenSharing: false
+            onScreenSharing: false,
+            message: "",
+            uploadMessage: "",
         }
         this.janus = null;
         this.sfu = null;
         this.streamRecorder = null;
-        this.totalStreamBlobs = [];
         this.streamBlobs = [];
         this.liveStream = null;
         this.uploadVideoBlob = null;
@@ -42,34 +42,41 @@ export default class LiveStreamDetail extends React.Component {
         if (this.props.match.params.id !== undefined && this.props.match.params.id !== null && !isNaN(parseInt(this.props.match.params.id))) {
             this.livestreamPrepare();
             this.props.getALiveStream(this.props.match.params.id);
-
-            initJanus().then(data => {
-                this.sfu = data.sfu;
-                this.janus = data.janus;
-                this.setState({ loading: false, isPublishing: false });
-                this.getRoomList();
-                if (!this.state.isPublisher) {
-                    this.checkRoomExistence().then(message => {
-                        this.subscribeStream(message.room, this.state.publisherID);
-                    });
-                }
-            });
         }
     }
 
     componentDidUpdate(prevProps) {
         if (this.props.livestream !== undefined && this.props.livestream !== null && this.props.livestream !== prevProps.livestream) {
             console.log("LIVESTREAM from database: ", this.props.livestream);
-            this.setState({ publisherID: this.props.livestream.publisher.id });
-
-            // if (this.props.livestream.url === null || this.props.livestream.status !== "ended") {
-            if (this.props.livestream.url === null) {
-                if (this.state.participantID === this.props.livestream.publisher.id) {
-                    this.setState({ isPublisher: true });
-                    console.log("is publisher");
+            if (this.state.isPublishing === null) {
+                if (this.props.livestream.url === null) {
+                    if (this.props.livestream.status === "created" && this.props.livestream.publisher.id !== this.state.participantID) {
+                        this.setState({ loading: false, isPublishing: null, message: "Livestream has not been publishing yet." });
+                    } else if (this.props.livestream.status !== "ended") {
+                        initJanus().then(data => {
+                            this.sfu = data.sfu;
+                            this.janus = data.janus;
+                            this.setState({ loading: false, isPublishing: false });
+                            this.isRoomExisting(this.props.livestream.roomID).then(exists => {
+                                if (exists) {
+                                    if (this.props.livestream.publisher.id === this.state.participantID) {
+                                        this.setState({ isPublisher: true });
+                                        console.log("is publisher");
+                                    } else {
+                                        this.setState({ isPublisher: false });
+                                        console.log("is subscriber");
+                                        this.subscribeStream(this.props.livestream.roomID, this.props.livestream.publisher.id);
+                                    }
+                                } else {
+                                    this.setState({ message: "Livestream is unavailable" });
+                                }
+                            });
+                        });
+                    } else if (this.props.livestream.status === "ended") {
+                        this.setState({ loading: false, isPublishing: null, message: "Livestream ended, and there is no recorded video." });
+                    }
                 } else {
-                    this.setState({ isPublisher: false });
-                    console.log("is subcriber");
+                    this.setState({ loading: false });
                 }
 
                 this.setState({
@@ -77,23 +84,11 @@ export default class LiveStreamDetail extends React.Component {
                     title: this.props.livestream.title,
                     description: this.props.livestream.description,
                     publisherName: `${this.props.livestream.publisher.firstName} ${this.props.livestream.publisher.lastName}`,
-                    url: this.props.livestream.url
+                    publisherID: this.props.livestream.publisher.id,
+                    url: this.props.livestream.url,
+                    roomID: this.props.livestream.roomID
                 });
             }
-        }
-    }
-
-
-    getRoomList = () => {
-        if (this.sfu !== undefined && this.sfu !== null) {
-            let body = { request: "list" };
-            this.sfu.send({
-                message: body, success: (message) => {
-                    console.log("ROOM", message);
-                }
-            });
-        } else {
-            console.log("SFU is null");
         }
     }
 
@@ -114,72 +109,76 @@ export default class LiveStreamDetail extends React.Component {
         }
     }
 
-    publishStream = () => {
-        this.checkRoomExistence().then(message => {
-            this.setState({ roomID: message.room });
+    publishStream = (e) => {
+        e.preventDefault();
+        if (this.sfu !== undefined && this.sfu !== null) {
+            this.setState({ roomID: this.state.roomID });
             let publisherConfig = {
                 request: "join",
                 ptype: "publisher",
-                room: message.room,
+                room: this.state.roomID,
                 id: this.state.participantID,
                 display: this.state.title
             };
 
             this.sfu.send({ message: publisherConfig });
 
-        }).catch(e => console.log(e));
+            this.sfu.onmessage = (message, jsep) => {
+                Janus.log("::: Got a message ::: ", message);
+                let event = message.videoroom;
+                Janus.log(("Event: " + event));
+                if (event !== undefined && event !== null) {
+                    if (event === "joined") {
+                        console.log("MESSAGE", message);
+                        Janus.log("Successfully joined room " + message.room + " with ID " + message.id);
+                        this.setState({ isPublishing: true });
+                        this.configStream();
+                        window.addEventListener("beforeunload", () => this.leaveLiveStreamRoom());
 
-        this.sfu.onmessage = (message, jsep) => {
-            Janus.log("::: Got a message ::: ", message);
-            let event = message.videoroom;
-            Janus.log(("Event: " + event));
-            if (event !== undefined && event !== null) {
-                if (event === "joined") {
-                    console.log("MESSAGE", message);
-                    Janus.log("Successfully joined room " + message.room + " with ID " + message.id);
-                    this.configStream();
-                    window.addEventListener("beforeunload", () => this.leaveLiveStreamRoom());
+                    } else if (event === "event") {
+                        if (message.unpublished !== undefined && message.unpublished !== null) {
+                            if (message.unpublished === "ok") {
 
-                } else if (event === "event") {
-                    if (message.unpublished !== undefined && message.unpublished !== null) {
-                        if (message.unpublished === "ok") {
+                                // console.log("Unpublish and create Screen sharing");
 
-                            // console.log("Unpublish and create Screen sharing");
-
+                            }
                         }
                     }
                 }
+
+                if (jsep !== undefined && jsep !== null) {
+                    Janus.log("Handling SDP as well...");
+                    Janus.log(jsep);
+                    this.sfu.handleRemoteJsep({ jsep: jsep });
+                }
             }
 
-            if (jsep !== undefined && jsep !== null) {
-                Janus.log("Handling SDP as well...");
-                Janus.log(jsep);
-                this.sfu.handleRemoteJsep({ jsep: jsep });
+            this.sfu.onlocalstream = (stream) => {
+                Janus.log(" ::: Got a local stream ::: ", stream);
+                this.liveStreamSrc.current.srcObject = stream;
+                this.liveStream = stream;
+                this.startStreamRecording();
             }
-        }
 
-        this.sfu.onlocalstream = (stream) => {
-            Janus.log(" ::: Got a local stream ::: ", stream);
-            this.liveStreamSrc.current.srcObject = stream;
-            this.liveStream = stream;
-            this.startStreamRecording();
-        }
-        this.sfu.oncleanup = () => {
+            this.sfu.oncleanup = () => {
 
+            }
+        } else {
+            console.log("cannot find sfu");
         }
     }
 
-    checkRoomExistence = () => {
+    isRoomExisting = (roomID) => {
         return new Promise((resolve, reject) => {
             if (this.sfu !== undefined && this.sfu !== null) {
-                let body = { request: "exists", room: parseInt(this.props.match.params.id) };
+                let body = { request: "exists", room: roomID };
                 this.sfu.send({
                     message: body, success: (message) => {
                         console.log("EXIST: ", message);
-                        if (message.exists) {
-                            resolve(message);
+                        if (message.videoroom === "success") {
+                            resolve(message.exists);
                         } else {
-                            this.setState({ error: "Livestream is unavailable" });
+                            this.setState({ message: "Livestream is unavailable" });
                             reject(message);
                         }
                     }
@@ -193,7 +192,7 @@ export default class LiveStreamDetail extends React.Component {
     configStream = () => {
         if (this.sfu !== undefined && this.sfu !== null) {
             this.sfu.createOffer({
-                media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: true },
+                media: { video: "hires-16:9", audioRecv: false, videoRecv: false, audioSend: true, videoSend: true },
                 success: (jsep) => {
                     Janus.log("Got publisher SDP!");
                     let publish = { request: "configure", audio: true, video: true };
@@ -241,8 +240,8 @@ export default class LiveStreamDetail extends React.Component {
     }
 
     leaveLiveStreamRoom = () => {
-        // let leavingRoomConfig = { request: "leave" };
-        // this.sfu.send({ message: leavingRoomConfig });
+        let leavingRoomConfig = { request: "leave" };
+        this.sfu.send({ message: leavingRoomConfig });
     }
 
     subscribeStream = (roomID, publisherID) => {
@@ -253,6 +252,7 @@ export default class LiveStreamDetail extends React.Component {
                 room: roomID,
                 feed: publisherID
             };
+
 
             this.sfu.videoCodec = "vp8".toUpperCase();
             this.sfu.send({ message: subscriberConfig });
@@ -275,6 +275,11 @@ export default class LiveStreamDetail extends React.Component {
                                 console.log("PAUSED SUCCESS");
                                 this.setState({ isStreamPlaying: false });
                             }
+                        } else if (message.error_code !== undefined && message.error_code !== null) {
+                            if (message.error_code === 428) {
+                                this.setState({ message: "Livestream is unavailable" });
+                            }
+
                         }
                     }
                 }
@@ -305,6 +310,8 @@ export default class LiveStreamDetail extends React.Component {
             }
             this.sfu.oncleanup = () => {
                 this.liveStreamSrc.current.srcObject = null;
+                this.setState({ isStreamPlaying: null, message: "Livestream has been ended. Please try to reload the page in order to watch the recorded lecture." });
+
             }
 
         } else {
@@ -369,10 +376,11 @@ export default class LiveStreamDetail extends React.Component {
 
     handleMediaStream = (e) => {
         e.preventDefault();
+        this.stopStreamRecording();
         if (this.sfu !== undefined && this.sfu !== null) {
             let media = "";
             if (this.state.onScreenSharing) {
-                media = { video: true, replaceVideo: true, audioSend: true, audioRecv: false, videoRecv: false };
+                media = { video: "hires-16:9", replaceVideo: true, audioSend: true, audioRecv: false, videoRecv: false };
             } else {
                 media = { video: "screen", replaceVideo: true, audioSend: true, audioRecv: false, videoRecv: false };
             }
@@ -439,9 +447,11 @@ export default class LiveStreamDetail extends React.Component {
     makeVideoUploadRequest = () => {
         let xhr = new XMLHttpRequest();
         console.log(window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse());
+
         xhr.open('POST', "https://www.googleapis.com/upload/youtube/v3/videos?part=snippet%2Cstatus", true);
         xhr.setRequestHeader('Authorization', 'Bearer ' + window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token);
         xhr.responseType = 'json';
+
         if (xhr.upload) {
             xhr.upload.onprogress = (data) => {
                 let progress = Math.round((data.loaded / data.total) * 100);
@@ -461,13 +471,17 @@ export default class LiveStreamDetail extends React.Component {
                 let youtubeURL = `https://www.youtube.com/embed/${xhr.response.id}`;
                 let livestream = this.state.livestream;
                 livestream.url = youtubeURL;
-                this.setState({ url: youtubeURL, livestream: livestream });
+                this.setState({ url: youtubeURL, livestream: livestream, uploadMessage: "" });
                 console.log("CURRENT LIVESTREAM", livestream);
-                // this.props.updateALiveStream(livestream);
-                // setTimeout(() => {
-                //     this.closeUploadingVideoDialog();
-                //     this.destroyRoom();
-                // }, 1000);
+                this.props.updateALiveStream(livestream);
+
+                setTimeout(() => {
+                    this.closeUploadingVideoDialog();
+                    this.destroyRoom();
+                }, 2000);
+
+            } else if (xhr.response.error !== undefined || xhr.response.error !== null) {
+                this.setState({ uploadMessage: "Errors have occured while uploading the lecture" });
             }
         };
 
@@ -490,7 +504,7 @@ export default class LiveStreamDetail extends React.Component {
     }
 
     closeUploadingVideoDialog = () => {
-        this.setState({ progress: null });
+        this.setState({ progress: null, message: "" });
     }
 
     destroyRoom = () => {
@@ -504,7 +518,7 @@ export default class LiveStreamDetail extends React.Component {
 
     componentWillUnmount() {
         this.leaveLiveStreamRoom();
-        // this.destroyRoom();
+        this.destroyRoom();
     }
 
     render() {
@@ -513,24 +527,26 @@ export default class LiveStreamDetail extends React.Component {
                 {this.state.loading ? <div className="loader"></div> :
                     <React.Fragment>
                         {this.state.progress === null || this.state.progress === 100 ? null :
-                            <UploadingVideoDialog progress={this.state.progress}
-                                closeUploadingVideoDialog={this.closeUploadingVideoDialog} />}
+                            <UploadingVideoDialog progress={this.state.progress} uploadMessage={this.state.uploadMessage} />}
+
+                        {this.state.message ? <LiveStreamMessageDialog message={this.state.message} /> : null}
+
                         <div className="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7 livestreamdetail-container">
                             <div className="livestreamdetail-header">
                                 <label>{this.state.title}</label>
-                                {
-                                    this.state.url !== null ? null :
-                                        !this.state.isPublisher ? null :
-                                            this.state.isPublishing === null ? null :
-                                                this.state.isPublishing ? <button onClick={this.stopPublishingStream}>Stop Publishing</button>
-                                                    :
-                                                    <button onClick={this.publishStream}>Start Publishing</button>
+                                {this.state.url !== null || !this.state.isPublisher ? null :
+                                    this.state.isPublishing === null ? null :
+                                        this.state.isPublishing === true ? <button onClick={this.stopPublishingStream}>Stop Publishing</button>
+                                            :
+                                            <button onClick={this.publishStream}>Start Publishing</button>
                                 }
                             </div>
                             <div className="livestreamdetail-videocontainer">
                                 {this.state.url === null ?
                                     <div className="video-container" id="video-container">
-                                        <video className="livestream-video" id="livestream-video" ref={this.liveStreamSrc} autoPlay muted></video>
+                                        {this.state.isPublisher ? <video className="livestream-video" id="livestream-video" ref={this.liveStreamSrc} autoPlay muted></video>
+                                            : <video className="livestream-video" id="livestream-video" ref={this.liveStreamSrc} autoPlay></video>
+                                        }
                                         <div className="controls">
                                             <div className="video-progress-bar">
                                                 <div className="video-progress-bar-color">
@@ -550,9 +566,11 @@ export default class LiveStreamDetail extends React.Component {
                                                             </button>}
 
 
-                                                {this.state.isPublishing ? <button type="button" id="screen-sharing-button" className="" title={this.state.onScreenSharing ? "Switch back to your camera" : "Click to share screen"} onClick={this.handleMediaStream}>
-                                                    {this.state.onScreenSharing ? <i className="fas fa-desktop"></i> : <span><i className="fas fa-slash"></i><i className="fas fa-desktop"></i></span>}
-                                                </button> : null}
+                                                {!this.state.isPublisher || !this.state.isPublishing ? null :
+                                                    <button type="button" id="screen-sharing-button" className="" title={this.state.onScreenSharing ? "Switch back to your camera" : "Click to share screen"} onClick={this.handleMediaStream}>
+                                                        {this.state.onScreenSharing ? <i className="fas fa-desktop"></i> : <span><i className="fas fa-slash"></i><i className="fas fa-desktop"></i></span>}
+                                                    </button>
+                                                }
 
                                                 {this.state.fullScreen ?
                                                     <button type="button" id="screen-adjust-button" onClick={this.exitFullScreen}>
@@ -567,7 +585,8 @@ export default class LiveStreamDetail extends React.Component {
 
                                             </div>
                                         </div>
-                                    </div> :
+                                    </div>
+                                    :
                                     <div className="video-container" id="video-container">
                                         <iframe title={this.state.title} className="livestream-video"
                                             src={this.state.url}
@@ -579,7 +598,7 @@ export default class LiveStreamDetail extends React.Component {
 
                             <div className="livestreamdetail-description">
                                 <label>Lecturer: {this.state.publisherName} </label>
-                                <p>{this.state.description}</p>
+                                <p><i>{this.state.description === "" || this.state.description === null ? "No Description" : this.state.description}</i></p>
                             </div>
                         </div>
 

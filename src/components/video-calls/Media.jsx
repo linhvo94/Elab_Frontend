@@ -150,46 +150,46 @@ export default class Media extends React.Component {
                     handleCloseCallDiaglog={this.handleCloseCallDiaglog}
                     handleCallDecline={this.handleCallDecline} />
 
-                <div className="col-1 col-sm-2 col-md-3 col-lg-3 col-xl-3 media-conversation-list-container">
-                    <div className="user clearfix">
-                        <div className="user-avatar">{this.state.username[0]}</div>
-                        <div className="about">
-                            <div className="name">{this.state.firstName} {this.state.lastName}</div>
-                            <div className="status">
-                                <i className="fa fa-circle online"></i> online
+                <div className="media-page-container">
+                    <div className="media-conversation-list-container">
+                        <div className="user clearfix">
+                            <div className="user-avatar">{this.state.username[0]}</div>
+                            <div className="about">
+                                <div className="name">{this.state.firstName} {this.state.lastName}</div>
+                                <div className="status">
+                                    <i className="fa fa-circle online"></i> online
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="people-list clearfix" id="people-list">
-                        <div className="search">
-                            <input className="form-control" type="text" onChange={this.handleChange} name="searchUser" value={this.state.searchUser} placeholder="Search..." />
-                        </div>
-                        <ul className="list">
-                            {this.state.filterUsers.map((user, index) =>
-                                <li key={index} className="clearfix">
-                                    <Link to={`${this.props.match.url}/${user}`}>
-                                        <div className="user-avatar">{user[0]}</div>
-                                        <div className="about">
-                                            <div className="name">{user}</div>
-                                            <div className="status">
-                                                <i className="fa fa-circle online"></i> online
+                        <div className="people-list clearfix" id="people-list">
+                            <div className="search">
+                                <input className="form-control" type="text" onChange={this.handleChange} name="searchUser" value={this.state.searchUser} placeholder="Search..." />
+                            </div>
+                            <ul className="list">
+                                {this.state.filterUsers.map((user, index) =>
+                                    <li key={index} className="clearfix">
+                                        <Link to={`${this.props.match.url}/${user}`}>
+                                            <div className="user-avatar">{user[0]}</div>
+                                            <div className="about">
+                                                <div className="name">{user}</div>
+                                                <div className="status">
+                                                    <i className="fa fa-circle online"></i> online
                                                 </div>
-                                        </div>
-                                    </Link>
-                                </li>
-                            )}
-                        </ul>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                )}
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="media-chat-container">
+                        <Route path={`${this.props.match.path}/:username`}
+                            render={(props) => <Chat {...props}
+                                onlineUsers={this.state.onlineUsers}
+                                isOnCall={this.state.isOnCall} />} />
                     </div>
                 </div>
-
-                <div className="col-11 col-sm-10 col-md-8 col-lg-8 col-xl-8 media-chat-container">
-                    <Route path={`${this.props.match.path}/:username`}
-                        render={(props) => <Chat {...props}
-                            onlineUsers={this.state.onlineUsers}
-                            isOnCall={this.state.isOnCall} />} />
-                </div>
-
             </React.Fragment>
 
         )

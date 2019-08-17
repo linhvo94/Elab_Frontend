@@ -1,5 +1,4 @@
 import React from "react";
-import { signinAccount, handleGoogleClientLoad } from "../../actions/livestream-actions/youtube";
 import { handleGetUserMedia } from "../webrtc-usermedia/usermedia-control.js";
 import { UploadingVideoDialog } from "./UploadingVideoDialog";
 

@@ -15,42 +15,34 @@ import LiveStreamDetail from "./components/livestream/LiveStreamDetail.jsx";
 import SideBar from "./components/video-calls/Sidebar.jsx";
 
 import { login, signup, logout } from "./actions/authentication-actions/authentication.js";
-import { fetchAllLiveStreams, createLiveStream, getALiveStream, initJanus, updateALiveStream, deleteALiveStream } from "./actions/livestream-actions/livestreaming.js";
-import LoginYoutube from "./components/livestream/LoginYoutube";
+import { fetchAllLiveStreams, createLiveStream, getALiveStream, updateALiveStream, deleteALiveStream } from "./actions/livestream-actions/livestreaming.js";
 
 
 class Root extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            janus: null,
-            sfu: null
+
         }
     }
 
     componentDidMount() {
-        initJanus().then(data => {
-            this.janus = data.janus;
-            this.sfu = data.sfu;
-            this.setState({ janus: data.janus, sfu: data.sfu });
-        });
     }
 
     render() {
         return (
             <BrowserRouter>
                 <React.Fragment>
-                    <Route exact path="/screen" render={(props) => <LoginYoutube />} />
-
                     <Route path="/" render={(props) => (props.location.pathname === "/" ||
                         props.location.pathname === "/home")
-                        && <Header {...props}
-                            authenticated={this.props.authentication.authenticated}
-                            logout={this.props.logout}
-                        />} />
+                        && <React.Fragment>
+                            <Header {...props}
+                                authenticated={this.props.authentication.authenticated}
+                                logout={this.props.logout} />
+                            <Body />
+                        </React.Fragment>
 
-                    <Route path="/" render={(props) => (props.location.pathname === "/" ||
-                        props.location.pathname === "/home") && <Body />} />
+                    } />
 
                     <Route exact path="/videocall" render={(props) => <VideoCall />} />
 
@@ -65,7 +57,52 @@ class Root extends React.Component {
                             signup={this.props.signup} />} />
 
 
-                    <div className="insider-page">
+                    <div className="row no-gutters">
+                        <div className="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1">
+                            <Route path="/" render={(props) => (props.location.pathname === "/media" ||
+                                props.location.pathname === "/livestream" || props.location.pathname.includes("/livestream/") || props.location.pathname === "/create-stream" ||
+                                props.location.pathname.includes("/media/"))
+                                && <SideBar {...props}
+                                />} />
+                        </div>
+                        <Switch>
+                            <div className="col-11 col-sm-11 col-md-11 col-lg-11 col-xl-11">
+                                <Route path="/media" render={(props) =>
+                                    !this.props.authentication.authenticated ?
+                                        <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
+                                        : <Media {...props} />
+                                } />
+
+
+                                <Route exact path="/create-stream" render={(props) =>
+                                    !this.props.authentication.authenticated ?
+                                        <Redirect to={{ pathname: "/login", state: { from: props.location } }} /> :
+                                        <LiveStreamForm {...props}
+                                            createLiveStream={this.props.createLiveStream}
+                                            livestream={this.props.livestream} />
+                                } />
+
+                                <Route path="/livestream" render={(props) =>
+                                    !this.props.authentication.authenticated ?
+                                        <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
+                                        : <LiveStream  {...props}
+                                            livestreams={this.props.livestreams}
+                                            fetchAllLiveStreams={this.props.fetchAllLiveStreams} />
+                                } />
+
+                                <Route path="/livestream/:id" render={(props) =>
+                                    !this.props.authentication.authenticated ?
+                                        <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
+                                        : <LiveStreamDetail {...props}
+                                            livestream={this.props.livestream}
+                                            getALiveStream={this.props.getALiveStream}
+                                            updateALiveStream={this.props.updateALiveStream}
+                                        />
+                                } />
+                            </div>
+                        </Switch>
+                    </div>
+                    {/* <div className="insider-page">
                         <div className="row">
                             <Route path="/" render={(props) => (props.location.pathname === "/media" ||
                                 props.location.pathname === "/livestream" || props.location.pathname.includes("/livestream/") || props.location.pathname === "/create-stream" ||
@@ -85,7 +122,7 @@ class Root extends React.Component {
                                         <Redirect to={{ pathname: "/login", state: { from: props.location } }} /> :
                                         <LiveStreamForm {...props}
                                             createLiveStream={this.props.createLiveStream}
-                                            roomCreated={this.props.roomCreated} />
+                                            livestream={this.props.livestream} />
                                 } />
 
                                 <Route exact path="/livestream" render={(props) =>
@@ -103,12 +140,12 @@ class Root extends React.Component {
                                             livestream={this.props.livestream}
                                             getALiveStream={this.props.getALiveStream}
                                             updateALiveStream={this.props.updateALiveStream}
-                                         />
+                                        />
                                 } />
                             </Switch>
                         </div>
 
-                    </div>
+                    </div> */}
 
                 </React.Fragment>
             </BrowserRouter >
@@ -122,9 +159,7 @@ const mapStateToProps = (state) => {
         authentication: state.authentication,
         registration: state.registration,
         livestreams: state.livestreams.livestreams,
-        roomCreated: state.livestreams.roomCreated,
         livestream: state.livestreams.livestream,
-        janus: state.janus
     }
 }
 

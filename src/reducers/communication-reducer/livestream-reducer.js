@@ -22,7 +22,7 @@ export const livestreams = (state = initialState, action) => {
         case CREATE_ROOM_SUCCESSFULLY: 
             return {
                 ...state,
-                roomCreated: action.payload,
+                livestream: action.payload,
                 errorMessage: "",
             }
         case FETCH_A_LIVESTREAM_SUCCESSFULLY: 

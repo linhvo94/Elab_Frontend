@@ -17,6 +17,7 @@ export const initJanus = () => {
                 } else {
                     let janus = new Janus({
                         server: JANUS_SERVER_WSS,
+                        // server: JANUS_SERVER_HTTP,
                         iceServers: iceServerConfig.iceServers,
                         success: () => {
                             console.log("=== success connect ===");
@@ -25,6 +26,12 @@ export const initJanus = () => {
                                 opaqueID: opaqueID,
                                 success: (pluginHandle) => {
                                     Janus.log(`[Video Room] plugin attached!(${pluginHandle.getPlugin()}, id = ${pluginHandle.getId()})`);
+                                    let body = { request: "list" };
+                                    pluginHandle.send({
+                                        message: body, success: (message) => {
+                                            console.log("ROOM", message);
+                                        }
+                                    });
                                     resolve({ janus: janus, sfu: pluginHandle });
                                 }
                             });
@@ -43,7 +50,7 @@ export const initJanus = () => {
 export function fetchAllLiveStreams() {
     let access_token = localStorage.getItem("access_token");
     return (dispatch) => {
-        fetch(`http://localhost:8080/get-livestreams?access_token=${access_token}`)
+        fetch(`https://www.e-lab.live:8080/api/get-livestreams?access_token=${access_token}`)
             .then((res) => { return res.json() })
             .then((data) => {
                 dispatch({
@@ -59,7 +66,7 @@ export function createLiveStream(liveStream) {
     let access_token = localStorage.getItem("access_token");
     return (dispatch) => {
         // https://www.e-lab.live:8080/api/create-livestream?access_token${access_token}
-        fetch(`http://localhost:8080/create-livestream?access_token=${access_token}`, {
+        fetch(`https://www.e-lab.live:8080/api/create-livestream?access_token=${access_token}`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -68,12 +75,8 @@ export function createLiveStream(liveStream) {
             body: JSON.stringify(liveStream)
         })
             .then(res => {
-                console.log(res.status);
                 if (res.status === 200) {
-                    dispatch({
-                        type: CREATE_ROOM_SUCCESSFULLY,
-                        payload: true
-                    });
+                    return res.json();
                 } else if (res.status === 400) {
 
                     // return res.text();
@@ -82,13 +85,20 @@ export function createLiveStream(liveStream) {
                     // return res.text();
                 }
             })
+            .then(data => {
+                console.log("livestream created", data);
+                dispatch({
+                    type: CREATE_ROOM_SUCCESSFULLY,
+                    payload: data
+                });
+            }).catch(e => console.log(e));
     }
 }
 
 export function updateALiveStream(liveStream) {
     let access_token = localStorage.getItem("access_token");
     return (dispatch) => {
-        fetch(`http://localhost:8080/update-livestream?access_token=${access_token}`, {
+        fetch(`https://www.e-lab.live:8080/api/update-livestream?access_token=${access_token}`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -108,7 +118,7 @@ export function updateALiveStream(liveStream) {
 export function getALiveStream(id) {
     let access_token = localStorage.getItem("access_token");
     return (dispatch) => {
-        fetch(`http://localhost:8080/get-livestream-by-room/${id}?access_token=${access_token}`)
+        fetch(`https://www.e-lab.live:8080/api/get-livestreams/${id}?access_token=${access_token}`)
             .then((res) => res.text())
             .then((text) => {
                 console.log(text);
@@ -134,7 +144,7 @@ export function getALiveStream(id) {
 export const deleteALiveStream = (id) => {
     let access_token = localStorage.getItem("access_token");
     return (dispatch) => {
-        fetch(`http://localhost:8080/delete-livestream/${id}?access_token=${access_token}`, {
+        fetch(`https://www.e-lab.live:8080/api/delete-livestream/${id}?access_token=${access_token}`, {
             method: 'DELETE'
         })
             .then((res) => { return res.text() })

@@ -60,13 +60,13 @@ export default class Header extends React.Component {
                                 <li><Link className="nav-link" to={"/media"}>Media</Link></li>
                                 <li><Link className="nav-link" to={"/livestream"}>Livestream</Link></li>
                                 {this.props.authenticated === false ?
-                                    <li><Link className="btn btn-default nav-login-link" to={"/login"}>Login</Link></li>
+                                    <li><Link className="nav-login-link" to={"/login"}>Login</Link></li>
                                     : <li>
                                         <div className="dropdown">
-                                            <button type="button" className="btn btn-default nav-name-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                {this.state.firstName !== "" ? this.state.firstName[0] : "Unknown"}
+                                            <button type="button" className="nav-name-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                {this.state.firstName === null || this.state.firstName === "" ? "Unknown" : this.state.firstName[0]}
                                             </button>
-                                            <div className="dropdown-menu dropdown-menu-right">
+                                            <div className="dropdown-menu">
                                                 <button className="dropdown-item" type="button" onClick={this.props.logout}>
                                                     Signout
                                                 </button>

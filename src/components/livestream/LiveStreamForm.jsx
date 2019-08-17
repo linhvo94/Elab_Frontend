@@ -23,18 +23,24 @@ export default class LiveStreamForm extends React.Component {
         if (user !== undefined && user !== null) {
             this.setState({ publisher: user });
         }
-        
-        handleGetUserMedia({ video: true, audio: true }).then(stream => {
+
+        handleGetUserMedia({
+            video: {
+                width: { min: 640, ideal: 1280 },
+                height: { min: 400, ideal: 720 },
+                aspectRatio: { ideal: 1.7777777778 }
+            }, 
+            audio: true
+        }).then(stream => {
             this.localStreamSource.current.srcObject = stream;
             this.localStream = stream;
         }).catch(e => console.log(e));
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.roomCreated !== undefined && this.props.roomCreated !== null) {
-            if (this.props.roomCreated && this.props.roomCreated !== prevProps.roomCreated) {
-                console.log("ROM CREATED");
-                this.props.history.push(`/livestream/${this.state.roomID}`);
+        if (this.props.livestream !== undefined && this.props.livestream !== null) {
+            if (this.props.livestream && this.props.livestream !== prevProps.livestream) {
+                this.props.history.push(`/livestream/${this.props.livestream.id}`);
             }
         }
 
@@ -54,7 +60,8 @@ export default class LiveStreamForm extends React.Component {
                 permanent: false,
                 description: this.state.title,
                 publishers: 1,
-                bitrate: 128000
+                // bitrate: 128000,
+                // bitrate_cap: true
             };
             sfu.send({
                 message: roomConfig,

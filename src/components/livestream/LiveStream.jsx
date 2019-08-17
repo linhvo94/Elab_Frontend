@@ -45,12 +45,9 @@ export default class LiveStream extends React.Component {
         e.preventDefault();
         if (type === "all") {
             this.setState({ filterLiveStreams: this.state.livestreams });
-        } else if (type === "live") {
-            let liveStreams = this.state.livestreams.filter(l => l.url !== null);
+        } else {
+            let liveStreams = this.state.livestreams.filter(l => l.status === type);
             this.setState({ filterLiveStreams: liveStreams });
-        } else if (type === "past") {
-            let pastStreams = this.state.livestreams.filter(l => l.url === null);
-            this.setState({ filterLiveStreams: pastStreams });
         }
     }
 
@@ -67,7 +64,8 @@ export default class LiveStream extends React.Component {
                 <div className="livestream-filters">
                     <button className="" onClick={(e) => this.filterLiveStreams(e, "all")}> Show all</button>
                     <button className="" onClick={(e) => this.filterLiveStreams(e, "live")}> Live </button>
-                    <button className="" onClick={(e) => this.filterLiveStreams(e, "past")}> Past </button>
+                    <button className="" onClick={(e) => this.filterLiveStreams(e, "created")}> Upcoming </button>
+                    <button className="" onClick={(e) => this.filterLiveStreams(e, "ended")}> Past </button>
                 </div>
 
                 <div className="livestream-list">
@@ -79,8 +77,14 @@ export default class LiveStream extends React.Component {
                                         <img className="card-img-top" src="https://cdn.dribbble.com/users/407431/screenshots/4281480/education.jpg" alt="Card cap" />
                                         <div className="card-body">
                                             <h5 className="card-title">{livestream.title}</h5>
-                                            <p className="card-text">{livestream.description}</p>
-                                            <Link to={`${this.props.match.url}/${livestream.roomID}`}>Watch Now</Link>
+                                            <p className="card-text"><i>{livestream.description === "" || livestream.description === null ? "No description" : livestream.description}</i></p>
+                                            <p className="card-status">{livestream.status === "" || livestream.status === null ? "Unknown Status" :
+                                                livestream.status === "live" ? <span><i className="fas fa-wave-square"></i> On going</span> :
+                                                    livestream.status === "ended" ? <span><i className="far fa-file-video"></i> Past</span> :
+                                                        livestream.status === "created" ? <span><i className="far fa-calendar-alt"></i> Upcoming</span> :
+                                                            "Unknown status"
+                                            }</p>
+                                            <Link to={`${this.props.match.url}/${livestream.id}`}>Watch Now</Link>
                                         </div>
                                     </div>
                                 </li>

@@ -165,11 +165,8 @@ video::-webkit-media-controls-enclosure {
 .header {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-}
-
-header {
     width: 100%;
+    box-sizing: border-box;
 }
 
 .container {
@@ -184,6 +181,7 @@ header {
 
 .intro-section {
     display: flex;
+    align-items: center;
     padding: 20px;
 }
 
@@ -217,45 +215,43 @@ header {
 }
 
 .availability-section {
-    margin-top: 30px;
-    padding: 20px;
+    margin: 30px 0;
     width: 100%;
+    display: flex;
+    align-content: center;
     align-items: center;
     text-align: center; 
 }
 
-.availability-section div div h1 {
+.availability-section h1 {
     font-size: 30px; font-weight: 500px;
 }
 
 .availability-section div div img {
-    margin: 20px;
     height: auto;
-    max-width: 500px;
+    width: 100%;
 }
 
 .platforms-logos {
-    display: block;
+    vertical-align: middle;
+    display: flex;
     align-items: center;
-    align-content: center;
-    text-align: center;
+    justify-content: space-between;
+    vertical-align: middle;
 }
 
 .platforms-logos div {
+    font-size: 18px; 
+    color: rgba(39,199,171,1);
     display: flex;
-    margin-top: 50px;
-    margin-left: 150px;
+    align-items: center;
+    vertical-align: middle;
 }
 
 .platforms-logos div i {
-    color: rgba(39,199,171,1);
-    margin-right: 5px;
+    margin: 10px;
 }
 
-.platforms-logos div span {
-    font-size: 18px; 
-    margin: 30px;
-}
 
 
 .header nav {
@@ -263,6 +259,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    align-content: center;
     text-transform: uppercase;
     font-size: 16px;
     position: relative;
@@ -292,6 +289,7 @@ header {
 }
 
 .header nav ul li:nth-child(4) {
+    margin: 13px 20px 0 20px;
     animation-delay: 1s;
 }
 
@@ -300,12 +298,16 @@ header {
 }
 
 .header .nav-login-link {
-    margin: 7.9px 20px;
+    text-transform: uppercase;
     color: white;
     position: relative;
     letter-spacing: 2px;
-    outline: none !important;
-    border: none !important;
+    text-align: center;
+    outline: none;
+    border: none;
+    box-shadow: none;
+    padding: 6px 12px;
+    border-radius: 3px;
     background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 90% );
 }
 
@@ -313,35 +315,38 @@ header {
     text-decoration: none;
     background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 50% );
     color: white;
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
+    outline: none;
+    border: none;
+    box-shadow: none;
 }
 
 .header .nav-login-link:active:focus {
-    outline: none !important;
-    box-shadow: none !important;
-    border: none !important;
+    outline: none;
+    box-shadow: none;
+    border: none;
     background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 50% );
 }
 
 .header .nav-name-button {
-    margin: 7.9px 20px;
+    margin: -15px 0 0 10px;
     text-transform: uppercase;
     color: white;
     position: relative;
     letter-spacing: 2px;
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
+    text-align: center;
+    outline: none;
+    border: none;
+    box-shadow: none;
+    padding: 4px 11px;
+    border-radius: 3px;
     background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 90% );
 }
 
 .header .nav-name-button:hover {
     text-decoration: none;
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
+    outline: none;
+    border: none;
+    box-shadow: none;
     background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 50% );
 }
 
@@ -430,9 +435,8 @@ header {
 }
 
 .intro-leftside {
-    height: 300px;
-    margin-top: 80px;
-    padding: 60px;
+    height: 100%;
+    padding: 80px 0 80px 60px;
 }
 
 .header .intro-leftside h1 {
@@ -446,16 +450,16 @@ header {
 }
 
 .intro-rightside {
-    height: auto;
+    display: flex;
+    align-items: center;
+    align-content: center;
     overflow: hidden;
 }
 
 .intro-rightside img {
-    margin: 20px;
-    width: 177.777%;
+    width: 170%;
+    margin: -11.875% -30.875%;
     height: auto;
-    max-width: 900px;
-    margin: -17.875% -21.875%;
 }
 
 
@@ -1153,25 +1157,54 @@ header {
 .mt-20 { margin-top: 20px; }
 
 
-
-
-
 .media-sidebar {
     height: 100vh;
-    width: 100%;
     display: block;
     text-align: center;
     justify-content: center;
     align-items: center;
-    background-color: white;
+    border-right: 1px solid rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar {
+    height: 100%;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin: 30px 0;
+}
+
+.sidebar ul li a {
+    color: rgba(39,199,171,1);
+    font-size: 20px;
+}
+
+.media-page-container {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+.media-page-container .media-conversation-list-container {
+    width: 30%;
+    height: 100vh;
     border-right: 1px solid rgba(0, 0, 0, 0.25);
 }
+
 
 .media-message-container {
     width: 100%;
     padding: 0;
     margin: 0;
-    position: relative;
 }
 
 .media-conversation-container {
@@ -1180,7 +1213,6 @@ header {
 }
 
 .conversation {
-    /* color: white; */
     border-bottom: 1px solid #eee;
     padding: 15px;
     align-items: center;
@@ -1204,8 +1236,6 @@ header {
     text-align: center;
     line-height: 40px;
     float: left;
-    /* display: inline-block; */
-    /* margin: 10px; */
 }
 
 .conversation > .conversation-time {
@@ -1214,8 +1244,6 @@ header {
 
 .conversation-username {
     font-weight: bold;
-    /* display: inline-block; */
-    /* margin: 5px 10px; */
 }
 
 .conversation > .media-message-content {
@@ -1242,38 +1270,6 @@ header {
     padding: 5px 20px;
 }
 
-.sidebar {
-    height: 100%;
-}
-
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-}
-
-.sidebar ul li {
-    margin: 30px 0;
-}
-
-.sidebar ul li a {
-    color: rgba(39,199,171,1);
-    font-size: 20px;
-}
-
-.media-page-container {
-    height: 100vh;
-    width: 100%;
-    overflow: hidden;
-}
-
-.insider-page {
-    height: 100vh;
-    max-height: 100vh;
-    width: 100%;
-    overflow: hidden;
-}
-
-
 .media-online-list {
     background: black;
 }
@@ -1282,17 +1278,33 @@ header {
     height: 100px;
 }
 
-.media-conversation-list-container {
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    position: relative;
-    border-right: 1px solid rgba(0, 0, 0, 0.25);
-}
 
 .media-conversation-list-container .user {
+    height: 15vh;
     padding: 20px;
     border-bottom: 1px solid rgba(146, 149, 158, 0.5);
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+
+.media-conversation-list-container .user .user-avatar {
+    padding: 0 5px;
+}
+
+.media-conversation-list-container .user .about {
+    float: left;
+    margin: 0 10px;
+}
+
+.media-conversation-list-container .user .about .name {
+    font-weight: bold;
+    width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .user-avatar {
@@ -1306,20 +1318,6 @@ header {
     line-height: 55px;
     text-transform: uppercase;
     font-size: 20px;
-}
-
-.media-conversation-list-container .user .about {
-    float: left;
-    margin-top: 7px;
-    padding-left: 8px;
-}
-
-.media-conversation-list-container .user .about .name {
-    font-weight: bold;
-    width: 200px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
 
@@ -1342,8 +1340,7 @@ header {
 
 .people-list {
     background: white;
-    width: 100%;
-    float: left;      
+    width: 100%;   
     height: 90vh;
     max-height: 90vh;
     overflow-x: hidden;
@@ -1368,12 +1365,15 @@ header {
 }
 
 .people-list ul {
-    padding: 0;
     padding: 20px;
     list-style: none;
 }
 
 .people-list > ul > li {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    vertical-align: middle;
     padding: 5px 0;
     border-bottom: 1px solid rgba(146, 149, 158, 0.219);
     cursor: pointer;
@@ -1387,9 +1387,8 @@ header {
     color: black;
     width: 100%;
     height: 100%;
-    margin-top: 5px;
-    padding: 5px 0;
     border-radius: 3px;
+    padding: 5px 0;
 }
 
 .people-list ul > li > a:visited, 
@@ -1406,10 +1405,7 @@ header {
 
 .people-list .about {
     float: left;
-    margin-top: 8px;
-}
-
-.people-list .about {
+    padding: 5px 0;
     padding-left: 8px;
 }
 
@@ -1463,57 +1459,53 @@ header {
 }
 
 .media-chat-container {
-    height: 100vh;
-    width: 100%;
-    padding: 0 15px 0 0;
-    margin: 0;
-    position: relative;
-    border-right: 1px solid rgba(0, 0, 0, 0.25);
+    width: 70%;
 }
 
 .chat {
-    background: white;
     width: 100%;
 }
     
 .chat .chat-header {
-    padding: 20px;
+    height: 15vh;
+    padding: 0 20px;
+    width: 100%;
     border-bottom: 1px solid rgba(146, 149, 158, 0.5);
-}
-    
-.chat .chat-header img {
-    float: left;
-    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
 }
     
 .chat .chat-about {
     float: left;
     color: black;
     padding-left: 10px;
-    margin-top: 15px;
 }
     
 .chat .chat-with {
     font-weight: bold;
     font-size: 16px;
-    width: 500px;
+    width: 545px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    
+}
+
+.chat .chat-header .user-avatar {
+    height: 55px;
 }
 
     
 .chat .chat-header .chat-call {
-    float: right;
     font-size: 25px;
-    margin-top: 6px;
 }
 
 .chat .chat-header .chat-call button {
     border: none;
     outline: none;
     background: transparent;
-    margin-right: 25px;
+    margin-left: 20px;
     color: rgba(39,199,171,1);
     cursor: pointer;
 }
@@ -1589,16 +1581,17 @@ header {
 }
 
 .chat-message {
+    height: 10vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 7px;
+    vertical-align: middle;
 }
     
 .chat-message textarea {
     width: 100%;
     border: none;
-    margin: 5px 10px 0px 10px;
+    margin: 0 10px;
     border-radius: 5px;
     resize: none;
     background: #eee;
@@ -1619,6 +1612,7 @@ header {
     cursor: pointer;
     font-weight: bold;
     background: white;
+    margin: 0 3px;
 }
     
 .chat-message button:hover {
@@ -1847,7 +1841,7 @@ header {
 .livestream-list ul > li {
     float: left;
     width: 30%;
-    height: 400px;
+    height: 450px;
     margin: 0px 10px 50px 20px;
     box-sizing: border-box;
 }
@@ -1869,6 +1863,15 @@ header {
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.livestream-list ul li .card-status {
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(39,199,171,1); 
+    font-size: 20px;
 }
 
 .livestream-list ul > li a {
@@ -2010,82 +2013,143 @@ header {
     text-align: right;
 }
 
+.modal-livestream-modal-dialog {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    width: 500px;
+    transform: translate(-50%, -50%);
+}
+
+.modal-livestream-modal-dialog .modal-title {
+    font-weight: bold;
+}
+
+.modal-livestream-modal-dialog .close {
+    border: none;
+    outline: none;
+}
+
 
 @media only screen and (max-width: 1200px) { 
 
-    .livestream-list ul > li {
-        /* width: 27%; */
-    }
-
-    #online-user-sidebar {
-        display: none;
-    }
-
-    .media-call-button-li {
-        display: none;
-    }
-
-    .media-video-button-li {
-        display: none;
-    }
-
-    .media-onlineuser-container {
-        display: none;
+    .media-conversation-list-container .user .about .name {
+        font-weight: bold;
+        width: 100px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }      
+        
+    .people-list .name {
+        width: 100px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }    
+        
+    .chat .chat-with {
+        width: 400px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
 }
 
 
 @media only screen and (max-width: 992px) {
-
-    .livestream-list ul > li {
-        width: 40%;
-    }
-
-    .online-user-sidebar {
-        display: none;
-    }
-
-    .platforms-logos {
-        display: flex;
-        align-content: center;
-        text-align: center;
-    }
-
-    .platforms-logos div span {
-        display: none;
-    }
-
-    .intro-rightside {
-        align-content: center;
-        text-align: center;
-        margin: 30px;
-    }
-    
     .intro-rightside img {
-        width: 177.777%;
-        margin: auto;
+        width: 130%;
+        margin: -15.875% -11.875%;
         height: auto;
-        max-width: 1100px;
-        margin: -15.875% -21.875%;
     }
 
     .intro-leftside {
         align-content: center;
         text-align: center;
-        height: 200px;
-        margin-top: 40px;
-        padding: 40px;
+        height: 100%;
+        padding: 60px;
     }
+
+    .intro-rightside {
+        align-content: center;
+        text-align: center;
+        height: 100%;
+    }
+
+    .media-conversation-list-container .user .about .name {
+        width: 75px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }      
+        
+    .people-list .name {
+        width: 75px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }    
+        
+    .chat .chat-with {
+        width: 320px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+}
+
+@media only screen and (max-width: 850px) {
+    .media-page-container .media-conversation-list-container {
+        width: 20%;
+        
+    }
+    .media-conversation-list-container .user {
+        display: flex;
+        justify-content: center;
+    }
+    .media-conversation-list-container .user .user-avatar {
+        display: block;
+        position: fixed;
+    }
+
+    .media-conversation-list-container .user .about {
+        display: none;
+    }
+    
+    .people-list {
+        display: flex;
+        justify-content: center;
+    }
+
+    .people-list ul > li a {
+        padding: 5px;
+    }
+
+    .people-list .search {
+        display: none;
+    }      
+    
+    .people-list .about {
+        display: none;
+    }
+    
+    .media-chat-container {
+        width: 80%;
+    }
+
+    .chat .chat-with {
+        width: 275px;
+    }
+
+
 }
 
 @media only screen and (max-width: 768px) { 
 
-    .livestream-list ul > li {
-        width: 42%;
-        margin: 0px 20px 20px 20px;
-    }
-
     .menu-toggle {
+        position: fixed;
 		display: block;
 	}
 
@@ -2095,7 +2159,7 @@ header {
 		flex-direction: column;
 		justify-content: space-evenly;
 		align-items: center;
-		height: 100vh;
+		height: 100%;
         text-align: center;
 	}
 
@@ -2114,75 +2178,25 @@ header {
 
 	.brand-name {
 		font-size: 1.5rem;
-	}
+    }
+
+    .header .nav-name-button {
+        margin-top: 20px;
+    }
   
     .overlay.menu-open, nav.menu-open {
         display: flex !important;
         transform: scale(1);
         opacity: 1;
-    }
-
-    .platforms-logos {
-        display: block;
         align-content: center;
-        text-align: center;
-        margin-left: 100px;
-    }
-
-    .platforms-logos div span {
-        display: none;
-    }
-
-    
-    .intro-rightside {
-        align-content: center;
-        text-align: center;
-        margin: 30px;
-    }
-
-    .intro-rightside img {
-        margin: auto;
-        height: auto;
-        max-width: 800px;
-        margin: -15.875% -21.875%;
-        
+        align-items: center;
     }
 
     .intro-leftside {
         align-content: center;
         text-align: center;
-        height: 200px;
-        margin-top: 40px;
-        padding: 40px;
-    }
-
-    .media-img {
-        background-size: center;
-    }
-
-    .media-video-button {
-        margin: 5px;
-    }
-
-    .media-message-button {
-        margin: 5px;
-    }
-
-    .modal-search-userbox {
-        width: 450px;
-        height: 300px;
-        position: absolute;
-        top: 50%;   
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: left;
-    }
-    
-    .search-userbox-group {
-        overflow: hidden;
-        overflow-y: scroll;
-        width: 100%;
-        height: 100px;
+        height: 100%;
+        padding: 60px;
     }
 
     .search-userbox-group-scroll {
@@ -2193,16 +2207,9 @@ header {
         overflow-y: scroll;
     }
 
-    .media-call-button-li {
-        display: none;
-    }
 
-    .media-video-button-li {
-        display: none;
-    }
-
-    .media-img {
-        display: none;
+    .chat .chat-with {
+        width: 200px;
     }
 }
 
@@ -2215,48 +2222,12 @@ header {
     }
 
     .platforms-logos {
-        display: block;
-        align-content: center;
-        text-align: center;
-        margin-left: 15px;
+        display: flex;
+        justify-content: space-between;
     }
 
     .platforms-logos div span {
         display: none;
-    }
-
-    .availability-section div div img {
-        margin: 20px;
-        height: auto;
-        max-width: 300px;
-    }
-
-    
-    .availability-section {
-        align-items: center;
-        text-align: center; 
-        
-    }
-
-    .intro-rightside {
-        align-content: center;
-        text-align: center;
-        margin: 30px;
-    }
-
-    .intro-rightside img {
-        height: auto;
-        max-width: 550px;
-        margin: -15.875% -21.875%;
-        
-    }
-
-    .intro-leftside {
-        align-content: center;
-        text-align: center;
-        height: 300px;
-        margin-top: 40px;
-        padding: 40px;
     }
 
     .login-img {
@@ -2285,21 +2256,32 @@ header {
         
     }
 
-    .modal-search-userbox {
-        width: 300px;
-        height: 250px;
-        position: absolute;
-        top: 50%;   
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: left;
+    .chat .chat-with {
+        width: 125px;
+    }
+}
+
+@media only screen and (max-width: 480px) { 
+    .sidebar ul li a {
+        font-size: 18px;
     }
 
-    .search-userbox-group-scroll {
-        margin-top: 5px;
-        width: 100%;
-        height: 80px;
-        overflow: hidden; 
-        overflow-y: scroll;
+    .chat .chat-with {
+        width: 80px;
+    }
+    
+    .chat .chat-call button {
+        padding: 0;
+        margin: 0;
+    }
+}
+
+
+@media only screen and (max-width: 380px) { 
+    /* .chat .chat-header .user-avatar {
+        position: relative;
+    } */
+    .chat .chat-with {
+        display: none;
     }
 }

@@ -47,7 +47,7 @@ export default class Body extends React.Component {
                 <section className="availability-section">
                     <div className="row">
                         <div className="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-6">
-                            <h1>Platform</h1>
+                            <h1>Platforms</h1>
                             <img src="https://cdn.dribbble.com/users/1458982/screenshots/5933007/hero-illustration_4x.png" alt="platforms" />
                         </div>
                         <div className="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-6 platforms-logos">
