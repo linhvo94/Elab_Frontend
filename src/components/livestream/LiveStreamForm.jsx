@@ -29,7 +29,7 @@ export default class LiveStreamForm extends React.Component {
                 width: { min: 640, ideal: 1280 },
                 height: { min: 400, ideal: 720 },
                 aspectRatio: { ideal: 1.7777777778 }
-            }, 
+            },
             audio: true
         }).then(stream => {
             this.localStreamSource.current.srcObject = stream;
@@ -103,24 +103,26 @@ export default class LiveStreamForm extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <div className="col-8 livestream-review">
-                    <div className="livestream-header">
-                        Preview
+                <div className="livestream-form-page">
+                    <div className="livestream-review">
+                        <div className="livestream-header">
+                            Preview
+                        </div>
+                        <video className="preview-localstream" ref={this.localStreamSource} muted autoPlay>
+
+                        </video>
                     </div>
-                    <video className="preview-localstream" ref={this.localStreamSource} muted autoPlay>
+                    <div className="livestream-form">
+                        <form>
+                            <input type="text" name="title" value={this.state.title} className="form-control"
+                                onChange={this.handleChange} placeholder="Title" />
+                            <textarea className="form-control" name="description" value={this.state.description}
+                                onChange={this.handleChange} rows="4" placeholder="Description"></textarea>
 
-                    </video>
-                </div>
-                <div className="col-3 livestream-form">
-                    <form>
-                        <input type="text" name="title" value={this.state.title} className="form-control"
-                            onChange={this.handleChange} placeholder="Title" />
-                        <textarea className="form-control" name="description" value={this.state.description}
-                            onChange={this.handleChange} rows="3" placeholder="Description"></textarea>
+                            <button onClick={this.createLiveStream}>Go Live</button>
+                        </form>
 
-                        <button onClick={this.createLiveStream}>Go Live</button>
-                    </form>
-
+                    </div>
                 </div>
             </React.Fragment>
         )

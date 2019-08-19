@@ -1,4 +1,47 @@
 import React from "react";
+// import ChatList from "../chatting/ChatList.jsx";
+import uuid from "uuid/v4";
+import { iceServerConfig } from "../../environment/ice-server-config.js";
+
+const ChatMessage = (props) => (
+    props.message.islocalpeer ?
+        <li className="my-chat-message-data">
+            <p>{props.message.message}</p>
+        </li>
+        :
+        <li className="chat-message-data">
+            <p>{props.message.message}</p>
+        </li>
+);
+
+class ChatList extends React.Component {
+    messagesEndRef = React.createRef();
+
+    componentDidMount() {
+        this.scrollToBottom();
+    }
+
+    componentDidUpdate() {
+        console.log(this.props.messages);
+        this.scrollToBottom();
+    }
+
+    scrollToBottom = () => {
+        this.messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    render() {
+        return (
+            <ul>
+                {this.props.messages !== undefined && this.props.messages.length > 0 ?
+                    this.props.messages.map((message, index) =>
+                        <ChatMessage key={index} message={message} />
+                    )
+                    : null}
+                <div ref={this.messagesEndRef}></div>
+            </ul>)
+    }
+}
 
 export default class Chat extends React.Component {
     constructor(props) {
@@ -10,6 +53,7 @@ export default class Chat extends React.Component {
             receiver: "",
             onlineUsers: []
         }
+
     }
 
     componentDidMount() {
@@ -46,6 +90,30 @@ export default class Chat extends React.Component {
                 }
             }
         }
+        // console.log("SOCKET", this.socket);
+        // if (this.props.socket !== undefined && this.props.socket !== null && this.props.socket !== prevProps.socket) {
+        //     this.socket = this.props.socket;
+        //     this.socket.on("connect", () => {
+        //         console.log("connected");
+        //         this.createPeerConnection();
+        //         this.socket.on("chat", (message) => {
+        //             console.log("incoming message.... ", message)
+        //             switch (message.type) {
+        //                 case "chat-offer":
+        //                     this.handleChatOffer(message);
+        //                     break;
+        //                 case "chat-answer":
+        //                     this.handleChatAnswer(message);
+        //                     break;
+        //                 case "new-ice-candidate":
+        //                     this.handleNewIceCandidate(message);
+        //                     break;
+        //                 default:
+        //                     return;
+        //             }
+        //         });
+        //     });
+        // }
 
         if (this.props.isOnCall !== undefined && this.props.isOnCall !== null) {
             console.log("is on call", this.props.isOnCall)
@@ -53,6 +121,10 @@ export default class Chat extends React.Component {
                 this.setState({ isOnCall: this.props.isOnCall });
             }
         }
+    }
+
+    handleChange = (e) => {
+        this.setState({ [e.target.name]: e.target.value });
     }
 
     isUserOnline = (usernameReq, onlineUsers) => {
@@ -93,65 +165,14 @@ export default class Chat extends React.Component {
                 </div>
                 <div className="chat-history">
                     {this.state.loading ? <div className="loader"></div> :
-                        <ul>
-                            {/* <li class="clearfix">
-                                <div class="message-data align-right">
-                                    <span class="message-data-time" >10:10 AM, Today</span> &nbsp; &nbsp;
-                            <span class="message-data-name" >Olia</span> <i class="fa fa-circle me"></i>
-
-                                </div>
-                                <div class="message other-message float-right">
-                                    Hi Vincent, how are you? How is the project coming along?
-                          </div>
-                            </li>
-
-                            <li>
-                                <div class="message-data">
-                                    <span class="message-data-name"><i class="fa fa-circle online"></i> Vincent</span>
-                                    <span class="message-data-time">10:12 AM, Today</span>
-                                </div>
-                                <div class="message my-message">
-                                    Are we meeting today? Project has been already finished and I have results to show you.
-                          </div>
-                            </li>
-
-                            <li class="clearfix">
-                                <div class="message-data align-right">
-                                    <span class="message-data-time" >10:14 AM, Today</span> &nbsp; &nbsp;
-                            <span class="message-data-name" >Olia</span> <i class="fa fa-circle me"></i>
-
-                                </div>
-                                <div class="message other-message float-right">
-                                    Well I am not sure. The rest of the team is not here yet. Maybe in an hour or so? Have you faced any problems at the last phase of the project?
-                          </div>
-                            </li>
-
-                            <li>
-                                <div class="message-data">
-                                    <span class="message-data-name"><i class="fa fa-circle online"></i> Vincent</span>
-                                    <span class="message-data-time">10:20 AM, Today</span>
-                                </div>
-                                <div class="message my-message">
-                                    Actually everything was fine. I'm very excited to show this to our team.
-                          </div>
-                            </li>
-
-                            <li>
-                                <div class="message-data">
-                                    <span class="message-data-name"><i class="fa fa-circle online"></i> Vincent</span>
-                                    <span class="message-data-time">10:31 AM, Today</span>
-                                </div>
-                                <i class="fa fa-circle online"></i>
-                                <i class="fa fa-circle online" ></i>
-                                <i class="fa fa-circle online"  ></i>
-                            </li> */}
-
-                        </ul>
+                        <ChatList messages={this.props.chatMessages} />
                     }
+
                 </div>
                 <div className="chat-message clearfix">
-                    <textarea className="form-control message-to-send" id="message-to-send" placeholder="Type your message" rows="1"></textarea>
-                    <button>Send</button>
+                    <textarea className="form-control message-to-send" id="message-to-send" placeholder="Type your message" rows="1"
+                        name="textMessage" value={this.props.textMessage} onChange={this.props.handleChange}></textarea>
+                    <button onClick={(e) => this.props.handleSendMessage(e, this.state.receiver)}>Send</button>
                 </div>
 
             </div>

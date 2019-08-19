@@ -53,7 +53,7 @@ export default class LiveStream extends React.Component {
 
     render() {
         return (
-            <div className="col-11 col-sm-11 col-md-11 col-lg-11 col-xl-11 livestream-container">
+            <div className="livestream-container">
                 <div className="livestream-create-header">
                     <input type="text" className="form-control" placeholder="Search"
                         name="searchLiveStream" value={this.state.searchLiveStream} onChange={this.handleChange} />

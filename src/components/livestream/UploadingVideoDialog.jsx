@@ -39,7 +39,7 @@ export default class UploadingVideoDialog extends React.Component {
                                 <p className="m-30">{this.state.uploadMessage}</p> :
                                 this.state.progress === null ? null :
                                     <React.Fragment>
-                                        <p className="m-30">{this.state.progress === 100 ? "Upload Completed" : `We are uploading your video...`}</p>
+                                        <p className="m-20">{this.state.progress === 100 ? "Upload Completed" : `We are uploading your video...`}</p>
                                         <div className="d-flex justify-content-center mb-30">
                                             {this.state.progress === 100 ? <i className="far fa-check-circle fa-5x"></i>
                                                 :

@@ -12,7 +12,7 @@ html, body {
 
 .livestream-detail-page {
     overflow: hidden;
-    height: 100%;
+    height: 100vh;
 }
 
 .livestream-detail-container {
@@ -20,8 +20,8 @@ html, body {
     display: flex;
     justify-content: center;
     align-content: center;
-    height: 60vh;
-    width: 100%;
+    height: 100vh;
+    width: 70%;
 }
 
 .livestream-description-container {
@@ -58,12 +58,13 @@ video::-webkit-media-controls-enclosure {
 }
 
 .video-container {
-    height: 423px;
+    width: 100%;
+    height: 100%;
+    /* height: 423px;
     width: 704px;
     max-width: 704px;
-    height: 396px;
+    height: 396px; */
     position: relative;
-    overflow: hidden;
 }
 
 .video-container:hover .controls {
@@ -72,6 +73,7 @@ video::-webkit-media-controls-enclosure {
 }
 
 .controls {
+    /* display: flex; */
     position: absolute;
     bottom: 0px;
     width: 100%;
@@ -83,10 +85,11 @@ video::-webkit-media-controls-enclosure {
 }
 
 .video-buttons {
-    padding: 10px;
+    padding: 3px;
 }
 
 .video-buttons button {
+    padding: 10px;
     background: none;
     border: 0;
     outline: 0;
@@ -96,8 +99,8 @@ video::-webkit-media-controls-enclosure {
 
 
 .video-buttons button::before {
-    width: 25px;
-    height: 25px;
+    width: 30px;
+    height: 30px;
     font-size: 28px;
     color: rgba(39, 199, 172, 0.9);
     text-align: center;
@@ -134,10 +137,6 @@ video::-webkit-media-controls-enclosure {
 .livestream-page h1 {
     font-size: 25px; font-weight: 500px; color: rgba(39,199,171,1);
     margin: 30px 70px 20px 70px;
-}
-
-.livestream-list {
-    margin: 0px 30px;
 }
 
 
@@ -328,7 +327,7 @@ video::-webkit-media-controls-enclosure {
 }
 
 .header .nav-name-button {
-    margin: -15px 0 0 10px;
+    margin: -16px 0 0 10px;
     text-transform: uppercase;
     color: white;
     position: relative;
@@ -337,7 +336,7 @@ video::-webkit-media-controls-enclosure {
     outline: none;
     border: none;
     box-shadow: none;
-    padding: 4px 11px;
+    padding: 5px 11px;
     border-radius: 3px;
     background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(39,199,171,1) 0%, rgba(70,143,197,1) 90% );
 }
@@ -1198,6 +1197,7 @@ video::-webkit-media-controls-enclosure {
     width: 30%;
     height: 100vh;
     border-right: 1px solid rgba(0, 0, 0, 0.25);
+    overflow: hidden;
 }
 
 
@@ -1212,44 +1212,6 @@ video::-webkit-media-controls-enclosure {
     width: 100%;
 }
 
-.conversation {
-    border-bottom: 1px solid #eee;
-    padding: 15px;
-    align-items: center;
-}
-
-.conversation:active,
-.conversation:hover {
-    background: #eee;
-}
-
-
-.conversation:hover {
-    cursor: pointer;
-}
-
-.conversation > .username-inital {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: red;
-    text-align: center;
-    line-height: 40px;
-    float: left;
-}
-
-.conversation > .conversation-time {
-    color: rgb(126, 126, 126);
-}
-
-.conversation-username {
-    font-weight: bold;
-}
-
-.conversation > .media-message-content {
-    float: left;
-    margin: 5px;
-}
 
 .media-search-container {
     height: 20%;
@@ -1460,10 +1422,14 @@ video::-webkit-media-controls-enclosure {
 
 .media-chat-container {
     width: 70%;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .chat {
     width: 100%;
+    height: 100vh;
+    overflow: hidden;
 }
     
 .chat .chat-header {
@@ -1519,67 +1485,68 @@ video::-webkit-media-controls-enclosure {
 }
 
 .chat-history {
-    padding: 30px 30px 20px;
+    width: 100%;
     border-bottom: 1px solid rgba(146, 149, 158, 0.5);
     overflow-y: auto;
+    height: 75vh;
     max-height: 75vh;
     overflow-x: hidden;
-    overflow-y: auto;
-    height: 75vh;
 }
 
 .chat-history ul {
     list-style: none;
     padding: 0;
-}
-    
-.chat-history .message-data {
-    margin-bottom: 15px;
-}
-    
-.chat-history .message-data-time {
-    color: lighten(#eee, 8%);
-    padding-left: 6px;
-}
-    
-.chat-history .message {      
-    color: white;
-    padding: 18px 20px;
-    line-height: 26px;
-    font-size: 16px;
-    border-radius: 7px;
-    margin-bottom: 30px;
-    width: 90%;
-    position: relative;
-}
-    
-.chat-history .message::after {
-    bottom: 100%;
-    left: 7%;
-    border: solid transparent;
-    content: " ";
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-    border-bottom-color: #86BB71;
-    border-width: 10px;
-    margin-left: -10px;
-}
-    
-.chat-history .my-message {
-    background: #86BB71;
-}
-    
-.chat-history .other-message {
-    background: #94C2ED;
-}
-    
-.chat-history .other-message::after {
-    border-bottom-color: #94C2ED;
-    left: 93%;    
+    margin: 0;
 }
 
+
+.chat-history .my-chat-message-data {
+    display: flex;
+    justify-content: flex-end;
+    text-align: right;
+    display: block;
+    position: relative;
+    clear: both;
+    max-width: 90%;
+    margin-bottom: 10px;
+    margin-top: 15px;
+    margin-left: 60px;
+}
+
+.chat-history .my-chat-message-data > p {
+    position: relative;
+    word-break: break-all;
+    display: inline-block;
+    padding: 10px;
+    border-radius: 7px;
+    font-size: 15px;
+    background: rgba(39,199,171,1);
+    color: white;
+    max-width: 90%;
+}
+
+.chat-history .chat-message-data {
+    position: relative;
+    border-radius: 6px; 
+    margin-top: 15px;
+    margin-left: 15px; 
+    margin-bottom: 10px;
+    font-size: 15px;
+    max-width: 90%;
+}
+
+.chat-history .chat-message-data > p {
+    position: relative;
+    word-break: break-all;
+    display: inline-block;
+    padding: 10px;
+    border-radius: 6px;  
+    background: #eee;
+    color: #000;
+    font-size: 15px;
+    max-width: 90%;
+}
+    
 .chat-message {
     height: 10vh;
     display: flex;
@@ -1646,10 +1613,20 @@ video::-webkit-media-controls-enclosure {
     100% { transform: rotate(360deg); }
 }
 
-.livestream-review {
+.livestream-form-page {
     width: 100%;
+    height: 100vh;
     display: flex;
-    position: relative;
+    align-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.livestream-review {
+    width: 75%;
+    height: 100vh;
     margin: 0;
     padding: 0;
     background: #000;
@@ -1658,24 +1635,21 @@ video::-webkit-media-controls-enclosure {
 .preview-localstream {
     margin: 0; 
     padding: 0;
-    /* max-height: 100%; */
     height: 100%;
     width: 100%;
 }
 
 .livestream-form {
+    width: 25%;
     display: flex;
-    position: relative;
     align-items: center;
     justify-content: center;
+    vertical-align: middle;
     height: 100vh; 
 }
 
-
 .livestream-form form {
     padding: 20px;
-    vertical-align: middle;
-    
 }
 
 .livestream-form input {
@@ -1699,12 +1673,6 @@ video::-webkit-media-controls-enclosure {
     padding: 7px;
     cursor: pointer;
     width: 100%;
-    /* vertical-align: middle; */
-    /* margin-left: 50%; */
-
-    /* float: center; */
-    /* float: center; */
-    /* margin: 10px 0; */
 }
 
 .livestream-page-container {
@@ -1731,22 +1699,19 @@ video::-webkit-media-controls-enclosure {
 
 
 .livestream-header {
-    padding: 20px;
-    color: white;
-    position: absolute;
+    position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10;
+    color: white;
+    padding: 20px;
     background-color: rgba(0,0,0,0.5);
+    z-index: 10;
+    cursor: pointer;
 }
 
 .livestreamdetail-container {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    max-height: 100vh;
+    height: 100vh;
+    width: 60%;
+    overflow: hidden;
 }
 
 .livestream-container {
@@ -1756,23 +1721,22 @@ video::-webkit-media-controls-enclosure {
     padding: 0;
     max-height: 100vh;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: scroll;
 }
 
 .livestream-create-header {
     display: flex;
     align-content: center;
+    align-items: center;
     justify-content: space-around;
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 20%;
     margin: 0;
-    padding: 30px 0;
 }
 
 .livestream-container input {
     width: 50%;
-
 }
 
 .livestream-container .create {
@@ -1791,15 +1755,13 @@ video::-webkit-media-controls-enclosure {
 }
 
 .livestreamdetail-header button {
-    padding: 10px;
+    padding: 12px 16px;
     border: none;
     background-color: rgba(39,199,171,1);
     text-decoration: none;
     color: white;
     border-radius: 3px;
     cursor: pointer;
-    margin-right: 30px;
-    top: 50%;
 }
 
 .livestreamdetail-header button:hover {
@@ -1809,7 +1771,6 @@ video::-webkit-media-controls-enclosure {
 .livestream-filters {
     width: 100%;
     margin-left: 30px;
-
 }
 
 .livestream-filters button {
@@ -1841,8 +1802,7 @@ video::-webkit-media-controls-enclosure {
 .livestream-list ul > li {
     float: left;
     width: 30%;
-    height: 450px;
-    margin: 0px 10px 50px 20px;
+    margin: 0px 10px 75px 20px;
     box-sizing: border-box;
 }
 
@@ -1887,60 +1847,65 @@ video::-webkit-media-controls-enclosure {
     cursor: pointer;
 }
 
+.livestreamdetail-page {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
 .livestreamdetail-header {
-    padding: 15px;
+    width: 100%;
     height: 10%;
+    padding: 25px;
     display: flex;
     align-items: center;
+    align-content: center;
     justify-content: space-between;
     vertical-align: middle; 
-    /* background: red; */
 }
 
 .livestreamdetail-header label {
     font-weight: bold;
-    top: 50%;
 }
 
 .livestreamdetail-videocontainer {
+    width: 100%;
     height: 70%;
     padding: 15px;
+    overflow: hidden;
 }
 
 .livestreamdetail-description {
-    padding: 15px;
+    padding: 10px 25px;
     height: 20%;
 }
 
 .livestreamdetail-description label {
     font-weight: bold;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.livestreamdetail-description label {
-    font-weight: bold;
-}
 
 .livestreamdetail-description p {
     font-weight: lighter;
+    height: 50%;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .livestreamdetail-chat-container {
-    padding: 30px 30px 20px;
-    /* background: #000; */
-    /* border-bottom: 1px solid rgba(146, 149, 158, 0.5); */
-    overflow-y: auto;
-    max-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: auto;
+    width: 40%;
+    overflow: hidden;
     height: 100vh;
-    width: 100%;
-    margin: 0;
-    padding: 0;
 }
 
 .livestreamdetail-chat-header {
     padding: 15px;
-    height: 10vh;
+    height: 10%;
 }
 
 .livestreamdetail-chat-header label {
@@ -1948,20 +1913,14 @@ video::-webkit-media-controls-enclosure {
 }
 
 .livestreamdetail-chat {
-    overflow-y: auto;
-    max-height: 70vh;
-    overflow-x: hidden;
-    overflow-y: auto;
     height: 70vh;
-    
 }
 
 .livestreamdetail-message {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 7px;
-    height: 20vh;
+    height: 20%;
 }
 
 .livestreamdetail-message textarea {
@@ -1969,21 +1928,23 @@ video::-webkit-media-controls-enclosure {
     width: 100%;
     border: none;
     padding: 5px 10px;
-    margin: 0px 10px;
     border-radius: 5px;
+    font-size: 15px;
     resize: none;
+    margin: 0 15px;
+
 }
 
 .livestreamdetail-message button {
-    padding: 5px 10px;
+    padding: 12px 16px;
     margin: 0px 10px;
     color: rgba(39,199,171,1);
     border: none;
     border-radius: 3px;
+    background: transparent;
     outline: none;
     cursor: pointer;
     font-weight: bold;
-    background: white;
 }
 
 .modal-uploading-video-dialog {
@@ -2031,6 +1992,55 @@ video::-webkit-media-controls-enclosure {
     outline: none;
 }
 
+.livechat {
+    padding: 10px 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    list-style: none;
+    height: 70vh;
+    max-height: 70vh;
+}
+
+.livechat li label {
+    font-weight: bold;
+    word-break: break-all;
+    display: block;
+}
+
+.message-data {
+    position: relative;
+    word-break: break-all;
+    display: inline-block;
+    border-radius: 7px;  
+    margin-bottom: 10px;
+    padding: 10px 10px 0px 15px;
+    background: #eee;
+    color: #000;
+    font-size: 15px;
+    max-width: 90%;
+}
+
+.my-message {
+    text-align: right;
+    display: block;
+    position: relative;
+    clear: both;
+    max-width: 90%;
+    margin-bottom: 10px;
+}
+
+.my-message-data {
+    position: relative;
+    word-break: break-all;
+    display: inline-block;
+    border-radius: 7px;  
+    padding: 10px 10px 0px 10px;
+    font-size: 15px;
+    background: rgba(39,199,171,1);
+    color: white;
+    max-width: 90%;
+}
+
 
 @media only screen and (max-width: 1200px) { 
 
@@ -2055,7 +2065,9 @@ video::-webkit-media-controls-enclosure {
         white-space: nowrap;
         text-overflow: ellipsis;
     }
+
 }
+
 
 
 @media only screen and (max-width: 992px) {
@@ -2097,6 +2109,38 @@ video::-webkit-media-controls-enclosure {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+    }
+
+
+    .livestream-review {
+        width: 60%;
+        
+    }
+
+
+    .livestream-form {
+        width: 40%;
+    }    
+
+    .livestream-list ul > li {
+        width: 44%;
+        margin: 0px 20px 50px 20px;
+    }
+
+    
+    .livestreamdetail-container {
+        width: 70%;
+    }
+
+    .livestreamdetail-chat-container {
+        width: 30%;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .livestream-list ul > li {
+        width: 42%;
+        margin: 0px 20px 40px 20px;
     }
 }
 
@@ -2143,13 +2187,15 @@ video::-webkit-media-controls-enclosure {
         width: 275px;
     }
 
-
+    .livestream-list ul > li {
+        width: 40%;
+        margin: 0px 20px 70px 20px;
+    }
 }
 
 @media only screen and (max-width: 768px) { 
 
     .menu-toggle {
-        position: fixed;
 		display: block;
 	}
 
@@ -2164,11 +2210,15 @@ video::-webkit-media-controls-enclosure {
 	}
 
 	nav ul {
-		flex-direction: column;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        vertical-align: middle;
 	}
 
 	nav ul li {
-		margin-top: 2rem;
+        margin-top: 2rem;
+        text-align: center;
 	}
 
 	nav ul li .nav-link {
@@ -2188,8 +2238,7 @@ video::-webkit-media-controls-enclosure {
         display: flex !important;
         transform: scale(1);
         opacity: 1;
-        align-content: center;
-        align-items: center;
+        vertical-align: middle;
     }
 
     .intro-leftside {
@@ -2210,6 +2259,19 @@ video::-webkit-media-controls-enclosure {
 
     .chat .chat-with {
         width: 200px;
+    }
+
+    .livestream-list ul > li {
+        width: 40%;
+        margin: 0px 20px 50px 20px;
+    }
+
+    .livestreamdetail-container {
+        width: 100%;
+    }
+
+    .livestreamdetail-chat-container {
+        display: none;
     }
 }
 
@@ -2259,11 +2321,52 @@ video::-webkit-media-controls-enclosure {
     .chat .chat-with {
         width: 125px;
     }
+
+    .livestream-review {
+        display: none;
+    }
+
+    .livestream-form {
+        width: 100%;
+    }
+
+    .livestream-list ul > li {
+        width: 90%;
+        margin: 0px 20px 50px 20px;
+    }
+
+    .modal-livestream-modal-dialog {
+        width: 100%;
+    }
+
+    .modal-uploading-video-dialog {
+        width: 100%;
+    }
+
+    .modal-callee-dialog {
+        width: 100%;
+    }
+
+    .livestream-create-header {
+        display: flex;
+        justify-content: left;
+        width: 100%;
+        height: 20%;
+        margin: 0;
+    }
+    
+    .livestream-create-header a {
+        margin-left: 30px;
+    }
+
+    .livestream-create-header input {
+        display: none;
+    }
 }
 
 @media only screen and (max-width: 480px) { 
     .sidebar ul li a {
-        font-size: 18px;
+        font-size: 16px;
     }
 
     .chat .chat-with {
@@ -2274,13 +2377,10 @@ video::-webkit-media-controls-enclosure {
         padding: 0;
         margin: 0;
     }
+
 }
 
-
 @media only screen and (max-width: 380px) { 
-    /* .chat .chat-header .user-avatar {
-        position: relative;
-    } */
     .chat .chat-with {
         display: none;
     }

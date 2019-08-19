@@ -49,8 +49,8 @@ export default class VideoCall extends React.Component {
         console.log(window.receiver);
         window.addEventListener("beforeunload", this.handleLeavePage);
 
-        this.socket = io("https://www.e-lab.live:9000");
-        // this.socket = io("http://localhost:9000");
+        // this.socket = io("https://www.e-lab.live:9000");
+        this.socket = io("http://localhost:9000");
         let sender = window.sender;
         let receiver = window.receiver;
         let userType = window.userType;

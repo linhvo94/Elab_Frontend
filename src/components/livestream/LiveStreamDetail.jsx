@@ -1,8 +1,57 @@
 import React from "react";
+import io from "socket.io-client";
 import Janus from "../../utils/janus-utils/janus.js";
 import { initJanus } from "../../actions/livestream-actions/livestreaming.js";
 import UploadingVideoDialog from "./UploadingVideoDialog.jsx";
 import { LiveStreamMessageDialog } from "./LiveStreamMessageDialog.jsx";
+
+
+const ChatMessage = (props) => (
+    props.message.sender === props.participantUsername ?
+        <li className="my-message">
+            <label>You</label>
+            <div className="my-message-data">
+                <p>{props.message.message}</p>
+            </div>
+        </li>
+        :
+        <li>
+            <div>
+                <label>{props.message.sender}</label>
+                <div className="message-data">
+                    <p>{props.message.message}</p>
+                </div>
+            </div>
+        </li>
+);
+
+class ChatList extends React.Component {
+    messagesEndRef = React.createRef();
+
+    componentDidMount() {
+        this.scrollToBottom();
+    }
+
+    componentDidUpdate() {
+        this.scrollToBottom();
+    }
+
+    scrollToBottom = () => {
+        this.messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    render() {
+        return (
+            <ul className="livechat">
+                {this.props.messages !== undefined && this.props.messages.length > 0 ?
+                    this.props.messages.map((message, index) =>
+                        <ChatMessage key={index} message={message} participantUsername={this.props.participantUsername} />
+                    ) : null}
+                <div ref={this.messagesEndRef}></div>
+            </ul>)
+    }
+}
+
 
 
 export default class LiveStreamDetail extends React.Component {
@@ -12,8 +61,11 @@ export default class LiveStreamDetail extends React.Component {
             roomID: "",
             firstName: "",
             lastName: "",
+            participantUsername: "",
             participantID: "",
             publisherID: "",
+            livestreamMesssage: "",
+            receivedMessages: [],
             isPublisher: null,
             isStreamPlaying: null,
             isPublishing: null,
@@ -31,6 +83,8 @@ export default class LiveStreamDetail extends React.Component {
         }
         this.janus = null;
         this.sfu = null;
+        this.socket = null;
+        this.liveChatRoom = "";
         this.streamRecorder = null;
         this.streamBlobs = [];
         this.liveStream = null;
@@ -49,6 +103,19 @@ export default class LiveStreamDetail extends React.Component {
         if (this.props.livestream !== undefined && this.props.livestream !== null && this.props.livestream !== prevProps.livestream) {
             console.log("LIVESTREAM from database: ", this.props.livestream);
             if (this.state.isPublishing === null) {
+                this.socket = io("http://localhost:9000");
+
+                this.socket.on("connect", () => {
+                    console.log("open live chat connection");
+                    this.liveChatRoom = `livechat-room${this.props.livestream.id}`;
+                    console.log(this.liveChatRoom);
+                    this.socket.emit("room", this.liveChatRoom);
+                    this.socket.on("message", (message) => {
+                        console.log("incoming message", message);
+                        this.setState({ receivedMessages: [...this.state.receivedMessages, message] });
+                    });
+                });
+
                 if (this.props.livestream.url === null) {
                     if (this.props.livestream.status === "created" && this.props.livestream.publisher.id !== this.state.participantID) {
                         this.setState({ loading: false, isPublishing: null, message: "Livestream has not been publishing yet." });
@@ -99,6 +166,10 @@ export default class LiveStreamDetail extends React.Component {
                 this.setState({ participantID: user.id });
             }
 
+            if (user.username !== undefined && user.username !== null) {
+                this.setState({ participantUsername: user.username });
+            }
+
             if (user.firstName !== undefined && user.firstName !== null) {
                 this.setState({ firstName: user.firstName });
             }
@@ -107,6 +178,21 @@ export default class LiveStreamDetail extends React.Component {
                 this.setState({ lastName: user.lastName });
             }
         }
+    }
+
+    handleChange = (e) => {
+        this.setState({ [e.target.name]: e.target.value });
+    }
+
+    sendLiveMessage = (e) => {
+        e.preventDefault();
+        this.socket.emit("live_chat_signal", {
+            sender: this.state.participantUsername,
+            message: this.state.livestreamMesssage,
+            room: this.liveChatRoom
+        });
+
+        this.setState({ livestreamMesssage: "" });
     }
 
     publishStream = (e) => {
@@ -240,8 +326,10 @@ export default class LiveStreamDetail extends React.Component {
     }
 
     leaveLiveStreamRoom = () => {
-        let leavingRoomConfig = { request: "leave" };
-        this.sfu.send({ message: leavingRoomConfig });
+        if (this.sfu !== undefined && this.sfu !== null) {
+            let leavingRoomConfig = { request: "leave" };
+            this.sfu.send({ message: leavingRoomConfig });
+        }
     }
 
     subscribeStream = (roomID, publisherID) => {
@@ -317,8 +405,6 @@ export default class LiveStreamDetail extends React.Component {
         } else {
             console.log("Cannot find janus instance");
         }
-
-
     }
 
     startStreamRecording = () => {
@@ -508,12 +594,14 @@ export default class LiveStreamDetail extends React.Component {
     }
 
     destroyRoom = () => {
-        let body = { request: "destroy", room: this.state.roomID };
-        this.sfu.send({
-            message: body, success: (message) => {
-                console.log(message);
-            }
-        });
+        if (this.sfu !== undefined && this.sfu !== null) {
+            let body = { request: "destroy", room: this.state.roomID };
+            this.sfu.send({
+                message: body, success: (message) => {
+                    console.log(message);
+                }
+            });
+        }
     }
 
     componentWillUnmount() {
@@ -530,93 +618,94 @@ export default class LiveStreamDetail extends React.Component {
                             <UploadingVideoDialog progress={this.state.progress} uploadMessage={this.state.uploadMessage} />}
 
                         {this.state.message ? <LiveStreamMessageDialog message={this.state.message} /> : null}
+                        <div className="livestreamdetail-page">
+                            <div className="livestreamdetail-container">
+                                <div className="livestreamdetail-header">
+                                    <label>{this.state.title}</label>
+                                    {this.state.url !== null || !this.state.isPublisher ? null :
+                                        this.state.isPublishing === null ? null :
+                                            this.state.isPublishing === true ? <button onClick={this.stopPublishingStream}>Stop Publishing</button>
+                                                :
+                                                <button onClick={this.publishStream}>Start Publishing</button>
+                                    }
+                                </div>
+                                <div className="livestreamdetail-videocontainer">
+                                    {this.state.url === null ?
+                                        <div className="video-container" id="video-container">
+                                            {this.state.isPublisher ? <video className="livestream-video" id="livestream-video" ref={this.liveStreamSrc} autoPlay muted></video>
+                                                : <video className="livestream-video" id="livestream-video" ref={this.liveStreamSrc} autoPlay></video>
+                                            }
+                                            <div className="controls">
+                                                <div className="video-progress-bar">
+                                                    <div className="video-progress-bar-color">
 
-                        <div className="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7 livestreamdetail-container">
-                            <div className="livestreamdetail-header">
-                                <label>{this.state.title}</label>
-                                {this.state.url !== null || !this.state.isPublisher ? null :
-                                    this.state.isPublishing === null ? null :
-                                        this.state.isPublishing === true ? <button onClick={this.stopPublishingStream}>Stop Publishing</button>
-                                            :
-                                            <button onClick={this.publishStream}>Start Publishing</button>
-                                }
-                            </div>
-                            <div className="livestreamdetail-videocontainer">
-                                {this.state.url === null ?
-                                    <div className="video-container" id="video-container">
-                                        {this.state.isPublisher ? <video className="livestream-video" id="livestream-video" ref={this.liveStreamSrc} autoPlay muted></video>
-                                            : <video className="livestream-video" id="livestream-video" ref={this.liveStreamSrc} autoPlay></video>
-                                        }
-                                        <div className="controls">
-                                            <div className="video-progress-bar">
-                                                <div className="video-progress-bar-color">
+                                                    </div>
+                                                </div>
+
+                                                <div className="video-buttons">
+                                                    {this.state.isPublisher ? null :
+                                                        this.state.isStreamPlaying === null ? null :
+                                                            this.state.isStreamPlaying ?
+                                                                <button type="button" id="play-button" onClick={this.pauseStream}>
+                                                                    <i className="fas fa-pause"></i>
+                                                                </button>
+                                                                : <button type="button" id="play-button" onClick={this.resumeStream}>
+                                                                    <i className="fas fa-play"></i>
+                                                                </button>}
+
+
+                                                    {!this.state.isPublisher || !this.state.isPublishing ? null :
+                                                        <button type="button" id="screen-sharing-button" className="" title={this.state.onScreenSharing ? "Switch back to your camera" : "Click to share screen"} onClick={this.handleMediaStream}>
+                                                            {this.state.onScreenSharing ? <i className="fas fa-desktop"></i> : <span><i className="fas fa-slash"></i><i className="fas fa-desktop"></i></span>}
+                                                        </button>
+                                                    }
+
+                                                    {this.state.fullScreen ?
+                                                        <button type="button" id="screen-adjust-button" onClick={this.exitFullScreen}>
+                                                            <i className="fas fa-compress"></i>
+                                                        </button>
+                                                        :
+                                                        <button type="button" id="screen-adjust-button" onClick={this.openFullScreen}>
+                                                            <i className="fas fa-expand"></i>
+                                                        </button>
+                                                    }
+
 
                                                 </div>
                                             </div>
-
-                                            <div className="video-buttons">
-                                                {this.state.isPublisher ? null :
-                                                    this.state.isStreamPlaying === null ? null :
-                                                        this.state.isStreamPlaying ?
-                                                            <button type="button" id="play-button" onClick={this.pauseStream}>
-                                                                <i className="fas fa-pause"></i>
-                                                            </button>
-                                                            : <button type="button" id="play-button" onClick={this.resumeStream}>
-                                                                <i className="fas fa-play"></i>
-                                                            </button>}
-
-
-                                                {!this.state.isPublisher || !this.state.isPublishing ? null :
-                                                    <button type="button" id="screen-sharing-button" className="" title={this.state.onScreenSharing ? "Switch back to your camera" : "Click to share screen"} onClick={this.handleMediaStream}>
-                                                        {this.state.onScreenSharing ? <i className="fas fa-desktop"></i> : <span><i className="fas fa-slash"></i><i className="fas fa-desktop"></i></span>}
-                                                    </button>
-                                                }
-
-                                                {this.state.fullScreen ?
-                                                    <button type="button" id="screen-adjust-button" onClick={this.exitFullScreen}>
-                                                        <i className="fas fa-compress"></i>
-                                                    </button>
-                                                    :
-                                                    <button type="button" id="screen-adjust-button" onClick={this.openFullScreen}>
-                                                        <i className="fas fa-expand"></i>
-                                                    </button>
-                                                }
-
-
-                                            </div>
                                         </div>
-                                    </div>
-                                    :
-                                    <div className="video-container" id="video-container">
-                                        <iframe title={this.state.title} className="livestream-video"
-                                            src={this.state.url}
-                                            allowFullScreen frameBorder="0">
-                                        </iframe>
-                                    </div>
-                                }
+                                        :
+                                        <div className="video-container" id="video-container">
+                                            <iframe title={this.state.title} className="livestream-video"
+                                                src={this.state.url}
+                                                allowFullScreen frameBorder="0">
+                                            </iframe>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div className="livestreamdetail-description">
+                                    <label>Lecturer: {this.state.publisherName} </label>
+                                    <p><i>{this.state.description === "" || this.state.description === null ? "No Description" : this.state.description}</i></p>
+                                </div>
                             </div>
 
-                            <div className="livestreamdetail-description">
-                                <label>Lecturer: {this.state.publisherName} </label>
-                                <p><i>{this.state.description === "" || this.state.description === null ? "No Description" : this.state.description}</i></p>
-                            </div>
-                        </div>
+                            <div className="livestreamdetail-chat-container">
+                                <div className="livestreamdetail-chat-header">
+                                    <label>Live Chat</label>
+                                </div>
 
-                        <div className="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4 livestreamdetail-chat-container">
-                            <div className="livestreamdetail-chat-header">
-                                <label>Live Chat</label>
-                            </div>
+                                <div className="livestreamdetail-chat">
+                                    <ChatList messages={this.state.receivedMessages} participantUsername={this.state.participantUsername} />
+                                </div>
 
-                            <div className="livestreamdetail-chat">
-                                <ul>
+                                <div className="livestreamdetail-message">
+                                    <textarea className="message-to-send" id="message-to-send" placeholder="Type your message" rows="1"
+                                        name="livestreamMesssage" value={this.state.livestreamMesssage} onChange={this.handleChange}>
 
-                                </ul>
-                            </div>
-
-                            <div className="livestreamdetail-message">
-                                <textarea className="message-to-send" id="message-to-send" placeholder="Type your message" rows="1"></textarea>
-                                <button>Send</button>
-
+                                    </textarea>
+                                    <button onClick={this.sendLiveMessage}>Send</button>
+                                </div>
                             </div>
                         </div>
                     </React.Fragment>
@@ -624,5 +713,4 @@ export default class LiveStreamDetail extends React.Component {
             </React.Fragment >
         )
     }
-
 }

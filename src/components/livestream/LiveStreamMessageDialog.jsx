@@ -12,7 +12,7 @@ export const LiveStreamMessageDialog = (props) => {
                         </button> */}
                     </div>
                     <div className="modal-body">
-                        <p className="m-30">{props.message}</p>
+                        <p className="m-20">{props.message}</p>
                     </div>
                 </div>
             </div>
