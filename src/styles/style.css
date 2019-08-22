@@ -288,8 +288,12 @@ video::-webkit-media-controls-enclosure {
 }
 
 .header nav ul li:nth-child(4) {
-    margin: 13px 20px 0 20px;
     animation-delay: 1s;
+}
+
+.header nav ul li:last-child {
+    margin: 13px 10px 0 20px;
+    animation-delay: 1.25s;
 }
 
 .header nav ul {
@@ -327,6 +331,7 @@ video::-webkit-media-controls-enclosure {
 }
 
 .header .nav-name-button {
+    cursor: pointer;
     margin: -16px 0 0 10px;
     text-transform: uppercase;
     color: white;
@@ -358,9 +363,30 @@ video::-webkit-media-controls-enclosure {
     display: inline-block;
 }
 
-.dropdown-menu {
-    margin-top: 10px
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 12px 16px;
+    z-index: 999999;
 }
+
+.dropdown-content button {
+    color: rgba(39,199,171,1);
+    text-decoration: none;
+    /* display: block; */
+    /* padding: 12px 16px; */
+}
+
+.dropdown-content button:hover { background-color: #f1f1f1; color: rgba(39,199,171,1); }
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
 
 .nav-link {
     padding: 15px 0;
@@ -376,6 +402,7 @@ video::-webkit-media-controls-enclosure {
 }
 
 .brand-name {
+    text-align: center;
     transform: translateX(-100rem);
     animation: slideIn .5s forwards;
 }
@@ -527,9 +554,10 @@ video::-webkit-media-controls-enclosure {
 
 .call-screen-page {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     position: fixed;
     background: black;
+    overflow: hidden;
 }
 
 
@@ -642,7 +670,6 @@ video::-webkit-media-controls-enclosure {
     width: 100%;
     height: 100vh;
     display: flex;
-    /* height: 100%; */
     align-items: center;
     justify-content: center;
 }
@@ -1247,7 +1274,6 @@ video::-webkit-media-controls-enclosure {
     border-bottom: 1px solid rgba(146, 149, 158, 0.5);
     display: flex;
     align-items: center;
-    vertical-align: middle;
     overflow: hidden;
 }
 
@@ -1359,6 +1385,21 @@ video::-webkit-media-controls-enclosure {
     background-color: #eeee;
 }
 
+.people-list ul > li > button {
+    border: none;
+    border-radius: 50%;
+    outline: none;
+    width: 30px;
+    height: 30px;
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+
+.people-list ul > li > button:hover {
+    background-color: #ddd;
+}
+
 
 .people-list img {
     float: left;
@@ -1376,9 +1417,14 @@ video::-webkit-media-controls-enclosure {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    font-weight: 600;
 }
 
 .people-list .status {
+    color: #92959E;
+}
+
+.people-list .new-message {
     color: #92959E;
 }
 
@@ -1425,6 +1471,7 @@ video::-webkit-media-controls-enclosure {
     height: 100vh;
     overflow: hidden;
 }
+
 
 .chat {
     width: 100%;
@@ -1508,9 +1555,12 @@ video::-webkit-media-controls-enclosure {
     position: relative;
     clear: both;
     max-width: 90%;
-    margin-bottom: 10px;
-    margin-top: 15px;
+    margin-bottom: 5px;
     margin-left: 60px;
+}
+
+.chat-history .my-chat-message-data:first-child {
+    margin-top: 10px;
 }
 
 .chat-history .my-chat-message-data > p {
@@ -1530,7 +1580,7 @@ video::-webkit-media-controls-enclosure {
     border-radius: 6px; 
     margin-top: 15px;
     margin-left: 15px; 
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     font-size: 15px;
     max-width: 90%;
 }
@@ -2041,6 +2091,294 @@ video::-webkit-media-controls-enclosure {
     max-width: 90%;
 }
 
+.conference-form-container {
+    width: 70%;
+    height: 100vh;
+    overflow: hidden;
+    
+}
+
+.conference-form-header {
+    height: 15vh;
+    padding: 0 20px;
+    width: 100%;
+    border-bottom: 1px solid rgba(146, 149, 158, 0.5);
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+
+.conference-form-create {
+    height: 70vh;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.conference-form-create ul {
+    padding: 0;
+    list-style: none;
+    padding: 100px;
+}
+
+.conference-form-create li {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background: #f1f1f1;
+    margin: 50px;
+    border-radius: 10px;
+}
+
+.conference-form-create li > div {
+    width: 100px;
+    height: 100px;
+    background: #f1f1f1;
+    border-radius: 10px;
+    border: none; 
+    outline: none;
+    background: #f1f1f1;
+    line-height: 100px;
+    text-align: center;
+}
+
+.conference-form-create li > div i {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.conference-form-create li > div:hover {
+    background-color: #ddd;
+}
+
+.conference-form-create ul > li > .btn-rm-user {
+    padding: 10px;
+    margin: 5px 0;
+    text-align: center;
+    background-color: rgba(39,199,171,1);
+    border-radius: 3px;
+    border: none;
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+.conference-form-create ul > li > .btn-rm-user:hover {
+    background-color: rgba(39, 199, 171, 0.75);
+}
+
+.conference-form-call-buttons {
+    height: 15vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;    
+}
+
+.conference-form-call-buttons button {
+    padding: 12px 16px;
+    text-align: center;
+    background-color: rgba(39,199,171,1);
+    border-radius: 3px;
+    border: none;
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+    margin: 0 20px;
+}
+
+.conference-form-call-buttons button:disabled, button[disabled] {
+    color: rgba(61, 80, 77, 0.75);
+}
+
+.conference-form-call-buttons button:hover:not([disabled]) {
+    background-color: rgba(39, 199, 171, 0.75);
+}
+
+.conference-screen-page {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    background: black;
+    overflow: hidden;
+}
+
+.conference-screen-container {
+    width: 100%;
+    height: 100vh;
+    background: black;
+    overflow: hidden;
+}
+
+.conference-screen-page .row:nth-child(1) {
+    height: 75vh;
+    padding: 0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.conference-screen-page .row:nth-child(2) {
+    height: 25vh;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    background: aquamarine;
+}
+
+.conference-remotestream-container {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+.conference-remote-stream-0 {
+    display: none;
+}
+
+.conference-remote-stream-1 {
+    max-height: 100%;
+    max-width: 70%;
+    width: 70%;
+    background: black;
+    margin: 0;
+    padding: 0;
+    /* display: inline-block; */
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+.conference-remote-stream-2 {
+    height: 100%;
+    width: 50%;
+    background: black;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+.conference-remote-stream-3 {
+    height: 100%;
+    width: 33%;
+    background: black;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+
+}
+
+.conference-remote-stream-4 {
+    height: 100%;
+    width: 33%;
+    background: black;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    margin-bottom: 15px;
+}
+
+.conference-remote-stream-5 {
+    height: 100%;
+    width: 33%;
+    background: black;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    margin-bottom: 15px;
+}
+
+.conference-remote-stream-1 video {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.conference-remote-stream-2 video {
+    width: 100%;
+    min-width: 100%;
+    max-height: 100%;
+}
+
+.conference-remote-stream-3 video {
+    width: 100%;
+    min-width: 100%;
+    max-height: 100%;
+}
+
+.conference-remote-stream-4 video {
+    width: 100%;
+    min-width: 100%;
+    max-height: 100%;
+}
+
+.conference-remote-stream-5 video {
+    width: 100%;
+    min-width: 100%;
+    max-height: 100%;
+}
+
+.conference-localstream-container {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.conference-localstream-container video {
+    height: 100%;
+    max-width: 100%;
+}
+
+.conference-screen-page .call-buttons {
+    display: flex;
+    width: 100%;
+    padding: 30px;
+    align-items: center;
+    align-content: center;
+    justify-content: flex-end;
+    position: absolute;
+    bottom: 0;
+    z-index: 10;
+    background-color: transparent;
+}
+
 
 @media only screen and (max-width: 1200px) { 
 
@@ -2071,6 +2409,11 @@ video::-webkit-media-controls-enclosure {
 
 
 @media only screen and (max-width: 992px) {
+
+    .brand-name span {
+        display: none;
+    }
+
     .intro-rightside img {
         width: 130%;
         margin: -15.875% -11.875%;
@@ -2202,23 +2545,25 @@ video::-webkit-media-controls-enclosure {
 	nav {
 		padding-top: 0;
 		display: none !important;
-		flex-direction: column;
-		justify-content: space-evenly;
+        flex-direction: column;
+        justify-content: center;
+        align-content: center;
 		align-items: center;
 		height: 100%;
         text-align: center;
+        vertical-align: middle;
 	}
 
 	nav ul {
         flex-direction: column;
-        align-items: center;
-        text-align: center;
-        vertical-align: middle;
+        margin: 0;
+        padding: 0;
 	}
 
 	nav ul li {
         margin-top: 2rem;
         text-align: center;
+        align-content: center;
 	}
 
 	nav ul li .nav-link {
@@ -2238,7 +2583,6 @@ video::-webkit-media-controls-enclosure {
         display: flex !important;
         transform: scale(1);
         opacity: 1;
-        vertical-align: middle;
     }
 
     .intro-leftside {

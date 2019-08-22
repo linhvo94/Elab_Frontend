@@ -16,6 +16,8 @@ import SideBar from "./components/general/Sidebar.jsx";
 
 import { login, signup, logout } from "./actions/authentication-actions/authentication.js";
 import { fetchAllLiveStreams, createLiveStream, getALiveStream, updateALiveStream, deleteALiveStream } from "./actions/livestream-actions/livestreaming.js";
+import Conference from "./components/conference/Conference";
+import ConferenceCall from "./components/conference/ConferenceCall";
 
 
 class Root extends React.Component {
@@ -45,6 +47,7 @@ class Root extends React.Component {
                     } />
 
                     <Route exact path="/videocall" render={(props) => <VideoCall />} />
+                    <Route path="/conferencecall" render={(props) => <ConferenceCall />} />
 
                     <Route exact path="/login" render={(props) =>
                         <Login {...props}
@@ -60,8 +63,9 @@ class Root extends React.Component {
                     <div className="row no-gutters">
                         <div className="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1">
                             <Route path="/" render={(props) => (props.location.pathname === "/media" ||
-                                props.location.pathname === "/livestream" || props.location.pathname.includes("/livestream/") || props.location.pathname === "/create-stream" ||
-                                props.location.pathname.includes("/media/"))
+                                props.location.pathname === "/livestream" || props.location.pathname.includes("/livestream/") || 
+                                props.location.pathname === "/create-stream" ||
+                                props.location.pathname.includes("/media/") || props.location.pathname === "/conference")
                                 && <SideBar {...props}
                                 />} />
                         </div>
@@ -70,6 +74,12 @@ class Root extends React.Component {
                                 !this.props.authentication.authenticated ?
                                     <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
                                     : <Media {...props} />
+                            } />
+
+                            <Route path="/conference" render={(props) =>
+                                !this.props.authentication.authenticated ?
+                                    <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
+                                    : <Conference {...props}/>
                             } />
 
 
@@ -88,6 +98,7 @@ class Root extends React.Component {
                                         livestreams={this.props.livestreams}
                                         fetchAllLiveStreams={this.props.fetchAllLiveStreams} />
                             } />
+
 
                             <Route path="/livestream/:id" render={(props) =>
                                 !this.props.authentication.authenticated ?

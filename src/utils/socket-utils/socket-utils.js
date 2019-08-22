@@ -1,4 +1,5 @@
 export const VIDEO_CALL_SIGNAL = "video_call_signal";
+export const CONFERENCE_CALL_SIGNAL = "conference_signal";
 
 export const sendVideoOffer = (socket, sender, receiver, isAudioCall, sdp) => {
     console.log("Offer", sender, receiver);
@@ -89,6 +90,57 @@ export const sendOfferChangingEvent = (socket, sender, receiver, socketOrigin, s
         sdp: sdp
     });
 }
+
+export const sendConferenceOffer = (socket, sender, receiver, roomID) => {
+    socket.emit(CONFERENCE_CALL_SIGNAL, {
+        type: "conference-offer",
+        sender: sender,
+        receiver: receiver,
+        room: roomID
+    });
+}
+
+export const sendConferenceAnswer = (socket, sender, receiver, socketOrigin) => {
+    socket.emit(CONFERENCE_CALL_SIGNAL, {
+        type: "conference-answer",
+        sender: sender,
+        receiver: receiver,
+        socketOrigin: socketOrigin
+    });
+}
+
+export const sendConferenceDeclineEvent = (socket, sender, receiver, socketOrigin) => {
+    socket.emit(CONFERENCE_CALL_SIGNAL, {
+        type: "conference-decline",
+        sender: sender,
+        receiver: receiver,
+        socketOrigin: socketOrigin
+    });
+}
+
+export const sendConferenceHangupEvent = (socket, sender, receiver) => {
+    socket.emit(CONFERENCE_CALL_SIGNAL, {
+        type: "conference-hangup",
+        sender: sender,
+        receiver: receiver
+    });
+};
+
+export const sendConferencePickedUpEvent = (socket, sender, receiver) => {
+    socket.emit(CONFERENCE_CALL_SIGNAL, {
+        type: "conference-picked-up",
+        sender: sender,
+        receiver: receiver
+    });
+};
+
+export const sendConferenceLeavingEvent = (socket, sender) => {
+    socket.emit(CONFERENCE_CALL_SIGNAL, {
+        type: "conference-leave",
+        sender: sender
+    });
+}
+
 
 
 

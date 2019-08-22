@@ -8,7 +8,6 @@ export default class LiveStreamForm extends React.Component {
         this.state = {
             title: "",
             description: "",
-            status: "created",
             roomID: Math.floor(Math.random() * 24683579),
             publisher: {}
         }

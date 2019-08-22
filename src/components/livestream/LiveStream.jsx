@@ -55,7 +55,7 @@ export default class LiveStream extends React.Component {
         return (
             <div className="livestream-container">
                 <div className="livestream-create-header">
-                    <input type="text" className="form-control" placeholder="Search"
+                    <input type="text" className="form-control" placeholder="Type the title"
                         name="searchLiveStream" value={this.state.searchLiveStream} onChange={this.handleChange} />
                     <Link className="create" to={"create-stream"}><i className="fas fa-plus"></i> Publish Stream </Link>
 

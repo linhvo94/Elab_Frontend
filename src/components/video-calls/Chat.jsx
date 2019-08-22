@@ -69,6 +69,7 @@ export default class Chat extends React.Component {
         if (this.props.match.params.username !== undefined && this.props.match.params.username !== null) {
             this.setState({ receiver: this.props.match.params.username });
             this.loadData(500);
+            // this.props.createPeerConnection(this.props.match.params.username);
         }
     }
 
@@ -84,37 +85,13 @@ export default class Chat extends React.Component {
 
         if (this.props.match.params.username !== undefined && this.props.match.params.username !== null) {
             if (this.props.match.params.username !== prevProps.match.params.username) {
-                if (this.isUserOnline(this.props.match.params.username, this.state.onlineUsers)) {
-                    this.setState({ receiver: this.props.match.params.username, loading: true });
-                    this.loadData(500);
-                }
+                // if (this.isUserOnline(this.props.match.params.username, this.state.onlineUsers)) {
+                this.props.createPeerConnection(this.props.match.params.username);
+                this.setState({ receiver: this.props.match.params.username, loading: true });
+                this.loadData(500);
+                // }
             }
         }
-        // console.log("SOCKET", this.socket);
-        // if (this.props.socket !== undefined && this.props.socket !== null && this.props.socket !== prevProps.socket) {
-        //     this.socket = this.props.socket;
-        //     this.socket.on("connect", () => {
-        //         console.log("connected");
-        //         this.createPeerConnection();
-        //         this.socket.on("chat", (message) => {
-        //             console.log("incoming message.... ", message)
-        //             switch (message.type) {
-        //                 case "chat-offer":
-        //                     this.handleChatOffer(message);
-        //                     break;
-        //                 case "chat-answer":
-        //                     this.handleChatAnswer(message);
-        //                     break;
-        //                 case "new-ice-candidate":
-        //                     this.handleNewIceCandidate(message);
-        //                     break;
-        //                 default:
-        //                     return;
-        //             }
-        //         });
-        //     });
-        // }
-
         if (this.props.isOnCall !== undefined && this.props.isOnCall !== null) {
             console.log("is on call", this.props.isOnCall)
             if (this.props.isOnCall !== prevProps.isOnCall) {
@@ -165,12 +142,12 @@ export default class Chat extends React.Component {
                 </div>
                 <div className="chat-history">
                     {this.state.loading ? <div className="loader"></div> :
-                        <ChatList messages={this.props.chatMessages} />
+                        <ChatList messages={this.props.chatMessages[this.props.match.params.username]} />
                     }
 
                 </div>
                 <div className="chat-message clearfix">
-                    <textarea className="form-control message-to-send" id="message-to-send" placeholder="Type your message" rows="1"
+                    <textarea className="form-control" id="message-to-send" placeholder="Type your message" rows="1"
                         name="textMessage" value={this.props.textMessage} onChange={this.props.handleChange}></textarea>
                     <button onClick={(e) => this.props.handleSendMessage(e, this.state.receiver)}>Send</button>
                 </div>

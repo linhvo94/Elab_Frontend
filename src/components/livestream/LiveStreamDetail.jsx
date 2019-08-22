@@ -103,7 +103,8 @@ export default class LiveStreamDetail extends React.Component {
         if (this.props.livestream !== undefined && this.props.livestream !== null && this.props.livestream !== prevProps.livestream) {
             console.log("LIVESTREAM from database: ", this.props.livestream);
             if (this.state.isPublishing === null) {
-                this.socket = io("http://localhost:9000");
+                // this.socket = io("http://localhost:9000");
+                this.socket = io("https://www.e-lab.live:9000");
 
                 this.socket.on("connect", () => {
                     console.log("open live chat connection");
@@ -349,7 +350,9 @@ export default class LiveStreamDetail extends React.Component {
                 console.log(message);
                 let event = message.videoroom;
 
-                if (event !== undefined && event !== null) {
+                if (message.error !== undefined && message.error !== null) {
+                    console.log("Error occurs: ", message.error);
+                } else if (event !== undefined && event !== null) {
                     if (event === "attached") {
                         window.addEventListener("beforeunload", () => this.leaveLiveStreamRoom());
                     } else if (event === "event") {
