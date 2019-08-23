@@ -1,29 +1,30 @@
 import React from 'react';
 
 export default class Video extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {};
+    constructor(...args) {
+      super(...args);
+      this.state = {};
     }
-
+  
     componentDidMount() {
-        const { srcObject } = this.props;
-        if (this.video.srcObject !== srcObject) {
-            this.video.srcObject = srcObject;
-        }
+      const { srcObject } = this.props;
+      if (this.elem.srcObject !== srcObject) {
+        this.elem.srcObject = srcObject;
+      }
     }
-
+  
     componentDidUpdate() {
-        const { srcObject } = this.props;
-        if (this.video.srcObject !== srcObject) {
-            this.video.srcObject = srcObject;
-        }
+      const { srcObject } = this.props;
+      if (this.elem.srcObject !== srcObject) {
+        this.elem.srcObject = srcObject;
+      }
     }
-
+  
     render() {
-        const { srcObject, ...rest } = this.props;
-        return (
-            <video ref={(video) => { this.video = video; }} />
-        );
+      const { srcObject, ...rest } = this.props;
+      return (
+        <video ref={(elem) => { this.elem = elem; }} {...rest} />
+        // <video src={this.props.srcObject} {...rest} />
+      );
     }
-}
+  }

@@ -3,10 +3,9 @@ import io from "socket.io-client";
 import Janus from "../../utils/janus-utils/janus.js";
 import ringing_tone from "../../media/sounds/ringing_tone.wav";
 import { playRingTone, stopRingTone } from "../../media/sounds/sound-control.js";
-import { sendAddOnlineUserEvent, sendConferenceOffer } from "../../utils/socket-utils/socket-utils";
+import { sendAddOnlineUserEvent, sendConferenceOffer, sendConferenceHangupEvent, sendConferenceAnswer, sendConferenceLeavingEvent } from "../../utils/socket-utils/socket-utils";
 import { initJanus } from "../../actions/livestream-actions/livestreaming";
 import Video from "./Video.jsx";
-import { compose } from "redux";
 
 
 export default class ConferenceCall extends React.Component {
@@ -20,9 +19,9 @@ export default class ConferenceCall extends React.Component {
             receiver: [],
             roomID: null,
             remoteStreamList: {},
+            notifications: [],
             onAudio: null,
             onVideo: null,
-            numOfPublishers: 0
         }
 
         this.socket = null;
@@ -34,31 +33,43 @@ export default class ConferenceCall extends React.Component {
         this.socketOrigin = null;
         this.sfu = null;
         this.janus = null;
+        this.messagesEndRef = React.createRef();
+        this.videos = ["http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"]
     }
 
     componentDidMount() {
+
         let sender = window.sender;
         let receiver = window.receiver;
-
+        this.scrollToBottom();
         if (sender !== "" && receiver !== "") {
             this.setState({ sender: sender, receiver: receiver });
             this.conferencePrepare();
 
-            // this.socket = io("http://localhost:9000");
-            this.socket = io("https://www.e-lab.live:9000");
+            this.socket = io("http://localhost:9000");
+            // this.socket = io("https://www.e-lab.live:9000");
             this.socket.on("connect", () => {
                 console.log("open connection");
                 sendAddOnlineUserEvent(this.socket, window.sender);
+                if (window.userType === "caller") {
+                    window.addEventListener("beforeunload", this.handleStopConference);
+                } else if (window.userType === "callee") {
+                    this.socketOrigin = window.offerMessage.socketOrigin;
+                    sendConferenceAnswer(this.socket, window.sender, window.receiver, window.offerMessage.socketOrigin);
+                }
+
                 initJanus().then(data => {
                     this.sfu = data.sfu;
                     this.janus = data.janus;
-                    
 
                     if (window.userType === "caller") {
+                        console.log("you are caller");
                         playRingTone(this.ringTone);
                         let roomIDToGenerate = Math.floor(Math.random() * 2468);
-                        this.getRoomList();
-
                         this.generateRoom(data.sfu, roomIDToGenerate)
                             .then((roomID) => {
                                 this.setState({ roomID: roomID });
@@ -66,6 +77,7 @@ export default class ConferenceCall extends React.Component {
                                 this.handleJoinAndConfigRoom(roomID);
                             });
                     } else if (window.userType === "callee") {
+                        console.log("you are callee", window.offerMessage);
                         this.setState({ roomID: window.offerMessage.room });
                         this.handleJoinAndConfigRoom(window.offerMessage.room);
                     }
@@ -78,7 +90,8 @@ export default class ConferenceCall extends React.Component {
                             if (event === "joined") {
                                 this.setState({ onAudio: true, onVideo: true });
                                 Janus.log("Successfully joined room " + message.room + " with ID " + message.id);
-                                window.addEventListener("beforeunload", () => this.leaveConferenceCall());
+                                window.addEventListener("beforeunload", this.leaveConferenceCall);
+
                                 if (message.publishers !== undefined && message.publishers !== null) {
                                     console.log("GOT NEW LIST OF PUBLISHERS: ", message.publishers);
                                     this.setState({ numOfPublishers: message.publishers.length });
@@ -110,7 +123,6 @@ export default class ConferenceCall extends React.Component {
                         Janus.log(" ::: Got a local stream ::: ", stream);
                         this.localStreamSrc.current.srcObject = stream;
                         this.liveStream = stream;
-                        stopRingTone(this.ringTone);
                     }
 
                     this.sfu.onremotestream = (stream) => {
@@ -125,22 +137,29 @@ export default class ConferenceCall extends React.Component {
 
                 this.socket.on("conference", (message) => {
                     console.log("conference message: ", message);
+                    let { notifications } = this.state;
 
                     switch (message.type) {
                         case "conference-answer":
+                            console.log("answered : ", message);
+                            stopRingTone(this.ringTone);
+                            notifications.push(`${message.sender} has joined the conference.`);
+                            this.setState({ notifications });
+                            window.removeEventListener("beforeunload", this.handleStopConference);
                             break;
 
                         case "conference-decline":
                             console.log("DECLINE", message);
+                            notifications.push(`${message.sender} has declined the conference.`);
+                            this.setState({ notifications });
                             break;
 
                         case "conference-leave":
+                            notifications.push(`${message.sender} has left the conference.`);
+                            this.setState({ notifications });
                             break;
 
                         case "conference-hangup":
-                            break;
-
-                        case "conference-picked-up":
                             break;
 
                         default:
@@ -150,6 +169,12 @@ export default class ConferenceCall extends React.Component {
                 });
 
             });
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.notifications !== prevState.notifications) {
+            this.scrollToBottom();
         }
     }
 
@@ -247,11 +272,11 @@ export default class ConferenceCall extends React.Component {
                         feed: publisher.id
                     };
 
-                    // if (Janus.webRTCAdapter.browserDetails.browser === 'safari'
-                    //     && (publisher.video_codec === 'vp9' || (publisher.video_codec === 'vp8' && !Janus.safariVp8))) {
-                    //     if (publisher.video_codec) { publisher.video_codec = publisher.video_codec.toUpperCase(); }
-                    //     subscriberConfig["offer_video"] = false;
-                    // }
+                    if (Janus.webRTCAdapter.browserDetails.browser === 'safari'
+                        && (publisher.video_codec === 'vp9' || (publisher.video_codec === 'vp8' && !Janus.safariVp8))) {
+                        if (publisher.video_codec) { publisher.video_codec = publisher.video_codec.toUpperCase(); }
+                        subscriberConfig["offer_video"] = false;
+                    }
 
                     remoteFeed.videoCodec = publisher.video_codec;
                     remoteFeed.send({ message: subscriberConfig });
@@ -295,12 +320,18 @@ export default class ConferenceCall extends React.Component {
                 },
                 onremotestream: (stream) => {
                     Janus.log(`[VideoRoom][Remote] Remote stream`);
-                    let remoteStreamList = this.state.remoteStreamList;
+                    let { remoteStreamList } = this.state;
                     remoteStreamList[publisher.id] = stream;
                     this.setState({ remoteStreamList });
                 },
                 oncleanup: () => {
                     Janus.log(`[VideoRoom][Remote] ::: Got a cleanup notification (remote feed ${publisher.id}) :::`);
+                    // let { notifications } = this.state;
+                    // notifications.push(`${this.} has declined the conference.`);
+                    // this.setState({ notifications });
+                    delete this.remoteStreamList[publisher.id];
+                    
+
                 },
             });
         } else {
@@ -340,14 +371,25 @@ export default class ConferenceCall extends React.Component {
         e.preventDefault();
         this.leaveConferenceCall();
         this.destroyRoom();
+
+        setTimeout(() => {
+            window.close();
+        }, 2000);
     }
 
     leaveConferenceCall = () => {
         if (this.sfu !== undefined && this.sfu !== null) {
             let leavingRoomConfig = { request: "leave" };
             this.sfu.send({ message: leavingRoomConfig });
-            this.destroyRoom();
+            sendConferenceLeavingEvent(this.socket, this.state.sender);
+            if (window.userType.caller === "caller") {
+                this.destroyRoom();
+            }
         }
+    }
+
+    handleStopConference = () => {
+        sendConferenceHangupEvent(this.socket, this.state.sender, this.state.sender);
     }
 
     destroyRoom = () => {
@@ -361,47 +403,81 @@ export default class ConferenceCall extends React.Component {
         }
     }
 
+    scrollToBottom = () => {
+        this.messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+
     componentWillUnmount = () => {
         this.leaveConferenceCall();
         this.destroyRoom();
     }
 
     render() {
-        console.log(this.state.numOfPublishers, " number of parti")
         return (
             <React.Fragment >
                 <div className="conference-screen-page">
                     <div className="conference-screen-container">
                         <div className="row">
-                            <div className="col-12 col-md-12 col-lg-12 col-xl-12">
-                                <div className="conference-remotestream-container">
-                                    {this.state.remoteStreamList && Object.keys(this.state.remoteStreamList).map((key, index) =>
-                                        <div className={`conference-remote-stream-${this.state.numOfPublishers}`}>
-                                            <Video key={index} srcObject={this.state.remoteStreamList[key]} autoPlay />
-                                        </div>
-                                    )}
-                                </div>
+                            <div className="col-12 col-md-12 col-lg-12 col-xl-12 conference-remotestream-container">
+                                {this.state.remoteStreamList && Object.keys(this.state.remoteStreamList).map((key, index) =>
+                                    <div className={`conference-remote-stream-${Object.keys(this.state.remoteStreamList).length}`} key={index}>
+                                        <Video key={index} srcObject={this.state.remoteStreamList[key]} autoPlay />
+                                    </div>
+                                )}
 
+                                {/* {this.videos.map((v, index) =>
+
+                                    <div key={index} className={`conference-remote-stream-${this.videos.length}`}>
+                                        <Video key={index} srcObject={v} autoPlay />
+                                    </div>
+
+                                )} */}
                             </div>
                         </div>
                         <div className="row">
                             <div className="col-12 col-md-12 col-lg-12 col-xl-12 conference-localstream-container">
-                                <video className="conference-local-stream" ref={this.localStreamSrc} muted autoPlay>
+                                <div className="conference-notifications">
+                                    <ul>
+                                        {this.state.notifications.map((notification, index) =>
+                                            <li key={index} className="conference-message">
+                                                {notification}
+                                            </li>
+                                        )}
+                                        {/* <li><div className="conference-message">sdadwq</div></li>
+                                        <li><div className="conference-message">sdadwq</div></li>
+                                        <li><div className="conference-message">sdadwfdsfffffffffffffffffffffewfewewfq</div></li>
+                                        <li><div className="conference-message">sdadwq</div></li>
+                                        <li><div className="conference-message">sdadwq</div></li>
+                                        <li><div className="conference-message">sdadwq</div></li> */}
+                                        <div ref={this.messagesEndRef}></div>
 
-                                </video>
+
+                                    </ul>
+                                </div>
+                                <div className="conference-local-stream">
+                                    <video ref={this.localStreamSrc} muted autoPlay>
+
+                                    </video>
+                                </div>
                                 <div className="call-buttons">
+                                    {/* <button type="button" className="btn-hangup" onClick={this.handleHangup}>
+                                        <i className="fas fa-phone-slash"></i>
+                                    </button>
+                                    <button type="button" className="btn-hangup" onClick={this.handleHangup}>
+                                        <i className="fas fa-phone-slash"></i>
+                                    </button> */}
                                     {this.sfu === undefined || this.sfu === null ? null :
-                                        <button type="button" className="btn-call ml-5" onClick={this.handleAudioState}>
-                                            {this.state.onAudio ? <i className="fas fa-microphone"></i> : <i className="fas fa-microphone-slash"></i> }
+                                        <button type="button" className="btn-call" onClick={this.handleAudioState}>
+                                            {this.state.onAudio ? <i className="fas fa-microphone"></i> : <i className="fas fa-microphone-slash"></i>}
                                         </button>
                                     }
 
-                                    <button type="button" className="btn-hangup ml-5" onClick={this.handleHangup}>
+                                    <button type="button" className="btn-hangup" onClick={this.handleHangup}>
                                         <i className="fas fa-phone-slash"></i>
                                     </button>
-                                    
+
                                     {(this.sfu === undefined || this.sfu === null) ? null :
-                                        <button type="button" className="btn-call ml-5" onClick={this.handleVideoState}>
+                                        <button type="button" className="btn-call" onClick={this.handleVideoState}>
                                             {this.state.onVideo ? <i className="fas fa-video"></i> : <i className="fas fa-video-slash"></i>}
                                         </button>
                                     }

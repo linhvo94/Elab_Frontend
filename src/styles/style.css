@@ -2218,31 +2218,29 @@ video::-webkit-media-controls-enclosure {
 }
 
 .conference-screen-page .row:nth-child(1) {
-    height: 75vh;
+    height: 70vh;
     padding: 0;
-    margin-bottom: 20px;
     display: flex;
     align-items: center;
     align-content: center;
     justify-content: center;
+    margin-bottom: 20px;
 }
 
 .conference-screen-page .row:nth-child(2) {
-    height: 25vh;
+    height: 30vh;
     width: 100%;
     padding: 0;
     margin: 0;
     display: flex;
     align-items: center;
     align-content: center;
-    background: aquamarine;
 }
 
 .conference-remotestream-container {
     margin: 0;
     padding: 0;
     width: 100%;
-    max-width: 100%;
     height: 100%;
     display: flex;
     flex-wrap: wrap;
@@ -2256,20 +2254,25 @@ video::-webkit-media-controls-enclosure {
 }
 
 .conference-remote-stream-1 {
+    /* min-height: 100%; */
     max-height: 100%;
+    height: 100%;
     max-width: 70%;
-    width: 70%;
     background: black;
+    width: 70%;
+    display: flex;
     margin: 0;
     padding: 0;
-    /* display: inline-block; */
     align-items: center;
     justify-content: center;
     align-content: center;
 }
 
 .conference-remote-stream-2 {
+    /* min-height: 100%; */
+    max-height: 100%;
     height: 100%;
+    max-width: 50%;
     width: 50%;
     background: black;
     margin: 0;
@@ -2281,7 +2284,10 @@ video::-webkit-media-controls-enclosure {
 }
 
 .conference-remote-stream-3 {
+    /* min-height: 100%; */
+    max-height: 100%;
     height: 100%;
+    max-width: 33%;
     width: 33%;
     background: black;
     margin: 0;
@@ -2290,11 +2296,10 @@ video::-webkit-media-controls-enclosure {
     align-items: center;
     justify-content: center;
     align-content: center;
-
 }
 
 .conference-remote-stream-4 {
-    height: 100%;
+    max-width: 33%;
     width: 33%;
     background: black;
     margin: 0;
@@ -2303,11 +2308,10 @@ video::-webkit-media-controls-enclosure {
     align-items: center;
     justify-content: center;
     align-content: center;
-    margin-bottom: 15px;
 }
 
 .conference-remote-stream-5 {
-    height: 100%;
+    max-width: 33%;
     width: 33%;
     background: black;
     margin: 0;
@@ -2316,37 +2320,41 @@ video::-webkit-media-controls-enclosure {
     align-items: center;
     justify-content: center;
     align-content: center;
-    margin-bottom: 15px;
 }
 
 .conference-remote-stream-1 video {
-    width: 100%;
-    max-width: 100%;
     max-height: 100%;
+    height: 100%;
+    min-height: 100%;
+    max-width: 100%;
 }
 
 .conference-remote-stream-2 video {
-    width: 100%;
-    min-width: 100%;
     max-height: 100%;
+    height: 100%;
+    min-height: 100%;
+    max-width: 100%;
 }
 
 .conference-remote-stream-3 video {
-    width: 100%;
-    min-width: 100%;
     max-height: 100%;
+    height: 100%;
+    min-height: 100%;
+    max-width: 100%;
 }
 
 .conference-remote-stream-4 video {
-    width: 100%;
-    min-width: 100%;
     max-height: 100%;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
 }
 
 .conference-remote-stream-5 video {
-    width: 100%;
-    min-width: 100%;
     max-height: 100%;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
 }
 
 .conference-localstream-container {
@@ -2354,29 +2362,69 @@ video::-webkit-media-controls-enclosure {
     padding: 0;
     width: 100%;
     height: 100%;
+    max-height: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     align-content: center;
-    background-color: rgba(0,0,0,0.5);
 }
 
-.conference-localstream-container video {
-    height: 100%;
-    max-width: 100%;
-}
-
-.conference-screen-page .call-buttons {
+.conference-localstream-container .conference-local-stream {
+    width: 50%;
+    height: 90%;
+    max-height: 90%;
     display: flex;
-    width: 100%;
-    padding: 30px;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.conference-localstream-container .conference-local-stream video {
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+}
+
+.conference-localstream-container .call-buttons {
+    height: 90%;
+    max-height: 90%;
+    width: 25%;
+    display: flex;
     align-items: center;
     align-content: center;
     justify-content: flex-end;
-    position: absolute;
-    bottom: 0;
-    z-index: 10;
     background-color: transparent;
+}
+
+.conference-localstream-container .call-buttons > button {
+    margin: 10px;
+}
+
+.conference-localstream-container .conference-notifications {
+    width: 25%;
+    padding: 0 10px;
+    overflow: hidden;
+    height: 90%;
+    max-height: 90%;
+}
+
+.conference-localstream-container .conference-notifications ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.conference-localstream-container .conference-notifications .conference-message {
+    position: relative;
+    word-break: break-all;
+    display: inline-block;
+    border-radius: 20px;  
+    margin-bottom: 10px;
+    padding: 5px 15px;
+    background: rgba(80, 80, 80, 0.5);
+    color: white;
+    font-size: 15px;
+    max-width: 100%;
 }
 
 
@@ -2569,7 +2617,12 @@ video::-webkit-media-controls-enclosure {
 	nav ul li .nav-link {
 		margin: 0;
 		font-size: 1.5rem;
-	}
+    }
+    
+    .header nav ul li:last-child {
+        margin: 0;
+        animation-delay: 1.25s;
+    }
 
 	.brand-name {
 		font-size: 1.5rem;

@@ -58,8 +58,8 @@ export default class Header extends React.Component {
                             <ul>
                                 <li><Link className="nav-link" to={"/home"}>Home</Link></li>
                                 <li><Link className="nav-link" to={"/media"}>Media</Link></li>
-                                <li><Link className="nav-link" to={"/livestream"}>Livestream</Link></li>
                                 <li><Link className="nav-link" to={"/conference"}>Conference</Link></li>
+                                <li><Link className="nav-link" to={"/livestream"}>Livestream</Link></li>      
                                 {this.props.authenticated === false ?
                                     <li><Link className="nav-login-link" to={"/login"}>Login</Link></li>
                                     : <li>
@@ -73,16 +73,6 @@ export default class Header extends React.Component {
                                                 </button>
                                             </div>
                                         </div>
-                                        {/* <div className="dropdown">
-                                            <button type="button" className="nav-name-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                {this.state.firstName === null || this.state.firstName === "" ? "Unknown" : this.state.firstName[0]}
-                                            </button>
-                                            <div className="dropdown-menu">
-                                                <button className="dropdown-item" type="button" onClick={this.props.logout}>
-                                                    Signout
-                                                </button>
-                                            </div>
-                                        </div> */}
                                     </li>
                                 }
                             </ul>

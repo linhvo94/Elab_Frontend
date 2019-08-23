@@ -1,9 +1,8 @@
 import React from "react";
 import io from "socket.io-client";
-import { Link } from "react-router-dom";
 import ringing_tone from "../../media/sounds/ringing_tone.wav";
 import { playRingTone, stopRingTone } from "../../media/sounds/sound-control.js";
-import { sendAddOnlineUserEvent, sendConferenceDeclineEvent } from "../../utils/socket-utils/socket-utils";
+import { sendAddOnlineUserEvent, sendConferenceDeclineEvent, sendConferencePickedUpEvent } from "../../utils/socket-utils/socket-utils";
 import ConferenceForm from "./ConferenceForm";
 import { CalleeDialog } from "../video-calls/CalleeDialog";
 
@@ -34,8 +33,8 @@ export default class Conference extends React.Component {
     componentDidMount() {
         let user = JSON.parse(localStorage.getItem("user"));
         this.setState({ username: user.username, firstName: user.firstName, lastName: user.lastName });
-        // this.socket = io("http://localhost:9000");
-        this.socket = io("https://www.e-lab.live:9000");
+        this.socket = io("http://localhost:9000");
+        // this.socket = io("https://www.e-lab.live:9000");
 
         this.socket.on("connect", () => {
             console.log("conference open connection");
@@ -44,7 +43,13 @@ export default class Conference extends React.Component {
             this.socket.on("online_users", (message) => {
                 console.log(message);
                 let onlineUsers = message.filter(m => m !== this.state.username);
-                this.setState({ onlineUsers: onlineUsers, filterUsers: onlineUsers });
+                this.setState({ onlineUsers: onlineUsers });
+                let filterUsers = onlineUsers.filter(user => !this.state.conferenceUsers.includes(user));
+
+                if (this.state.searchUser === "") {
+                    this.setState({ filterUsers: filterUsers });
+                }
+
             });
 
             this.socket.on("conference", (message) => {
@@ -58,19 +63,24 @@ export default class Conference extends React.Component {
                         this.setState({ receiver: message.sender, callDiaglogOpened: true });
                         break;
 
-                    case "conference-answer":
-                        break;
-
-                    case "conference-decline":
-                        break;
-
-                    case "conference-leave":
-                        break;
-
                     case "conference-hangup":
+                        stopRingTone(this.ringTone);
+                        this.setState({ callDiaglogOpened: false, isOnCall: false })
                         break;
 
                     case "conference-picked-up":
+                        stopRingTone(this.ringTone);
+                        this.setState({ callDiaglogOpened: false, isOnCall: true });
+                        break;
+
+                    case "on-call":
+                        if (message.isOnCall !== undefined && message.isOnCall !== null) {
+                            this.setState({ isOnCall: message.isOnCall });
+                        }
+                        break;
+
+                    case "busy-user":
+                        this.setState({ isOnCall: false });
                         break;
 
                     default:
@@ -79,7 +89,7 @@ export default class Conference extends React.Component {
                 }
             });
 
-        })
+        });
     }
 
     livestreamPrepare = () => {
@@ -119,7 +129,6 @@ export default class Conference extends React.Component {
     }
 
     handleAddUserToConference = (e, username) => {
-        console.log("add");
         if (this.state.conferenceUsers.length < 5) {
             e.preventDefault();
             let conferenceUsers = this.state.conferenceUsers;
@@ -133,7 +142,6 @@ export default class Conference extends React.Component {
 
 
     handleRemoveUserFromConference = (e, username) => {
-        console.log("remove");
         e.preventDefault();
         let { filterUsers, conferenceUsers } = this.state;
         let updatedConferenceUsers = conferenceUsers.filter(user => user !== username);
@@ -144,21 +152,21 @@ export default class Conference extends React.Component {
     handleCall = (e) => {
         e.preventDefault();
         if (this.state.conferenceUsers.length > 0) {
-            console.log("making a call to......", this.state.conferenceUsers);
             this.setState({ isOnCall: true });
+            console.log("making a call to......", this.state.conferenceUsers);
             var videoCallWindow = window.open("/conferencecall", "Popup", "toolbar=no, location=no, statusbar=no, menubar=no, scrollbars=1, resizable=0, width=1024, height=576, top=30");
             videoCallWindow.sender = this.state.username;
             videoCallWindow.receiver = this.state.conferenceUsers;
             videoCallWindow.userType = "caller";
         } else {
-            alert("Conference must have at least two participants.")
+            alert("Conference must have at least two participants.");
         }
     }
 
     handleCallAccept = (e) => {
         e.preventDefault();
-
         stopRingTone(this.ringTone);
+        // sendConferencePickedUpEvent(this.socket, this.state.username, this.state.username);
         this.setState({ callDiaglogOpened: false, isOnCall: true });
 
         var videoCallWindow = window.open("/conferencecall", "Popup", "toolbar=no, location=no, statusbar=no, menubar=no, scrollbars=1, resizable=0, width=1024, height=576");
@@ -224,10 +232,11 @@ export default class Conference extends React.Component {
                         </div>
                     </div>
                     <div className="conference-form-container">
-                        <ConferenceForm 
+                        <ConferenceForm
                             handleRemoveUserFromConference={this.handleRemoveUserFromConference}
                             conferenceUsers={this.state.conferenceUsers}
-                            handleCall={this.handleCall} />
+                            handleCall={this.handleCall}
+                            isOnCall={this.state.isOnCall} />
                     </div>
                 </div>
 

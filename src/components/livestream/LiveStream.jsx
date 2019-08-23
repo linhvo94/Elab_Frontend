@@ -76,7 +76,7 @@ export default class LiveStream extends React.Component {
                                     <div className="card">
                                         <img className="card-img-top" src="https://cdn.dribbble.com/users/407431/screenshots/4281480/education.jpg" alt="Card cap" />
                                         <div className="card-body">
-                                            <h5 className="card-title">{livestream.title}</h5>
+                                            <h5 className="card-title">{livestream.title === "" || livestream.title === null ? "No title" : livestream.title}</h5>
                                             <p className="card-text"><i>{livestream.description === "" || livestream.description === null ? "No description" : livestream.description}</i></p>
                                             <p className="card-status">{livestream.status === "" || livestream.status === null ? "Unknown Status" :
                                                 livestream.status === "live" ? <span><i className="fas fa-wave-square"></i> On going</span> :
