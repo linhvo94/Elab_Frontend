@@ -7,9 +7,9 @@ export const LiveStreamMessageDialog = (props) => {
                 <div className="modal-content">
                     <div className="modal-header">
                         <h6 className="modal-title">Message</h6>
-                        {/* <button type="button" className="close" aria-label="Close">
+                        <button type="button" className="close" aria-label="Close" onClick={props.closeMessageDialog}>
                             <span aria-hidden="true">&times;</span>
-                        </button> */}
+                        </button>
                     </div>
                     <div className="modal-body">
                         <p className="m-20">{props.message}</p>

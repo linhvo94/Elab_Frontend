@@ -1,5 +1,8 @@
+import { send } from "q";
+
 export const VIDEO_CALL_SIGNAL = "video_call_signal";
 export const CONFERENCE_CALL_SIGNAL = "conference_signal";
+export const CHAT_SIGNAL = "chat_signal";
 
 export const sendVideoOffer = (socket, sender, receiver, isAudioCall, sdp) => {
     console.log("Offer", sender, receiver);
@@ -138,6 +141,33 @@ export const sendConferenceLeavingEvent = (socket, sender) => {
     socket.emit(CONFERENCE_CALL_SIGNAL, {
         type: "conference-leave",
         sender: sender
+    });
+}
+
+export const sendChatOffer = (socket, sender, receiver, sdp) => {
+    socket.emit(CHAT_SIGNAL, {
+        type: "chat-offer",
+        sender: sender,
+        receiver: receiver,
+        sdp: sdp
+    });
+}
+
+export const sendChatAnswer = (socket, sender, receiver, sdp) => {
+    socket.emit(CHAT_SIGNAL, {
+        type: "chat-answer",
+        sender: sender,
+        receiver: receiver,
+        sdp: sdp
+    })
+}
+
+export const sendChatNewIceCandidate = (socket, sender, receiver, candidate) => {
+    socket.emit(CHAT_SIGNAL, {
+        type: "new-ice-candidate",
+        sender: sender,
+        receiver: receiver,
+        candidate: candidate
     });
 }
 

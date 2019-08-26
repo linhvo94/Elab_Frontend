@@ -8,7 +8,7 @@ export function login(user) {
     return (dispatch) => {
         // https://www.e-lab.live:8080/api/oauth/token?grant_type=password&username=${user.username}&password=${user.password}
         // http://localhost:8080/oauth/token?grant_type=password&username=${user.username}&password=${user.password}
-        fetch(`http://localhost:8080/oauth/token?grant_type=password&username=${user.username}&password=${user.password}`,
+        fetch(`https://www.e-lab.live:8080/api/oauth/token?grant_type=password&username=${user.username}&password=${user.password}`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -35,7 +35,7 @@ export function login(user) {
                 }
             })
             .then(data => {
-                if (data !== "") {
+                if (data !== "" && data !== null) {
                     console.log(data);
 
                     localStorage.setItem("access_token", data.access_token);
@@ -47,7 +47,7 @@ export function login(user) {
 
                     dispatch({
                         type: LOGIN_SUCCESSFULLY,
-                        payload: ""
+                        payload: data.user
                     });
                 }
             })
@@ -57,7 +57,7 @@ export function login(user) {
 export function signup(user) {
     var status = ""
     return (dispatch) => {
-        fetch("http://localhost:8080/create-student-account",
+        fetch("https://www.e-lab.live:8080/api/create-student-account",
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -69,7 +69,7 @@ export function signup(user) {
             })
             .then(res => {
                 if (res.status === 200) {
-                    status = 200;
+                    return res.json();
                 } else if (res.status === 400) {
                     status = 400;
                     return res.text();
@@ -101,8 +101,14 @@ export function signup(user) {
                     })
                 }
             })
+            .catch(e => {
+                dispatch({
+                    type: SERVER_ERRORS,
+                    payload: "Unexpected errors have occured"
+                })
+            })
     }
-} 
+}
 
 export function logout() {
     localStorage.removeItem("user");

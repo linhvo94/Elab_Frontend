@@ -39,7 +39,13 @@ export default class VideoCall extends React.Component {
         this.isAudioCall = null;
         this.socketOrigin = "";
         this.audioCallConstraint = { video: false, audio: true };
-        this.videoCallConstraint = { video: true, audio: true };
+        this.videoCallConstraint = {
+            video: {
+                width: 1920,
+                height: 1080,
+                aspectRatio: 1.777777778
+            }, audio: true
+        };
         this.currentCallConstraint = null;
     }
 
@@ -66,6 +72,11 @@ export default class VideoCall extends React.Component {
                 handleGetUserMedia(mediaConstraints).then(stream => {
                     this.localStreamSource.current.srcObject = stream;
                     this.localStream = stream;
+                    if (window.isAudioCall) {
+                        this.setState({ onAudio: true, onVideo: null });
+                    } else {
+                        this.setState({ onAudio: true, onVideo: true });
+                    }
                     this.createPeerConnection(stream);
                     playRingTone(this.ringTone);
                 }).catch(e => console.log(e));
@@ -80,6 +91,13 @@ export default class VideoCall extends React.Component {
                 handleGetUserMedia(mediaConstraints).then(stream => {
                     this.localStreamSource.current.srcObject = stream;
                     this.localStream = stream;
+
+                    if (window.isAudioCall) {
+                        this.setState({ onAudio: true, onVideo: null });
+                    } else {
+                        this.setState({ onAudio: true, onVideo: true });
+                    }
+
                     this.handleVideoOffer(stream, window.offerMessage);
                 }).catch(e => console.log(e));
             }
@@ -173,12 +191,9 @@ export default class VideoCall extends React.Component {
 
     configCallConstraints = (isAudioCall) => {
         if (isAudioCall) {
-            this.setState({ onAudio: true, onVideo: null });
             this.currentCallConstraint = this.audioCallConstraint;
             return this.audioCallConstraint;
-
         } else if (isAudioCall === false) {
-            this.setState({ onAudio: true, onVideo: true, onScreen: false });
             this.currentCallConstraint = this.videoCallConstraint;
             return this.videoCallConstraint;
         }
@@ -343,14 +358,24 @@ export default class VideoCall extends React.Component {
 
     handleAudioState = (e) => {
         e.preventDefault();
-        this.setState({ onAudio: !this.state.onAudio });
-        this.localStream.getAudioTracks()[0].enabled = !this.localStream.getAudioTracks()[0].enabled;
+        this.localStream.getAudioTracks()[0].enabled = !(this.localStream.getAudioTracks()[0].enabled);
+        this.setState({ onAudio: this.localStream.getAudioTracks()[0].enabled });
+        // if (this.localStream.getAudioTracks()[0].enabled) {
+        //     this.setState({ onAudio: true });
+        // } else {
+        //     this.setState({ onAudio: false });
+        // }
     }
 
     handleVideoState = (e) => {
         e.preventDefault();
-        this.setState({ onVideo: !this.state.onVideo });
-        this.localStream.getVideoTracks()[0].enabled = !this.localStream.getVideoTracks()[0].enabled;
+        this.localStream.getVideoTracks()[0].enabled = !(this.localStream.getVideoTracks()[0].enabled);
+        this.setState({ onVideo: this.localStream.getVideoTracks()[0].enabled });
+        // if (this.localStream.getVideoTracks()[0].enabled) {
+        //     this.setState({ onVideo: true });
+        // } else {
+        //     this.setState({ onVideo: false });
+        // }
     }
 
     handleScreenSharing = (e) => {
@@ -375,7 +400,7 @@ export default class VideoCall extends React.Component {
                 this.peerConnection.createOffer()
                     .then(offerSDP => {
                         this.onCreateOfferSuccess("video-offer-changing", offerSDP);
-                        this.setState({ onVideo: false, onAudio: true, onScreen: true });
+                        this.setState({ onScreen: true  });
                     })
                     .catch(e => console.log(e));;
             })
@@ -383,7 +408,7 @@ export default class VideoCall extends React.Component {
         })
             .catch(e => console.log(e));
     }
-    
+
     handleVideoOfferChanges = (message) => {
         let remoteSDP = new RTCSessionDescription(message.sdp);
         this.peerConnection.setRemoteDescription(remoteSDP);
@@ -405,7 +430,7 @@ export default class VideoCall extends React.Component {
                 this.peerConnection.createOffer()
                     .then(offerSDP => {
                         this.onCreateOfferSuccess("video-offer-changing", offerSDP);
-                        this.setState({ onScreen: false, onVideo: true });
+                        this.setState({ onScreen: false });
                     })
                     .catch(e => console.log(e));;
             })
@@ -483,10 +508,10 @@ export default class VideoCall extends React.Component {
                                 {this.state.onVideo === null ?
                                     <button type="button" className="btn-call ml-5" onClick={this.handleUpgradeVideo}>
                                         <i className="fas fa-video"></i>
-                                    </button>
+                                    </button> 
                                     :
                                     <button type="button" className="btn-call ml-5" onClick={this.handleVideoState}>
-                                        {this.state.onVideo ? <i className="fas fa-video"></i> : <i className="fas fa-video-slash"></i>}
+                                        {this.state.onVideo === true ? <i className="fas fa-video"></i> : <i className="fas fa-video-slash"></i>}
                                     </button>
                                 }
 

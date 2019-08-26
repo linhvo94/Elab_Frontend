@@ -30,25 +30,26 @@ export default class ConferenceForm extends React.Component {
 
                 <div className="conference-form-create">
                     <ul>
-                        {this.props.conferenceUsers === undefined && this.props.conferenceUsers === null ? null :
-                            this.props.conferenceUsers.map((user, index) =>
+                        {this.props.conferenceUsers === undefined || Object.keys(this.props.conferenceUsers) === 0 ? null :
+                            Object.keys(this.props.conferenceUsers).map((userKey, index) =>
                                 <li key={index}>
                                     <div>
-                                        {user}
+                                        {this.props.conferenceUsers[userKey].firstName}
                                     </div>
 
-                                    <button onClick={(e) => this.props.handleRemoveUserFromConference(e, user)} className="btn-rm-user" type="button">
+                                    <button onClick={(e) => this.props.handleRemoveUserFromConference(e, userKey)} className="btn-rm-user" type="button">
                                         Remove
                                     </button>
 
                                 </li>
                             )}
+
                     </ul>
                 </div>
                 <div className="conference-form-call-buttons">
                     <button onClick={this.props.handleCall} disabled={(this.props.conferenceUsers !== undefined
                         && this.props.conferenceUsers !== null
-                        && this.props.conferenceUsers.length > 0)
+                        && Object.keys(this.props.conferenceUsers).length > 0)
                         && !this.state.isOnCall ? false : true}>Start Group Call
                     </button>
                 </div>

@@ -39,6 +39,14 @@ export default class Header extends React.Component {
         });
     }
 
+    logout = () => {
+        this.props.logout();
+        if (this.props.socket !== undefined && this.props.socket !== null) {
+            this.props.socket.disconnect();
+        }
+
+        window.location.reload();
+    }
 
     render() {
         return (
@@ -68,7 +76,7 @@ export default class Header extends React.Component {
                                                 {this.state.firstName === null || this.state.firstName === "" ? "Unknown" : this.state.firstName[0]}
                                             </button>
                                             <div className="dropdown-content">
-                                                <button className="dropdown-item" type="button" onClick={this.props.logout}>
+                                                <button className="dropdown-item" type="button" onClick={this.logout}>
                                                     Signout
                                                 </button>
                                             </div>

@@ -24,12 +24,9 @@ export const VideoUpgradeDialog = (props) => {
                                 <i className="fas fa-phone-alt"></i>
                             </button>
                         </div>
-
                     </div>
-
                 </div>
             </div>
-
         </div>
     );
 };

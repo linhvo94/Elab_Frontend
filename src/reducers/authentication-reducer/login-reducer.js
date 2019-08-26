@@ -7,6 +7,7 @@ import {
 const initialState = {
     authenticated: false,
     authorized: false,
+    user: null,
     errorMessage: ""
 }
 
@@ -17,24 +18,28 @@ export const authentication = (state = initialState, action) => {
             return {
                 ...state,
                 authenticated: true,
+                user: action.payload,
                 errorMessage: ""
             }
         case BAD_CREDENTIALS:
             return {
                 ...state,
                 authenticated: false,
+                user: null,
                 errorMessage: action.payload
             }
         case SERVER_ERRORS:
             return {
                 ...state,
                 authenticated: false,
+                user: null,
                 errorMessage: action.payload
             }
         case LOGOUT_SUCCESSFULLY:
             return {
                 ...state,
                 authenticated: false,
+                user: null,
                 errorMessage: ""
             }
         default:

@@ -6,54 +6,6 @@ import UploadingVideoDialog from "./UploadingVideoDialog.jsx";
 import { LiveStreamMessageDialog } from "./LiveStreamMessageDialog.jsx";
 
 
-const ChatMessage = (props) => (
-    props.message.sender === props.participantUsername ?
-        <li className="my-message">
-            <label>You</label>
-            <div className="my-message-data">
-                <p>{props.message.message}</p>
-            </div>
-        </li>
-        :
-        <li>
-            <div>
-                <label>{props.message.sender}</label>
-                <div className="message-data">
-                    <p>{props.message.message}</p>
-                </div>
-            </div>
-        </li>
-);
-
-class ChatList extends React.Component {
-    messagesEndRef = React.createRef();
-
-    componentDidMount() {
-        this.scrollToBottom();
-    }
-
-    componentDidUpdate() {
-        this.scrollToBottom();
-    }
-
-    scrollToBottom = () => {
-        this.messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-
-    render() {
-        return (
-            <ul className="livechat">
-                {this.props.messages !== undefined && this.props.messages.length > 0 ?
-                    this.props.messages.map((message, index) =>
-                        <ChatMessage key={index} message={message} participantUsername={this.props.participantUsername} />
-                    ) : null}
-                <div ref={this.messagesEndRef}></div>
-            </ul>)
-    }
-}
-
-
-
 export default class LiveStreamDetail extends React.Component {
     constructor(props) {
         super(props);
@@ -81,6 +33,7 @@ export default class LiveStreamDetail extends React.Component {
             message: "",
             uploadMessage: "",
         }
+
         this.janus = null;
         this.sfu = null;
         this.socket = null;
@@ -103,16 +56,13 @@ export default class LiveStreamDetail extends React.Component {
         if (this.props.livestream !== undefined && this.props.livestream !== null && this.props.livestream !== prevProps.livestream) {
             console.log("LIVESTREAM from database: ", this.props.livestream);
             if (this.state.isPublishing === null) {
-                // this.socket = io("http://localhost:9000");
                 this.socket = io("https://www.e-lab.live:9000");
 
                 this.socket.on("connect", () => {
                     console.log("open live chat connection");
                     this.liveChatRoom = `livechat-room${this.props.livestream.id}`;
-                    console.log(this.liveChatRoom);
                     this.socket.emit("room", this.liveChatRoom);
                     this.socket.on("message", (message) => {
-                        console.log("incoming message", message);
                         this.setState({ receivedMessages: [...this.state.receivedMessages, message] });
                     });
                 });
@@ -187,13 +137,15 @@ export default class LiveStreamDetail extends React.Component {
 
     sendLiveMessage = (e) => {
         e.preventDefault();
-        this.socket.emit("live_chat_signal", {
-            sender: this.state.participantUsername,
-            message: this.state.livestreamMesssage,
-            room: this.liveChatRoom
-        });
+        if (this.state.livestreamMesssage !== "") {
+            this.socket.emit("live_chat_signal", {
+                sender: this.state.participantUsername,
+                message: this.state.livestreamMesssage,
+                room: this.liveChatRoom
+            });
 
-        this.setState({ livestreamMesssage: "" });
+            this.setState({ livestreamMesssage: "" });
+        }
     }
 
     publishStream = (e) => {
@@ -225,9 +177,7 @@ export default class LiveStreamDetail extends React.Component {
                     } else if (event === "event") {
                         if (message.unpublished !== undefined && message.unpublished !== null) {
                             if (message.unpublished === "ok") {
-
-                                // console.log("Unpublish and create Screen sharing");
-
+                                this.destroyRoom();
                             }
                         }
                     }
@@ -358,12 +308,10 @@ export default class LiveStreamDetail extends React.Component {
                     } else if (event === "event") {
                         if (message.started !== undefined && message.started !== null) {
                             if (message.started === "ok") {
-                                console.log("START SUCCESS");
                                 this.setState({ isStreamPlaying: true });
                             }
                         } else if (message.paused !== undefined && message.paused !== null) {
                             if (message.paused === "ok") {
-                                console.log("PAUSED SUCCESS");
                                 this.setState({ isStreamPlaying: false });
                             }
                         } else if (message.error_code !== undefined && message.error_code !== null) {
@@ -436,16 +384,10 @@ export default class LiveStreamDetail extends React.Component {
 
         this.streamRecorder.onstop = (event) => {
             console.log('Recorder stopped: ', event);
-            let livestreamVideo = document.getElementById("livestream-video");
-            // console.log(this.streamBlobs);
-            // this.uploadVideoBlob = new Blob(this.streamBlobs, { type: this.streamRecorder.mimeType });
-            // livestreamVideo.srcObject = null;
-            // livestreamVideo.src = null;
-            // livestreamVideo.src = window.URL.createObjectURL(this.uploadVideoBlob);
         };
 
         this.streamRecorder.ondataavailable = this.handleDataAvailable;
-        this.streamRecorder.start(10); // collect 10ms of data
+        this.streamRecorder.start(10);
         console.log('MediaRecorder started', this.streamRecorder);
     }
 
@@ -465,7 +407,6 @@ export default class LiveStreamDetail extends React.Component {
 
     handleMediaStream = (e) => {
         e.preventDefault();
-        this.stopStreamRecording();
         if (this.sfu !== undefined && this.sfu !== null) {
             let media = "";
             if (this.state.onScreenSharing) {
@@ -560,13 +501,12 @@ export default class LiveStreamDetail extends React.Component {
                 let youtubeURL = `https://www.youtube.com/embed/${xhr.response.id}`;
                 let livestream = this.state.livestream;
                 livestream.url = youtubeURL;
-                this.setState({ url: youtubeURL, livestream: livestream, uploadMessage: "" });
+                this.setState({ url: youtubeURL, livestream: livestream });
                 console.log("CURRENT LIVESTREAM", livestream);
                 this.props.updateALiveStream(livestream);
 
                 setTimeout(() => {
                     this.closeUploadingVideoDialog();
-                    this.destroyRoom();
                 }, 2000);
 
             } else if (xhr.response.error !== undefined || xhr.response.error !== null) {
@@ -593,7 +533,7 @@ export default class LiveStreamDetail extends React.Component {
     }
 
     closeUploadingVideoDialog = () => {
-        this.setState({ progress: null, message: "" });
+        this.setState({ progress: null, message: "", uploadMessage: "" });
     }
 
     destroyRoom = () => {
@@ -607,9 +547,13 @@ export default class LiveStreamDetail extends React.Component {
         }
     }
 
+    closeMessageDialog = (e) => {
+        e.preventDefault();
+        this.setState({ message: "" });
+    }
+
     componentWillUnmount() {
         this.leaveLiveStreamRoom();
-        this.destroyRoom();
     }
 
     render() {
@@ -620,7 +564,9 @@ export default class LiveStreamDetail extends React.Component {
                         {this.state.progress === null || this.state.progress === 100 ? null :
                             <UploadingVideoDialog progress={this.state.progress} uploadMessage={this.state.uploadMessage} />}
 
-                        {this.state.message ? <LiveStreamMessageDialog message={this.state.message} /> : null}
+                        {this.state.message !== "" ? <LiveStreamMessageDialog message={this.state.message}
+                            closeMessageDialog={this.closeMessageDialog} /> : null}
+
                         <div className="livestreamdetail-page">
                             <div className="livestreamdetail-container">
                                 <div className="livestreamdetail-header">
@@ -715,5 +661,52 @@ export default class LiveStreamDetail extends React.Component {
                 }
             </React.Fragment >
         )
+    }
+}
+
+
+const ChatMessage = (props) => (
+    props.message.sender === props.participantUsername ?
+        <li className="my-message">
+            <label>You</label>
+            <div className="my-message-data">
+                <p>{props.message.message}</p>
+            </div>
+        </li>
+        :
+        <li>
+            <div>
+                <label>{props.message.sender}</label>
+                <div className="message-data">
+                    <p>{props.message.message}</p>
+                </div>
+            </div>
+        </li>
+);
+
+class ChatList extends React.Component {
+    messagesEndRef = React.createRef();
+
+    componentDidMount() {
+        this.scrollToBottom();
+    }
+
+    componentDidUpdate() {
+        this.scrollToBottom();
+    }
+
+    scrollToBottom = () => {
+        this.messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    render() {
+        return (
+            <ul className="livechat">
+                {this.props.messages !== undefined && this.props.messages.length > 0 ?
+                    this.props.messages.map((message, index) =>
+                        <ChatMessage key={index} message={message} participantUsername={this.props.participantUsername} />
+                    ) : null}
+                <div ref={this.messagesEndRef}></div>
+            </ul>)
     }
 }
