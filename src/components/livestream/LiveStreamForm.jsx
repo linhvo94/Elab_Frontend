@@ -91,13 +91,15 @@ export default class LiveStreamForm extends React.Component {
     }
 
     componentWillUnmount() {
-        let tracks = this.localStream.getTracks();
-        tracks.forEach(track => {
-            track.stop();
-            this.localStream.removeTrack(track);
-        });
+        if (this.localStream !== null) {
+            let tracks = this.localStream.getTracks();
+            tracks.forEach(track => {
+                track.stop();
+                this.localStream.removeTrack(track);
+            });
 
-        this.localStreamSource.current.srcObject = null;
+            this.localStreamSource.current.srcObject = null;
+        }
     }
 
     render() {

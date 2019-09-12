@@ -4,6 +4,7 @@ import Janus from "../../utils/janus-utils/janus.js";
 import { initJanus } from "../../actions/livestream-actions/livestreaming.js";
 import UploadingVideoDialog from "./UploadingVideoDialog.jsx";
 import { LiveStreamMessageDialog } from "./LiveStreamMessageDialog.jsx";
+import { SIGNALING_SERVER_URL } from "../../environment/api-urls.js";
 
 
 export default class LiveStreamDetail extends React.Component {
@@ -56,7 +57,7 @@ export default class LiveStreamDetail extends React.Component {
         if (this.props.livestream !== undefined && this.props.livestream !== null && this.props.livestream !== prevProps.livestream) {
             console.log("LIVESTREAM from database: ", this.props.livestream);
             if (this.state.isPublishing === null) {
-                this.socket = io("https://www.e-lab.live:9000");
+                this.socket = io(SIGNALING_SERVER_URL);
 
                 this.socket.on("connect", () => {
                     console.log("open live chat connection");
@@ -79,10 +80,8 @@ export default class LiveStreamDetail extends React.Component {
                                 if (exists) {
                                     if (this.props.livestream.publisher.id === this.state.participantID) {
                                         this.setState({ isPublisher: true });
-                                        console.log("is publisher");
                                     } else {
                                         this.setState({ isPublisher: false });
-                                        console.log("is subscriber");
                                         this.subscribeStream(this.props.livestream.roomID, this.props.livestream.publisher.id);
                                     }
                                 } else {
@@ -193,8 +192,8 @@ export default class LiveStreamDetail extends React.Component {
             this.sfu.onlocalstream = (stream) => {
                 Janus.log(" ::: Got a local stream ::: ", stream);
                 this.liveStreamSrc.current.srcObject = stream;
-                this.liveStream = stream;
-                this.startStreamRecording();
+                // this.liveStream = stream;
+                this.startStreamRecording(stream);
             }
 
             this.sfu.oncleanup = () => {
@@ -358,7 +357,7 @@ export default class LiveStreamDetail extends React.Component {
         }
     }
 
-    startStreamRecording = () => {
+    startStreamRecording = (stream) => {
         let options = { mimeType: 'video/webm;codecs=vp9' };
         if (!MediaRecorder.isTypeSupported(options.mimeType)) {
             console.error(`${options.mimeType} is not Supported`);
@@ -374,7 +373,8 @@ export default class LiveStreamDetail extends React.Component {
         }
 
         try {
-            this.streamRecorder = new MediaRecorder(this.liveStream, options);
+            this.streamRecorder = null;
+            this.streamRecorder = new MediaRecorder(stream, options);
         } catch (e) {
             console.error('Exception while creating MediaRecorder:', e);
             return;
@@ -401,7 +401,6 @@ export default class LiveStreamDetail extends React.Component {
     stopStreamRecording = () => {
         if (this.streamRecorder !== undefined && this.streamRecorder !== null) {
             this.streamRecorder.stop();
-            this.uploadVideoBlob = new Blob(this.streamBlobs, { type: this.streamRecorder.mimeType });
         }
     }
 
@@ -514,6 +513,8 @@ export default class LiveStreamDetail extends React.Component {
             }
         };
 
+        let uploadVideoBlob = new Blob(this.streamBlobs, { type: this.streamRecorder.mimeType });
+
         let parameters = JSON.stringify({
             snippet: {
                 description: this.state.description,
@@ -527,7 +528,7 @@ export default class LiveStreamDetail extends React.Component {
         let jsonBlob = new Blob([parameters], { type: "application/json" });
         let formData = new FormData();
         formData.append("snippet", jsonBlob, "file.json");
-        formData.append("file", this.uploadVideoBlob, (this.state.title.toLowerCase()).replace(/\s/g, ''));
+        formData.append("file", uploadVideoBlob, (this.state.title.toLowerCase()).replace(/\s/g, ''));
         xhr.send(formData);
         this.setState({ progress: 0 });
     }

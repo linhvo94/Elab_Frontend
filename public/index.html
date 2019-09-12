@@ -39,13 +39,11 @@
     let initClient = () => {
       gapi.client.init({
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
+        // clientId: "666862508904-4fgeqlrvs6u99jga85cuhn27j873ai2a.apps.googleusercontent.com",
         clientId: "303172413023-lq0i18prdi3lp5tg9u2hlqn9m5ou71ao.apps.googleusercontent.com",
         scope: "https://www.googleapis.com/auth/youtube.upload"
-      }).then(() => {
-        console.log("INIT SUCCESSFULLY");
       });
     }
-
   </script>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>

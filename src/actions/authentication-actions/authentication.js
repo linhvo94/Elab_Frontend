@@ -36,8 +36,6 @@ export function login(user) {
             })
             .then(data => {
                 if (data !== "" && data !== null) {
-                    console.log(data);
-
                     localStorage.setItem("access_token", data.access_token);
                     localStorage.setItem("expires_in", data.expires_in);
                     localStorage.setItem("refresh_token", data.refresh_token);
@@ -69,6 +67,7 @@ export function signup(user) {
             })
             .then(res => {
                 if (res.status === 200) {
+                    status = 200;
                     return res.json();
                 } else if (res.status === 400) {
                     status = 400;
@@ -80,10 +79,10 @@ export function signup(user) {
             })
             .then((data) => {
                 if (status === 200) {
+                    dispatch(login(user));
                     dispatch({
                         type: SIGNUP_SUCCESSFULLY
                     });
-                    dispatch(login(user));
                 } else if (status === 400) {
                     dispatch({
                         type: BAD_REQUEST,

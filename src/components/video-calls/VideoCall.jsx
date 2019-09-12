@@ -13,6 +13,7 @@ import {
     sendVideoUpgrade, sendVideoUpgradeDecline, sendOfferChangingEvent
 
 } from '../../utils/socket-utils/socket-utils.js';
+import { SIGNALING_SERVER_URL } from "../../environment/api-urls.js";
 
 export default class VideoCall extends React.Component {
     constructor(props) {
@@ -55,8 +56,7 @@ export default class VideoCall extends React.Component {
         console.log(window.receiver);
         window.addEventListener("beforeunload", this.handleLeavePage);
 
-        this.socket = io("https://www.e-lab.live:9000");
-        // this.socket = io("http://localhost:9000");
+        this.socket = io(SIGNALING_SERVER_URL);
         let sender = window.sender;
         let receiver = window.receiver;
         let userType = window.userType;
@@ -124,11 +124,12 @@ export default class VideoCall extends React.Component {
                                 videoMessageDialogOpened: true,
                                 videoMessage: `${this.state.receiver} declined your call.`
                             });
-
+                    
                             setTimeout(() => {
+                                window.opener.location.reload();
                                 window.close();
                             }, 2000);
-
+                            
                             break;
 
                         case "video-hangup":
@@ -283,6 +284,7 @@ export default class VideoCall extends React.Component {
         this.callCleanup();
 
         setTimeout(() => {
+            window.opener.location.reload();
             window.close();
         }, 1000);
     }
@@ -360,22 +362,12 @@ export default class VideoCall extends React.Component {
         e.preventDefault();
         this.localStream.getAudioTracks()[0].enabled = !(this.localStream.getAudioTracks()[0].enabled);
         this.setState({ onAudio: this.localStream.getAudioTracks()[0].enabled });
-        // if (this.localStream.getAudioTracks()[0].enabled) {
-        //     this.setState({ onAudio: true });
-        // } else {
-        //     this.setState({ onAudio: false });
-        // }
     }
 
     handleVideoState = (e) => {
         e.preventDefault();
         this.localStream.getVideoTracks()[0].enabled = !(this.localStream.getVideoTracks()[0].enabled);
         this.setState({ onVideo: this.localStream.getVideoTracks()[0].enabled });
-        // if (this.localStream.getVideoTracks()[0].enabled) {
-        //     this.setState({ onVideo: true });
-        // } else {
-        //     this.setState({ onVideo: false });
-        // }
     }
 
     handleScreenSharing = (e) => {
@@ -446,6 +438,9 @@ export default class VideoCall extends React.Component {
 
     componentWillUnmount() {
         window.removeEventListener('beforeunload', this.handleLeavePage);
+        if (this.socket !== null) {
+            this.socket.disconnect();
+        }
     }
 
     render() {

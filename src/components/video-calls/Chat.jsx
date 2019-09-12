@@ -67,7 +67,9 @@ export default class Chat extends React.Component {
         if (this.props.match.params.username !== undefined && this.props.match.params.username !== null) {
             let receiver = this.props.onlineUsers.find(user => this.props.match.params.username === user.username);
             this.setState({ receiver: receiver });
-            this.props.createPeerConnection(this.props.match.params.username);
+            if (receiver !== undefined) {
+                this.props.createPeerConnection(this.props.match.params.username);
+            }
             this.loadData(500);
         }
     }
@@ -79,15 +81,19 @@ export default class Chat extends React.Component {
             this.setState({ loading: true });
             let receiver = onlineUsers.find(user => usernameParams === user.username);
             this.setState({ receiver: receiver });
-            this.props.createPeerConnection(usernameParams);
+            if (receiver !== undefined) {
+                this.props.createPeerConnection(usernameParams);
+            }
             this.loadData(500);
 
         }
 
         if (onlineUsers !== undefined && onlineUsers !== null && onlineUsers !== prevProps.onlineUsers) {
             let receiver = onlineUsers.find(user => usernameParams === user.username);
-            this.setState({ receiver: receiver });
-            this.props.createPeerConnection(usernameParams);
+            if (receiver !== undefined) {
+                this.setState({ receiver: receiver });
+                this.props.createPeerConnection(usernameParams);
+            }
         }
 
         if (this.props.isOnCall !== undefined && this.props.isOnCall !== null

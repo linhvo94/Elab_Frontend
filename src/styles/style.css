@@ -1432,6 +1432,10 @@ video::-webkit-media-controls-enclosure {
 
 .people-list .new-message {
     color: #92959E;
+    white-space: nowrap;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .online, .offline, .me {

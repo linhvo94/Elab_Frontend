@@ -1,5 +1,3 @@
-import { send } from "q";
-
 export const VIDEO_CALL_SIGNAL = "video_call_signal";
 export const CONFERENCE_CALL_SIGNAL = "conference_signal";
 export const CHAT_SIGNAL = "chat_signal";

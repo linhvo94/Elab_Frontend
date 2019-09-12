@@ -16,55 +16,16 @@ import LiveStreamDetail from "./components/livestream/LiveStreamDetail.jsx";
 import SideBar from "./components/general/Sidebar.jsx";
 
 import { login, signup, logout } from "./actions/authentication-actions/authentication.js";
-import { fetchAllLiveStreams, createLiveStream, getALiveStream, updateALiveStream, deleteALiveStream } from "./actions/livestream-actions/livestreaming.js";
+import { fetchAllLiveStreams, createLiveStream, getALiveStream, updateALiveStream, deleteALiveStream, initJanus } from "./actions/livestream-actions/livestreaming.js";
 import Conference from "./components/conference/Conference";
 import ConferenceCall from "./components/conference/ConferenceCall";
 import { fetchAllUsers } from "./actions/user-actions/user";
-import { sendAddOnlineUserEvent } from "./utils/socket-utils/socket-utils";
-import { SIGNALING_SERVER_URL } from "./environment/api-urls";
 
 
 class Root extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            socket: null,
-            onlineUsersFromSocket: []
-        }
-    }
-
-    componentDidMount() {
-        let user = JSON.parse(localStorage.getItem("user"));
-        if (user !== undefined && user !== null) {
-            let socket = io(SIGNALING_SERVER_URL);
-            this.setState({ socket });
-            socket.on("connect", () => {
-                console.log("open connection");
-                sendAddOnlineUserEvent(socket, user.username);
-                socket.on("online_users", (message) => {
-                    this.setState({ onlineUsersFromSocket: message });
-                });
-            });
-        }
-    }
-
-    componentDidUpdate(prevProps) {
-        if (this.props.authentication.user !== undefined && this.props.authentication.user !== null
-            && this.props.authentication.user !== prevProps.authentication.user) {
-            let socket = io(SIGNALING_SERVER_URL);
-            this.setState({ socket });
-            socket.on("connect", () => {
-                console.log("open connection");
-                sendAddOnlineUserEvent(socket, this.props.authentication.user.username);
-                socket.on("online_users", (message) => {
-                    this.setState({ onlineUsersFromSocket: message });
-                });
-            });
-        }
-    }
-
-    componentWillUnmount() {
-        this.state.socket.disconnect();
+        this.state = {}
     }
 
     render() {
@@ -76,8 +37,8 @@ class Root extends React.Component {
                         && <React.Fragment>
                             <Header {...props}
                                 authenticated={this.props.authentication.authenticated}
-                                logout={this.props.logout}
-                                socket={this.state.socket} />
+                                firstName={this.props.authentication.authenticated ? this.props.authentication.user.firstName : ""}
+                                logout={this.props.logout} />
                             <Body />
                         </React.Fragment>
 
@@ -104,6 +65,7 @@ class Root extends React.Component {
                                 props.location.pathname === "/create-stream" ||
                                 props.location.pathname.includes("/media/") || props.location.pathname === "/conference")
                                 && <SideBar {...props}
+                                    logout={this.props.logout}
                                 />} />
                         </div>
                         <div className="col-11 col-sm-11 col-md-11 col-lg-11 col-xl-11">
@@ -111,10 +73,9 @@ class Root extends React.Component {
                                 !this.props.authentication.authenticated ?
                                     <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
                                     : <Media {...props}
+                                        user={this.props.authentication.user}
                                         users={this.props.users}
                                         fetchAllUsers={this.props.fetchAllUsers}
-                                        socket={this.state.socket}
-                                        onlineUsersFromSocket={this.state.onlineUsersFromSocket}
                                     />
                             } />
 
@@ -122,10 +83,9 @@ class Root extends React.Component {
                                 !this.props.authentication.authenticated ?
                                     <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
                                     : <Conference {...props}
+                                        user={this.props.authentication.user}
                                         users={this.props.users}
                                         fetchAllUsers={this.props.fetchAllUsers}
-                                        socket={this.state.socket}
-                                        onlineUsersFromSocket={this.state.onlineUsersFromSocket}
                                     />
                             } />
 

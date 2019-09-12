@@ -11,6 +11,7 @@ export default class Sidebar extends React.Component {
                         <li><Link to={"/media"}><i className="fas fa-comment-alt"></i></Link></li>
                         <li><Link to={"/conference"}><i className="fas fa-users"></i></Link></li>
                         <li><Link to={"/livestream"}><i className="fas fa-broadcast-tower"></i></Link></li>
+                        <li><Link to={"/"} onClick={this.props.logout}><i className="fas fa-sign-out-alt"></i></Link></li>
                     </ul>
                 </div>
             </div>

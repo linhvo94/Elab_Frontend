@@ -2,9 +2,10 @@ import React from "react";
 import io from "socket.io-client";
 import ringing_tone from "../../media/sounds/ringing_tone.wav";
 import { playRingTone, stopRingTone } from "../../media/sounds/sound-control.js";
-import { sendConferenceDeclineEvent, sendConferencePickedUpEvent } from "../../utils/socket-utils/socket-utils";
+import { sendConferenceDeclineEvent, sendConferencePickedUpEvent, sendAddOnlineUserEvent } from "../../utils/socket-utils/socket-utils";
 import ConferenceForm from "./ConferenceForm";
 import { CalleeDialog } from "../video-calls/CalleeDialog";
+import { SIGNALING_SERVER_URL } from "../../environment/api-urls";
 
 export default class Conference extends React.Component {
     constructor(props) {
@@ -22,29 +23,65 @@ export default class Conference extends React.Component {
             onlineUsersFromSocket: [],
             conferenceUsers: {},
 
-            isOnCall: false,
-
-            socket: null
+            isOnCall: false
         }
 
+        this.socket = null;
         this.offerMessage = null;
         this.ringTone = new Audio(ringing_tone);
     }
 
     componentDidMount() {
         this.props.fetchAllUsers();
-        let user = JSON.parse(localStorage.getItem("user"));
-        if (user !== undefined && user !== null) {
-            this.setState({ sender: user });
-        }
+        if (this.props.user !== undefined && this.props.user !== null) {
+            this.setState({ sender: this.props.user });
+            this.socket = io(SIGNALING_SERVER_URL);
+            this.socket.on("connect", () => {
+                sendAddOnlineUserEvent(this.socket, this.props.user.username);
 
-        if (this.props.socket !== undefined && this.props.socket !== null) {
-            this.setState({ socket: this.props.socket });
-            this.handleSocketEvent(this.props.socket);
-        }
+                this.socket.on("online_users", (message) => {
+                    this.setState({ onlineUsersFromSocket: message });
+                    this.handleOnlineUsers(this.state.usersFromDB, message);
+                });
 
-        if (this.props.onlineUsersFromSocket !== undefined && this.props.onlineUsersFromSocket !== null) {
-            this.setState({ onlineUsersFromSocket: this.props.onlineUsersFromSocket });
+                this.socket.on("conference", (message) => {
+                    console.log("conference message: ", message);
+    
+                    switch (message.type) {
+                        case "conference-offer":
+                            this.offerMessage = message;
+                            playRingTone(this.ringTone);
+                            let receiver = this.state.usersFromDB.find(user => user.username === message.sender);
+                            this.setState({ receiver: receiver, callDiaglogOpened: true });
+                            break;
+    
+                        case "conference-hangup":
+                            stopRingTone(this.ringTone);
+                            this.setState({ callDiaglogOpened: false, isOnCall: false })
+                            break;
+    
+                        case "conference-picked-up":
+                            stopRingTone(this.ringTone);
+                            this.setState({ callDiaglogOpened: false, isOnCall: true });
+                            break;
+    
+                        case "on-call":
+                            if (message.isOnCall !== undefined && message.isOnCall !== null) {
+                                this.setState({ isOnCall: message.isOnCall });
+                            }
+    
+                            break;
+    
+                        case "busy-user":
+                            this.setState({ isOnCall: false });
+                            break;
+    
+                        default:
+                            break;
+    
+                    }
+                });
+            });
         }
     }
 
@@ -52,17 +89,6 @@ export default class Conference extends React.Component {
         if (this.props.users !== undefined && this.props.users !== null && this.props.users !== prevProps.users) {
             this.setState({ usersFromDB: this.props.users });
             this.handleOnlineUsers(this.props.users, this.state.onlineUsersFromSocket);
-        }
-
-        if (this.props.socket !== undefined && this.props.socket !== null && this.props.socket !== prevProps.socket) {
-            this.setState({ socket: this.props.socket });
-            this.handleSocketEvent(this.props.socket);
-        }
-
-        if (this.props.onlineUsersFromSocket !== undefined && this.props.onlineUsersFromSocket !== null
-            && this.props.onlineUsersFromSocket !== prevProps.onlineUsersFromSocket) {
-            this.setState({ onlineUsersFromSocket: this.props.onlineUsersFromSocket });
-            this.handleOnlineUsers(this.state.usersFromDB, this.props.onlineUsersFromSocket);
         }
     }
 
@@ -72,8 +98,7 @@ export default class Conference extends React.Component {
         if (onlineUsersFromSocket.length > 0) {
             onlineUsersFromSocket.forEach(userSocket => {
                 let onlineUser = usersFromDB.find(userDB => userDB.username === userSocket && userDB.username !== this.state.sender.username);
-                if (onlineUser !== undefined && onlineUser !== null
-                    && onlineUser.username !== this.state.sender.username && actualOnlineUsers.indexOf(onlineUser) === -1) {
+                if (onlineUser !== undefined && onlineUser !== null && onlineUser.username !== this.state.sender.username) {
                     actualOnlineUsers.push(onlineUser);
                 }
             });
@@ -176,10 +201,11 @@ export default class Conference extends React.Component {
             this.state.onlineUsers.forEach(onlineUser => {
                 if ((onlineUser.username !== this.state.sender.username)
                     && (conferenceUsers[onlineUser.username] === undefined || conferenceUsers[onlineUser.username] === null)) {
+                    this.setState({ conferenceUsers });
                     filterUsers.push(onlineUser);
                 }
             });
-            this.setState({ conferenceUsers, filterUsers });
+            this.setState({ filterUsers });
         } else {
             alert("You have reached the maximum number of participant in a conference.");
         }
@@ -190,6 +216,8 @@ export default class Conference extends React.Component {
         e.preventDefault();
         let { conferenceUsers, onlineUsers } = this.state;
         delete conferenceUsers[username];
+        this.setState({ conferenceUsers });
+        
         let filterUsers = [];
         onlineUsers.forEach(onlineUser => {
             if ((onlineUser.username !== this.state.sender.username)
@@ -197,7 +225,7 @@ export default class Conference extends React.Component {
                 filterUsers.push(onlineUser);
             }
         });
-        this.setState({ filterUsers, conferenceUsers });
+        this.setState({ filterUsers });
     }
 
     handleCall = (e) => {
@@ -217,7 +245,7 @@ export default class Conference extends React.Component {
     handleCallAccept = (e) => {
         e.preventDefault();
         stopRingTone(this.ringTone);
-        sendConferencePickedUpEvent(this.state.socket, this.state.sender.username, this.state.sender.username);
+        sendConferencePickedUpEvent(this.socket, this.state.sender.username, this.state.sender.username);
         this.setState({ callDiaglogOpened: false, isOnCall: true });
 
         var videoCallWindow = window.open("/conferencecall", "Popup", "toolbar=no, location=no, statusbar=no, menubar=no, scrollbars=1, resizable=0, width=1024, height=576");
@@ -237,7 +265,13 @@ export default class Conference extends React.Component {
         e.preventDefault();
         stopRingTone(this.ringTone);
         this.setState({ callDiaglogOpened: false });
-        sendConferenceDeclineEvent(this.state.socket, this.state.sender.username, this.state.receiver.username, this.offerMessage.socketOrigin);
+        sendConferenceDeclineEvent(this.socket, this.state.sender.username, this.state.receiver.username, this.offerMessage.socketOrigin);
+    }
+
+    componentWillMount() {
+        if (this.socket !== null) {
+            this.socket.disconnect();
+        }
     }
 
     render() {

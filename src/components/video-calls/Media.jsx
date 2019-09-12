@@ -1,14 +1,14 @@
 import React from "react";
 import { Link, Route } from "react-router-dom";
-import io from "socket.io-client";
 import uuid from "uuid/v4";
-
+import io from "socket.io-client";
 import Chat from "./Chat.jsx";
 import ringing_tone from "../../media/sounds/ringing_tone.wav";
 import { CalleeDialog } from "./CalleeDialog.jsx";
 import { playRingTone, stopRingTone } from "../../media/sounds/sound-control.js";
-import { sendVideoDeclineEvent, sendChatOffer, sendChatAnswer, sendChatNewIceCandidate } from '../../utils/socket-utils/socket-utils.js';
+import { sendVideoDeclineEvent, sendChatOffer, sendChatAnswer, sendChatNewIceCandidate, sendAddOnlineUserEvent } from '../../utils/socket-utils/socket-utils.js';
 import { iceServerConfig } from "../../environment/ice-server-config.js";
+import { SIGNALING_SERVER_URL } from "../../environment/api-urls.js";
 
 export default class Media extends React.Component {
     constructor(props) {
@@ -26,12 +26,9 @@ export default class Media extends React.Component {
             chatMessages: {},
 
             callDiaglogOpened: false,
-            offerResponded: false,
-            isOnCall: false,
-            socket: null
-
+            isOnCall: false
         }
-
+        this.socket = null;
         this.peerConnections = [];
         this.dataChannel = null;
         this.offerSDP = null;
@@ -44,18 +41,72 @@ export default class Media extends React.Component {
 
     componentDidMount() {
         this.props.fetchAllUsers();
-        let user = JSON.parse(localStorage.getItem("user"));
-        if (user !== undefined && user !== null) {
-            this.setState({ sender: user });
-        }
 
-        if (this.props.socket !== undefined && this.props.socket !== null) {
-            this.setState({ socket: this.props.socket });
-            this.handleSocketEvent(this.props.socket);
-        }
+        if (this.props.user !== undefined && this.props.user !== null) {
+            this.setState({ sender: this.props.user });
+            this.socket = io(SIGNALING_SERVER_URL);
+            this.socket.on("connect", () => {
+                console.log("open connection");
+                sendAddOnlineUserEvent(this.socket, this.props.user.username);
+                this.socket.on("online_users", (message) => {
+                    this.setState({ onlineUsersFromSocket: message });
+                    this.handleOnlineUsers(this.state.usersFromDB, message);
+                });
 
-        if (this.props.onlineUsersFromSocket !== undefined && this.props.onlineUsersFromSocket !== null) {
-            this.setState({ onlineUsersFromSocket: this.props.onlineUsersFromSocket });
+                this.socket.on("video_call", (message) => {
+                    console.log("message type.....", message.type);
+                    switch (message.type) {
+                        case "video-offer":
+                            this.offerMessage = message;
+                            let receiver = this.state.usersFromDB.find(user => user.username === message.sender);
+                            this.setState({ receiver: receiver, callDiaglogOpened: true });
+                            playRingTone(this.ringTone);
+                            break;
+
+                        case "video-hangup":
+                            stopRingTone(this.ringTone);
+                            this.setState({ callDiaglogOpened: false, isOnCall: false });
+                            break;
+
+                        case "video-picked-up":
+                            stopRingTone(this.ringTone);
+                            this.setState({ callDiaglogOpened: false, isOnCall: true });
+                            break;
+
+                        case "on-call":
+                            if (message.isOnCall !== undefined && message.isOnCall !== null) {
+                                this.setState({ isOnCall: message.isOnCall });
+                            }
+                            break;
+
+                        case "busy-user":
+                            this.setState({ isOnCall: false });
+                            break;
+
+                        default:
+                            return;
+                    }
+                });
+
+                this.socket.on("chat", (message) => {
+                    console.log("incoming message.... ", message);
+                    switch (message.type) {
+                        case "chat-offer":
+                            this.handleChatOffer(message);
+                            break;
+                        case "chat-answer":
+                            this.handleChatAnswer(message);
+                            break;
+                        case "new-ice-candidate":
+                            this.handleNewIceCandidate(message);
+                            break;
+                        default:
+                            return;
+                    }
+                });
+
+            });
+
         }
     }
 
@@ -64,84 +115,6 @@ export default class Media extends React.Component {
             this.setState({ usersFromDB: this.props.users });
             this.handleOnlineUsers(this.props.users, this.state.onlineUsersFromSocket);
         }
-
-        if (this.props.socket !== undefined && this.props.socket !== null && this.props.socket !== prevProps.socket) {
-            this.setState({ socket: this.props.socket });
-            this.handleSocketEvent(this.props.socket);
-        }
-
-        if (this.props.onlineUsersFromSocket !== undefined && this.props.onlineUsersFromSocket !== null
-            && this.props.onlineUsersFromSocket !== prevProps.onlineUsersFromSocket) {
-            this.setState({ onlineUsersFromSocket: this.props.onlineUsersFromSocket });
-            this.handleOnlineUsers(this.state.usersFromDB, this.props.onlineUsersFromSocket);
-        }
-
-    }
-
-    handleSocketEvent = (socket) => {
-        socket.on("connect", () => {
-            socket.on("video_call", (message) => {
-                console.log("message type.....", message.type);
-                switch (message.type) {
-                    case "video-offer":
-                        this.offerMessage = message;
-                        let receiver = this.state.usersFromDB.find(user => user.username === message.sender);
-                        this.setState({ receiver: receiver, callDiaglogOpened: true });
-                        playRingTone(this.ringTone);
-
-                        // setTimeout(() => {
-                        //     if (this.state.offerResponded === false) {
-                        //         sendVideoHangupEvent(this.socket, this.state.username, this.state.receiver);
-                        //         stopRingTone(this.ringTone);
-                        //         this.setState({ callDiaglogOpened: false });
-                        //     }
-                        // }, 30000);
-
-                        break;
-
-                    case "video-hangup":
-                        stopRingTone(this.ringTone);
-                        this.setState({ callDiaglogOpened: false, offerResponded: true, isOnCall: false });
-                        break;
-
-                    case "video-picked-up":
-                        stopRingTone(this.ringTone);
-                        this.setState({ callDiaglogOpened: false, offerResponded: true, isOnCall: true });
-                        break;
-
-                    case "on-call":
-                        if (message.isOnCall !== undefined && message.isOnCall !== null) {
-                            this.setState({ isOnCall: message.isOnCall });
-                        }
-                        break;
-
-                    case "busy-user":
-                        this.setState({ isOnCall: false });
-                        break;
-
-                    default:
-                        return;
-                }
-            });
-
-            socket.on("chat", (message) => {
-                console.log("incoming message.... ", message)
-                switch (message.type) {
-                    case "chat-offer":
-                        this.handleChatOffer(message);
-                        break;
-                    case "chat-answer":
-                        this.handleChatAnswer(message);
-                        break;
-                    case "new-ice-candidate":
-                        this.handleNewIceCandidate(message);
-                        break;
-                    default:
-                        return;
-                }
-            });
-
-        });
     }
 
     handleOnlineUsers = (usersFromDB, onlineUsersFromSocket) => {
@@ -149,8 +122,8 @@ export default class Media extends React.Component {
         if (onlineUsersFromSocket.length > 0) {
             onlineUsersFromSocket.forEach(userSocket => {
                 let onlineUser = usersFromDB.find(userDB => userDB.username === userSocket && userDB.username !== this.state.sender.username);
-                if (onlineUser !== undefined && onlineUser !== null 
-                        && onlineUser !== this.state.sender.username && actualOnlineUsers.indexOf(onlineUser) === -1) {
+                if (onlineUser !== undefined && onlineUser !== null
+                    && onlineUser !== this.state.sender.username && actualOnlineUsers.indexOf(onlineUser) === -1) {
                     actualOnlineUsers.push(onlineUser);
                 }
             });
@@ -196,7 +169,7 @@ export default class Media extends React.Component {
     createPeerConnection = (remoteUsername) => {
         if (remoteUsername !== "" && remoteUsername !== null && this.isUserOnline(remoteUsername)) {
             if (this.findPeer(remoteUsername)) {
-                console.log("Peer Connection already exists")
+                console.log("Peer Connection already exists");
                 return;
             } else {
                 console.log("create peer connection....");
@@ -206,7 +179,7 @@ export default class Media extends React.Component {
                 peer["dataChannel"] = peer.peerConnection.createDataChannel(`chat-${uuid()}`);
                 this.peerConnections.push(peer);
 
-                let chatMessages = this.state.chatMessages;
+                let { chatMessages } = this.state;
                 chatMessages[remoteUsername] = [];
 
                 this.setState({ chatMessages: chatMessages });
@@ -230,32 +203,28 @@ export default class Media extends React.Component {
 
                 peer.peerConnection.createOffer()
                     .then(offerSDP => {
-                        console.log("Offer SDP", offerSDP);
                         this.offerSDP = offerSDP;
-                        sendChatOffer(this.state.socket, this.state.sender.username, remoteUsername, offerSDP);
+                        sendChatOffer(this.socket, this.state.sender.username, remoteUsername, offerSDP);
                     })
                     .catch(e => console.log(e));
             }
-        } else {
-            // alert("The current user is not online.");
         }
     }
 
-    handleDataChannelState = () => {
-        if (this.dataChannel !== null) {
-            if (this.dataChannel.readyState === "open") {
-                console.log("Data channel is open");
-                this.setState({ dataChannelNotReady: false });
-            }
-        }
-    }
 
     handleChatOffer = (message) => {
-        let peer = {};
-        peer["remoteUsername"] = message.sender;
-        peer["peerConnection"] = new RTCPeerConnection(iceServerConfig);
+        let peer = this.findPeer(message.sender);
 
-        this.peerConnections.push(peer);
+        if (peer === undefined) {
+            peer = {};
+            peer["remoteUsername"] = message.sender;
+            peer["peerConnection"] = new RTCPeerConnection(iceServerConfig);
+            this.peerConnections.push(peer);
+        } else {
+            peer.peerConnection = new RTCPeerConnection(iceServerConfig);
+        }
+
+
         console.log(this.peerConnections);
 
         let chatMessages = this.state.chatMessages;
@@ -284,44 +253,47 @@ export default class Media extends React.Component {
             .then(() => peer.peerConnection.createAnswer())
             .then(answerSDP => {
                 peer.peerConnection.setLocalDescription(answerSDP);
-                return answerSDP;
+                sendChatAnswer(this.socket, this.state.sender.username, message.sender, answerSDP);
             })
-            .then(answerSDP => 
-                sendChatAnswer(this.state.socket, this.state.sender.username, message.sender, answerSDP))
             .catch(e => console.log(e));
     }
 
     handleChatAnswer = (message) => {
         let peer = this.findPeer(message.sender);
-        if (peer.peerConnection !== undefined && peer.peerConnection !== null) {
-            peer.peerConnection.setLocalDescription(this.offerSDP);
-            let remoteSDP = new RTCSessionDescription(message.sdp);
-            peer.peerConnection.setRemoteDescription(remoteSDP);
-        } else {
-            alert("Peer Connection is not available");
+        if (peer !== undefined) {
+            if (peer.peerConnection !== undefined && peer.peerConnection !== null) {
+                peer.peerConnection.setLocalDescription(this.offerSDP);
+                let remoteSDP = new RTCSessionDescription(message.sdp);
+                peer.peerConnection.setRemoteDescription(remoteSDP);
+            } else {
+                console.log("Peer Connection is not available");
+            }
         }
 
     }
 
     handleNewIceCandidate = (message) => {
         let peer = this.findPeer(message.sender);
-        if (peer.peerConnection !== undefined && peer.peerConnection !== null) {
-            let candidate = new RTCIceCandidate(message.candidate);
-            peer.peerConnection.addIceCandidate(candidate)
-                .catch(e => console.log(e));
-        } else {
-            alert("Peer Connection is not available");
+        if (peer !== undefined) {
+            if (peer.peerConnection !== undefined && peer.peerConnection !== null) {
+                let candidate = new RTCIceCandidate(message.candidate);
+                peer.peerConnection.addIceCandidate(candidate)
+                    .catch(e => console.log(e));
+            } else {
+                console.log("Peer Connection is not available");
+            }
         }
+
     }
 
     handleIceCandidate = (event, receiver) => {
         if (event.candidate !== null) {
-            sendChatNewIceCandidate(this.state.socket, this.state.sender.username, receiver, event.candidate);
+            sendChatNewIceCandidate(this.socket, this.state.sender.username, receiver, event.candidate);
         }
     }
 
     handleMessage = (event, receiver) => {
-        let chatMessages = this.state.chatMessages;
+        let { chatMessages } = this.state;
         let message = {};
         message["islocalpeer"] = false;
         message["message"] = event.data;
@@ -336,21 +308,19 @@ export default class Media extends React.Component {
             if (peer !== undefined && peer !== null && peer.peerConnection !== undefined && peer.peerConnection !== null) {
                 if (peer.dataChannel !== undefined && peer.dataChannel !== null && peer.dataChannel.readyState === "open") {
                     peer.dataChannel.send(this.state.textMessage);
-                    let chatMessages = this.state.chatMessages;
+                    let { chatMessages } = this.state;
                     let message = {};
                     message["islocalpeer"] = true;
                     message["message"] = this.state.textMessage;
-                    console.log(chatMessages);
                     chatMessages[receiver].push(message);
-                    this.setState({ textMessage: "", chatMessages: chatMessages });
+                    this.setState({ textMessage: "", chatMessages });
                 } else {
-                    alert("Data Channel is not available");
+                    setTimeout(() => {
+                        this.handleSendMessage(e, receiver);
+                    }, 1000);
                 }
-            } else {
-                alert("Peer Connection is not available");
             }
         }
-
     }
 
     findPeer = (receiver) => {
@@ -359,17 +329,15 @@ export default class Media extends React.Component {
 
 
     isUserOnline = (username) => {
-        let isOnline = this.state.onlineUsers.some(user => { return user.username === username });
-        return isOnline;
+        return this.state.onlineUsers.some(user => user.username === username);
     }
 
 
     handleCallAccept = (e) => {
         e.preventDefault();
-
         stopRingTone(this.ringTone);
-        this.setState({ callDiaglogOpened: false, offerResponded: true, isOnCall: true });
 
+        this.setState({ callDiaglogOpened: false, isOnCall: true });
         var videoCallWindow = window.open("/videocall", "Popup", "toolbar=no, location=no, statusbar=no, menubar=no, scrollbars=1, resizable=0, width=1024, height=576");
         videoCallWindow.sender = this.state.sender.username;
         videoCallWindow.receiver = this.state.receiver.username;
@@ -381,8 +349,8 @@ export default class Media extends React.Component {
     handleCallDecline = (e) => {
         e.preventDefault();
         stopRingTone(this.ringTone);
-        this.setState({ callDiaglogOpened: false, offerResponded: true });
-        sendVideoDeclineEvent(this.state.socket, this.state.sender.username, this.state.receiver.username, this.offerMessage.socketOrigin);
+        this.setState({ callDiaglogOpened: false });
+        sendVideoDeclineEvent(this.socket, this.state.sender.username, this.state.receiver.username, this.offerMessage.socketOrigin);
     }
 
     handleCloseCallDiaglog = (e) => {
@@ -402,6 +370,11 @@ export default class Media extends React.Component {
                 peer.peerConnection = null;
             }
         });
+
+        this.peerConnections = [];
+        if (this.socket !== null) {
+            this.socket.disconnect();
+        }
     }
 
     render() {
@@ -446,7 +419,7 @@ export default class Media extends React.Component {
                                 {this.state.filterUsers.map((user, index) =>
                                     <li key={index} className="clearfix">
                                         <Link to={`${this.props.match.url}/${user.username}`} onClick={() => this.createPeerConnection(user.username)}>
-                                            <div className="user-avatar">{user.firstName === undefined ? "Unknown" : user.firstName[0]}</div>
+                                            <div className="user-avatar">{user.firstName === undefined || user.firstName === null ? "..." : user.firstName[0]}</div>
                                             <div className="about">
                                                 <div className="name">{user.firstName} {user.lastName}</div>
                                                 {this.state.chatMessages[user.username] !== undefined && this.state.chatMessages[user.username].length > 0 ?
@@ -466,10 +439,6 @@ export default class Media extends React.Component {
                         </div>
                     </div>
                     <div className="media-chat-container">
-                        <div className="no-message">
-                            <img src="https://cdn.dribbble.com/users/2217210/screenshots/6770753/working_together_4x.jpg" alt="" />
-                        </div>
-                        
                         <Route path={`${this.props.match.path}/:username`}
                             render={(props) => <Chat {...props}
                                 handleChange={this.handleChange}

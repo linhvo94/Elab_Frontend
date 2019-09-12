@@ -11,9 +11,8 @@ export default class Header extends React.Component {
     }
 
     componentDidMount() {
-        let user = JSON.parse(localStorage.getItem("user"));
-        if (user !== undefined && user !== null && user.firstName !== null) {
-            this.setState({ firstName: user.firstName });
+        if (this.props.firstName !== undefined && this.props.firstName !== null) {
+            this.setState({ firstName: this.props.firstName });
         }
 
         let open = document.getElementById('hamburger');
@@ -39,14 +38,18 @@ export default class Header extends React.Component {
         });
     }
 
-    logout = () => {
-        this.props.logout();
-        if (this.props.socket !== undefined && this.props.socket !== null) {
-            this.props.socket.disconnect();
+    componentDidUpdate(prevProps) {
+        if (this.props.firstName !== undefined && this.props.firstName !== null && this.props.firstName !== prevProps.firstName) {
+            this.setState({ firstName: this.props.firstName });
         }
-
-        window.location.reload();
     }
+
+    // logout = () => {
+    //     this.props.logout();
+    //     if (this.props.socket !== undefined && this.props.socket !== null) {
+    //         this.props.socket.disconnect();
+    //     }
+    // }
 
     render() {
         return (
@@ -67,7 +70,7 @@ export default class Header extends React.Component {
                                 <li><Link className="nav-link" to={"/home"}>Home</Link></li>
                                 <li><Link className="nav-link" to={"/media"}>Media</Link></li>
                                 <li><Link className="nav-link" to={"/conference"}>Conference</Link></li>
-                                <li><Link className="nav-link" to={"/livestream"}>Livestream</Link></li>      
+                                <li><Link className="nav-link" to={"/livestream"}>Livestream</Link></li>
                                 {this.props.authenticated === false ?
                                     <li><Link className="nav-login-link" to={"/login"}>Login</Link></li>
                                     : <li>
@@ -76,7 +79,7 @@ export default class Header extends React.Component {
                                                 {this.state.firstName === null || this.state.firstName === "" ? "Unknown" : this.state.firstName[0]}
                                             </button>
                                             <div className="dropdown-content">
-                                                <button className="dropdown-item" type="button" onClick={this.logout}>
+                                                <button className="dropdown-item" type="button" onClick={this.props.logout}>
                                                     Signout
                                                 </button>
                                             </div>

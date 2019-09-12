@@ -6,6 +6,7 @@ import { playRingTone, stopRingTone } from "../../media/sounds/sound-control.js"
 import { sendAddOnlineUserEvent, sendConferenceOffer, sendConferenceHangupEvent, sendConferenceAnswer, sendConferenceLeavingEvent } from "../../utils/socket-utils/socket-utils";
 import { initJanus } from "../../actions/livestream-actions/livestreaming";
 import Video from "./Video.jsx";
+import { SIGNALING_SERVER_URL } from "../../environment/api-urls.js";
 
 
 export default class ConferenceCall extends React.Component {
@@ -33,11 +34,6 @@ export default class ConferenceCall extends React.Component {
         this.janus = null;
         this.remoteFeeds = [];
         this.messagesEndRef = React.createRef();
-        this.videos = ["http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"]
     }
 
     componentDidMount() {
@@ -48,7 +44,7 @@ export default class ConferenceCall extends React.Component {
             this.setState({ sender: sender, receiver: receiver });
             this.conferencePrepare();
 
-            this.socket = io("https://www.e-lab.live:9000");
+            this.socket = io(SIGNALING_SERVER_URL);
             this.socket.on("connect", () => {
                 console.log("open connection");
                 sendAddOnlineUserEvent(this.socket, window.sender);
@@ -112,10 +108,9 @@ export default class ConferenceCall extends React.Component {
                                         this.remoteFeeds.forEach(remoteFeed => remoteFeed.detach());
                                         this.sfu.detach();
                                         sendConferenceLeavingEvent(this.socket, this.state.sender);
+                                        window.opener.location.reload();
                                         window.close();
-                                        // setTimeout(() => {
-                                        //     window.close();
-                                        // }, 2000);
+
 
                                     } else {
                                         console.log(`publisher id ${message.leaving} is left`);
@@ -145,10 +140,8 @@ export default class ConferenceCall extends React.Component {
                                         this.remoteFeeds.forEach(remoteFeed => remoteFeed.detach());
                                         this.sfu.detach();
                                         sendConferenceLeavingEvent(this.socket, this.state.sender);
+                                        window.opener.location.reload();
                                         window.close();
-                                        // setTimeout(() => {
-                                        //     window.close();
-                                        // }, 2000);
 
                                     } else {
                                         console.log(`publisher id ${message.unpublished} is left`);
@@ -205,7 +198,6 @@ export default class ConferenceCall extends React.Component {
                             break;
 
                         case "conference-decline":
-                            console.log("DECLINE", message);
                             notifications.push(`${message.sender} has declined the conference.`);
                             this.setState({ notifications });
                             this.scrollToBottom();
@@ -248,7 +240,6 @@ export default class ConferenceCall extends React.Component {
                 if (type === "joined") {
                     notifications.push(`${publisher.firstName} ${publisher.lastName} has joined the conference.`);
                 } else if (type === "leaving") {
-                    console.log("LEAVING NOTI");
                     notifications.push(`${publisher.firstName} ${publisher.lastName} has left the conference.`);
                 }
 
@@ -257,16 +248,6 @@ export default class ConferenceCall extends React.Component {
             }
         }
     }
-
-    // getRoomList = () => {
-    //     let body = { request: "list" }
-    //     this.sfu.send({
-    //         message: body, success: (message) => {
-    //             console.log("ROOM", message);
-    //         }
-    //     });
-    // }
-
 
     generateRoom = (sfu, roomID) => {
         return new Promise((resolve, reject) => {
@@ -463,7 +444,6 @@ export default class ConferenceCall extends React.Component {
     }
 
     render() {
-        console.log("VALUES", this.remoteFeeds);
         return (
             <React.Fragment >
                 <div className="conference-screen-page">
@@ -475,14 +455,6 @@ export default class ConferenceCall extends React.Component {
                                         <Video key={index} srcObject={this.state.remoteStreamList[key]} autoPlay />
                                     </div>
                                 )}
-
-                                {/* {this.videos.map((v, index) =>
-
-                                    <div key={index} className={`conference-remote-stream-${this.videos.length}`}>
-                                        <Video key={index} srcObject={v} autoPlay />
-                                    </div>
-
-                                )} */}
                             </div>
                         </div>
                         <div className="row">
